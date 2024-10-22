@@ -1,0 +1,23 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "Clockwork is a movement library for Screeps.",
+  "scripts": {
+    "build": "nx build",
+    "test": "nx test"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@monodon/rust": "^2.0.0",
+    "@nx/eslint": "20.0.3",
+    "@nx/rollup": "20.0.3",
+    "eslint": "~8.57.0",
+    "nx": "20.0.3",
+    "rollup": "^4.14.0"
+  },
+  "nx": {},
+  "workspaces": [
+    "packages/*"
+  ]
+}

@@ -1,6 +1,6 @@
 import 'fastestsmallesttextencoderdecoder-encodeinto/EncoderDecoderTogether.min.js';
 
-import * as clockwork from 'screeps-clockwork-core/';
+import * as clockwork from 'screeps-clockwork-core';
 export { clockwork };
 
 declare namespace WebAssembly {

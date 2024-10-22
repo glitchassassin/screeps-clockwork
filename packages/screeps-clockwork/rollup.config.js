@@ -21,7 +21,7 @@ export default [
 			  }]
 			}),
 			commonjs(),
-			typescript({ tsconfig: './tsconfig.json' }), // so Rollup can convert TypeScript to JavaScript
+			typescript(),
 		],
 		output: {
 			file: 'dist/index.js',

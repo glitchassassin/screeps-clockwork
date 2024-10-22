@@ -1,14 +1,14 @@
 {
-  "name": "screeps-cartographer",
-  "version": "1.8.12",
+  "name": "screeps-clockwork-test-bot",
+  "version": "1.0.0",
   "description": "An advanced (and open source) movement library for Screeps",
-  "homepage": "https://glitchassassin.github.io/screeps-cartographer/",
+  "homepage": "https://glitchassassin.github.io/screeps-clockwork/",
   "repository": {
     "type": "git",
-    "url": "https://github.com/glitchassassin/screeps-cartographer/"
+    "url": "https://github.com/glitchassassin/screeps-clockwork/"
   },
   "bugs": {
-    "url": "https://github.com/glitchassassin/screeps-cartographer/issues"
+    "url": "https://github.com/glitchassassin/screeps-clockwork/issues"
   },
   "main": "dist/main.js",
   "types": "dist/main.d.ts",
@@ -16,9 +16,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "test": "jest",
-    "build": "rollup -c",
-    "build:docs": "typedoc src/main.ts",
+    "build": "rollup -c --environment DEST:pserver",
     "watch": "rollup -cw",
     "watch-pserver": "rollup -cw --environment DEST:pserver"
   },
@@ -47,5 +45,18 @@
   "dependencies": {
     "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22",
     "screeps-clockwork": "file:../screeps-clockwork"
-  }
+  },
+  "nx": {
+      "targets": {
+          "build": {
+              "inputs": [
+                  "{workspaceRoot}/packages/screeps-clockwork/dist"
+              ],
+              "dependsOn": [
+                  "^build"
+              ]
+          }
+      }
+  },
+    "type": "module"
 }

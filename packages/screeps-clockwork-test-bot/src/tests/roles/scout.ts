@@ -2,7 +2,6 @@ declare global {
   interface CreepMemory {
     room: string;
     scoutTarget?: string;
-    useCartographer?: boolean;
   }
   interface RoomMemory {
     visited?: boolean;

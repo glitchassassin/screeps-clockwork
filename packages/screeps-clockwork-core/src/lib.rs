@@ -10,5 +10,5 @@ extern "C" {
 
 #[wasm_bindgen]
 pub fn greet() {
-    log("Hello, screeps-clockwork!");
+    log("Hello, screeps-clockwork 2.5!");
 }

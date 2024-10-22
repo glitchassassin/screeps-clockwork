@@ -28,13 +28,13 @@ export default [
 			wasm(),
 			copy({
 			  targets: [{
-				src: 'node_modules/screeps-clockwork/dist/screeps_clockwork.wasm',
+				src: '../screeps-clockwork/dist/screeps_clockwork.wasm',
 				dest: 'dist',
 				rename: 'screeps_clockwork.wasm',
 			  }]
 			}),
 			commonjs(),
-			typescript({ tsconfig: './tsconfig.json' }), // so Rollup can convert TypeScript to JavaScript
+			typescript(),
 			screeps({ config: cfg, dryRun: cfg == null })
 		],
 		output: {

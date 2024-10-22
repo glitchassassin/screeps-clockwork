@@ -5,9 +5,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "build": "npm run build:core && npm run build:wrapper",
-        "build:core": "cd ../core && wasm-pack build --target web --config build.rustflags=[\\'-Ctarget-feature=-reference-types\\',\\'-Ctarget-feature=-multivalue\\',\\'-Ctarget-feature=-sign-ext\\'] -Z build-std=std,panic_abort",
-        "build:wrapper": "rollup -c"
+        "build": "rollup -c"
     },
     "repository": {
         "type": "git",
@@ -45,6 +43,22 @@
     },
     "dependencies": {
         "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22",
-        "screeps-clockwork-core": "file:../core/pkg"
-    }
+        "screeps-clockwork-core": "file:../screeps-clockwork-core/pkg"
+    },
+    "nx": {
+        "targets": {
+            "build": {
+                "inputs": [
+                    "{workspaceRoot}/packages/screeps-clockwork-core/pkg"
+                ],
+                "dependsOn": [
+                    "^build"
+                ]
+            }
+        },
+        "implicitDependencies": [
+            "screeps-clockwork-core"
+        ]
+    },
+    "type": "module"
 }
