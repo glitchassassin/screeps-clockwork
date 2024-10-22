@@ -1,5 +1,5 @@
 [package]
-name = "screeps-clockwork"
+name = "screeps-clockwork-core"
 version = "0.1.0"
 authors = ["Jon <jon.winsley@gmail.com>"]
 edition = "2018"
@@ -11,7 +11,12 @@ crate-type = ["cdylib", "rlib"]
 default = ["console_error_panic_hook"]
 
 [dependencies]
+js-sys = "0.3"
+log = "0.4"
+fern = "0.6"
+screeps-game-api = "0.22"
 wasm-bindgen = "0.2.84"
+web-sys = { version = "0.3", features = ["console"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
@@ -24,4 +29,15 @@ wasm-bindgen-test = "0.3.34"
 
 [profile.release]
 # Tell `rustc` to optimize for small code size.
-opt-level = "s"
+panic = "abort"
+opt-level = 3
+lto = true
+
+[package.metadata.wasm-pack.profile.release]
+# See wasm-opt for full available options; handy examples:
+# -O4 - optimize aggressively for performance
+# -Oz - optimize aggressively for code size
+# -g - leave debug info in place, allowing for more descriptive stack traces on panic
+# --signext-lowering - removes opcodes that the screeps servers can't load (see 
+# https://github.com/rustyscreeps/screeps-game-api/issues/391)
+wasm-opt = ["-O4", "--signext-lowering"]

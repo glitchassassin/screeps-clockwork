@@ -1,0 +1,50 @@
+{
+    "name": "screeps-clockwork",
+    "version": "1.0.0",
+    "description": "A WASM movement library for Screeps",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "npm run build:core && npm run build:wrapper",
+        "build:core": "cd ../core && wasm-pack build --target web --config build.rustflags=[\\'-Ctarget-feature=-reference-types\\',\\'-Ctarget-feature=-multivalue\\',\\'-Ctarget-feature=-sign-ext\\'] -Z build-std=std,panic_abort",
+        "build:wrapper": "rollup -c"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/glitchassassin/screeps-clockwork.git"
+    },
+    "keywords": [
+        "typescript",
+        "screeps",
+        "wasm",
+        "pathfinding"
+    ],
+    "author": "Jon Winsley <jon.winsley@gmail.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/glitchassassin/screeps-clockwork/issues"
+    },
+    "homepage": "https://github.com/glitchassassin/screeps-clockwork#readme",
+    "devDependencies": {
+        "@knodes/typedoc-plugin-pages": "^0.23.1",
+        "@rollup/plugin-commonjs": "^25.0.3",
+        "@rollup/plugin-node-resolve": "^15.1.0",
+        "@rollup/plugin-typescript": "^8.3.4",
+        "@rollup/plugin-wasm": "^6.2.2",
+        "@types/node": "^22.7.8",
+        "@types/screeps": "^3.3.0",
+        "@typescript-eslint/eslint-plugin": "^5.0.0",
+        "@typescript-eslint/parser": "^5.0.0",
+        "eslint": "^8.0.0",
+        "prettier": "^2.0.0",
+        "rollup": "^2.78.0",
+        "rollup-plugin-clear": "^2.0.7",
+        "rollup-plugin-copy": "^3.5.0",
+        "rollup-plugin-screeps": "^1.0.1",
+        "typescript": "^4.0.0"
+    },
+    "dependencies": {
+        "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22",
+        "screeps-clockwork-core": "file:../core/pkg"
+    }
+}

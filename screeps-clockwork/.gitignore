@@ -1,0 +1,7 @@
+package-lock.json
+*.js
+!rollup.config.js
+*.d.ts
+*.wasm
+node_modules/
+dist/

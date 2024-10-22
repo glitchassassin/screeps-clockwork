@@ -1,0 +1,51 @@
+{
+  "name": "screeps-cartographer",
+  "version": "1.8.12",
+  "description": "An advanced (and open source) movement library for Screeps",
+  "homepage": "https://glitchassassin.github.io/screeps-cartographer/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glitchassassin/screeps-cartographer/"
+  },
+  "bugs": {
+    "url": "https://github.com/glitchassassin/screeps-cartographer/issues"
+  },
+  "main": "dist/main.js",
+  "types": "dist/main.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "test": "jest",
+    "build": "rollup -c",
+    "build:docs": "typedoc src/main.ts",
+    "watch": "rollup -cw",
+    "watch-pserver": "rollup -cw --environment DEST:pserver"
+  },
+  "keywords": [
+    "screeps",
+    "movement",
+    "traveling",
+    "path",
+    "pathfinding",
+    "traffic"
+  ],
+  "author": "LordGreywether",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.3",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "@rollup/plugin-typescript": "^8.3.4",
+    "@rollup/plugin-wasm": "^6.2.2",
+    "@types/screeps": "^3.3.0",
+    "rollup": "^2.78.0",
+    "rollup-plugin-clear": "^2.0.7",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-screeps": "^1.0.1",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22",
+    "screeps-clockwork": "file:../screeps-clockwork"
+  }
+}
