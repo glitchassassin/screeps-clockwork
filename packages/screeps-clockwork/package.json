@@ -43,13 +43,13 @@
     },
     "dependencies": {
         "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22",
-        "screeps-clockwork-core": "file:../screeps-clockwork-core/pkg"
+        "wasm": "file:../wasm/pkg"
     },
     "nx": {
         "targets": {
             "build": {
                 "inputs": [
-                    "{workspaceRoot}/packages/screeps-clockwork-core/pkg"
+                    "{workspaceRoot}/packages/wasm/pkg"
                 ],
                 "dependsOn": [
                     "^build"
@@ -57,7 +57,7 @@
             }
         },
         "implicitDependencies": [
-            "screeps-clockwork-core"
+            "wasm"
         ]
     },
     "type": "module"

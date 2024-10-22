@@ -15,7 +15,7 @@ export default [
 			wasm(),
 			copy({
 			  targets: [{
-				src: 'node_modules/screeps-clockwork-core/screeps_clockwork_core_bg.wasm',
+				src: 'node_modules/wasm/screeps_clockwork_core_bg.wasm',
 				dest: 'dist',
 				rename: 'screeps_clockwork.wasm',
 			  }]

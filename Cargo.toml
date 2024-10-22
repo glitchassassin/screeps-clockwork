@@ -1,7 +1,7 @@
 
 [workspace]
 resolver = '2'
-members = ['packages/screeps-clockwork-core']
+members = ['packages/wasm']
 
 [profile.release]
 lto = true

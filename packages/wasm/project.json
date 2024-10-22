@@ -1,8 +1,8 @@
 {
-  "name": "screeps-clockwork-core",
+  "name": "wasm",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "packages/screeps-clockwork-core/src",
+  "sourceRoot": "packages/wasm/src",
   "targets": {
     "build": {
       "cache": true,
@@ -10,7 +10,7 @@
       "inputs": ["{projectRoot}/src"],
       "outputs": ["{projectRoot}/pkg"],
       "options": {
-        "cwd": "packages/screeps-clockwork-core",
+        "cwd": "packages/wasm",
         "command": "wasm-pack build --target web --config build.rustflags=[\\'-Ctarget-feature=-reference-types\\',\\'-Ctarget-feature=-multivalue\\',\\'-Ctarget-feature=-sign-ext\\'] -Z build-std=std,panic_abort"
       },
       "configurations": {
@@ -24,7 +24,7 @@
       "executor": "@monodon/rust:test",
       "outputs": ["{options.target-dir}"],
       "options": {
-        "target-dir": "dist/target/screeps-clockwork-core"
+        "target-dir": "dist/target/wasm"
       },
       "configurations": {
         "production": {
@@ -37,7 +37,7 @@
       "executor": "@monodon/rust:lint",
       "outputs": ["{options.target-dir}"],
       "options": {
-        "target-dir": "dist/target/screeps-clockwork-core"
+        "target-dir": "dist/target/wasm"
       }
     }
   },
