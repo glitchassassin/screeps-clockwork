@@ -1,14 +1,6 @@
-# Basic Geometry
-
-## Rooms
-
-Each room in Screeps is a 50x50 square of tiles, numbered from 0-49 on the x and y axes. The room is named by quadrant (N/S/E/W) and coordinates (0-90, depending on the shard). For example, E10N10 is in the top right quadrant.
-
-## Terrain
+# Fatigue
 
 Each tile may have one of three terrain types: plains, swamp, or wall. Movement on swamps generates 10 fatigue per body part, while movement on plains generates 2. Movement on walls is impossible (unless a road has been built).
-
-## Fatigue
 
 All body parts (except `MOVE` and empty `CARRY` parts) [generate fatigue](https://docs.screeps.com/creeps.html#Movement) when the creep moves. When a creep's fatigue level is above 0, it is too tired to move.
 

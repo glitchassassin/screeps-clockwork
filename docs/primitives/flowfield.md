@@ -10,7 +10,7 @@ A distance field that takes into account terrain costs (1 for plains, 5 for swam
 
 A flow field is more compact: it always needs only three bits per tile, to represent one of eight possible directions. This is in theory all that's needed for movement, but it makes calculating distance a little more expensive.
 
-A flow field can also store multiple directions per tile, if equally viable, for smoother traffic management. This means a cap of 3x8 = 24 bits, but could be compressible.
+A flow field can also store multiple directions per tile, if equally viable, for smoother traffic management. This means 8 bits per tile (one for each direction).
 
 ## Usage
 
@@ -20,7 +20,7 @@ With a flow field, simply look up the direction for the current x/y position, an
 
 With a distance field, check the adjacent positions for the lowest value, and move to one of those. (Note that this can give multiple movement options, useful for traffic management.)
 
-We could track a modified flow field that includes multiple equally viable moves: this would take 3x8 = 24 bits per tile (likely compressible).
+We could track a modified flow field that includes multiple equally viable moves.
 
 ### Pathing from the target to anywhere in the room
 
