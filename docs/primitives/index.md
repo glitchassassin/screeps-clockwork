@@ -14,3 +14,6 @@ Basic algorithms and patterns can be composed into an optimized pathfinding stra
   - [A\*](./astar.md)
 - Systems
   - [Traffic](./traffic.md)
+  - Movement (e.g. following a path)
+    - It's useful to look up the next `n` steps in the path - e.g. for bucket brigade
+    - Frequently useful to know the current distance from target
