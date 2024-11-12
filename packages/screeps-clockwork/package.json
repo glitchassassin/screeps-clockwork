@@ -42,8 +42,7 @@
         "typescript": "^4.0.0"
     },
     "dependencies": {
-        "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22",
-        "wasm": "file:../wasm/pkg"
+        "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22"
     },
     "nx": {
         "targets": {
@@ -53,7 +52,17 @@
                 ],
                 "dependsOn": [
                     "^build"
-                ]
+                ],
+                "executor": "nx:run-commands",
+                "options": {
+                    "cwd": "packages/screeps-clockwork",
+                    "commands": [
+                        "rm -rf ./wasm",
+                        "cp -r ../wasm/pkg ./wasm",
+                        "rollup -c"
+                    ],
+                    "parallel": false
+                }
             }
         },
         "implicitDependencies": [

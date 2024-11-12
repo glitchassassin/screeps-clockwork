@@ -1,6 +1,6 @@
 import 'fastestsmallesttextencoderdecoder-encodeinto/EncoderDecoderTogether.min.js';
 
-import * as clockwork from 'wasm';
+import * as clockwork from '../wasm';
 export { clockwork };
 
 declare namespace WebAssembly {

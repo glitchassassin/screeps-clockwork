@@ -2,6 +2,6 @@ package-lock.json
 *.js
 !rollup.config.js
 *.d.ts
-*.wasm
+wasm/
 node_modules/
 dist/
