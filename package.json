@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Clockwork is a movement library for Screeps.",
   "scripts": {
-    "build": "nx build",
-    "test": "nx test"
+    "watch": "nx watch --projects=test-bot --includeDependentProjects -- nx run test-bot:build --skip-nx-cache"
   },
   "author": "",
   "license": "ISC",

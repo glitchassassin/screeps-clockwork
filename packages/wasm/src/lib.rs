@@ -1,5 +1,6 @@
 mod utils;
 
+use screeps::Position;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -10,5 +11,12 @@ extern "C" {
 
 #[wasm_bindgen]
 pub fn greet() {
-    log("Hello, screeps-clockwork 1.1!");
+    log("Hello, screeps-clockwork 1.3!");
+}
+
+#[wasm_bindgen]
+pub fn get_range(packed_pos_1: u32, packed_pos_2: u32) -> u32 {
+    let pos1 = Position::from_packed(packed_pos_1);
+    let pos2 = Position::from_packed(packed_pos_2);
+    pos1.get_range_to(pos2)
 }

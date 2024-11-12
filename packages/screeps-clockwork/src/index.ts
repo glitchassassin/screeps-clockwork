@@ -3,6 +3,10 @@ import 'fastestsmallesttextencoderdecoder-encodeinto/EncoderDecoderTogether.min.
 import * as clockwork from '../wasm';
 export { clockwork };
 
+export function getRange(pos1: RoomPosition, pos2: RoomPosition) {
+  return clockwork.get_range(pos1.__packedPos, pos2.__packedPos);
+}
+
 declare namespace WebAssembly {
   class Module {
     constructor(bytes: Uint8Array);
