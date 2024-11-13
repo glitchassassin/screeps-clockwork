@@ -20,18 +20,3 @@ pub fn get_range(packed_pos_1: u32, packed_pos_2: u32) -> u32 {
     let pos2 = Position::from_packed(packed_pos_2);
     pos1.get_range_to(pos2)
 }
-
-#[wasm_bindgen]
-pub fn echo_num(num: u32) -> u32 {
-    num
-}
-
-#[wasm_bindgen]
-pub fn echo_str(s: String) -> String {
-    s
-}
-
-#[wasm_bindgen]
-pub fn echo_array(arr: Vec<u32>) -> Vec<u32> {
-    arr
-}
