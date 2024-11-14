@@ -10,6 +10,9 @@ pub struct FlowField {
 }
 
 impl FlowField {
+    /**
+     * Create a new flow field.
+     */
     pub fn new() -> Self {
         FlowField { data: [0; 2500] }
     }
