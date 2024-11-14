@@ -1,5 +1,7 @@
+mod flow_field;
 mod utils;
 
+pub use flow_field::FlowField;
 use screeps::Position;
 use wasm_bindgen::prelude::*;
 
