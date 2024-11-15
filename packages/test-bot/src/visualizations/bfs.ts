@@ -12,21 +12,27 @@ function getTerrainCostMatrix(room: string) {
 }
 
 export function visualizeBfsDistanceMap() {
-  for (const flag of Object.values(Game.flags)) {
+  const rooms = Object.values(Game.flags).reduce((acc, flag) => {
     if (flag.color === COLOR_BLUE && flag.secondaryColor === COLOR_BLUE) {
-      const costMatrix = getTerrainCostMatrix(flag.pos.roomName);
-      const distanceMap = bfsDistanceMap([flag.pos], costMatrix);
-      const distanceMapArray = distanceMap.toArray();
-      distanceMap.free();
-
-      const visual = Game.rooms[flag.pos.roomName].visual;
-      distanceMapArray.forEach((distance, index) => {
-        const x = index % 50;
-        const y = Math.floor(index / 50);
-        if (distance) {
-          visual.text(`${distance}`, x, y);
-        }
-      });
+      acc[flag.pos.roomName] ??= [];
+      acc[flag.pos.roomName].push(flag.pos);
     }
+    return acc;
+  }, {} as Record<string, RoomPosition[]>);
+  for (const room in rooms) {
+    const flagPositions = rooms[room];
+    const costMatrix = getTerrainCostMatrix(room);
+    const distanceMap = bfsDistanceMap(flagPositions, costMatrix);
+    const distanceMapArray = distanceMap.toArray();
+    distanceMap.free();
+
+    const visual = Game.rooms[room].visual;
+    distanceMapArray.forEach((distance, index) => {
+      const x = index % 50;
+      const y = Math.floor(index / 50);
+      if (distance) {
+        visual.text(`${distance}`, x, y);
+      }
+    });
   }
 }

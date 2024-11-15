@@ -18,8 +18,8 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-pub fn greet() {
-    log("Hello, screeps-clockwork 1.0!");
+pub fn version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
 }
 
 #[wasm_bindgen]
