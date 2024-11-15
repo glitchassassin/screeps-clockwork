@@ -1,7 +1,7 @@
-import { bfsDistanceMap } from 'screeps-clockwork';
+import { bfsDistanceMap, ClockworkCostMatrix } from 'screeps-clockwork';
 
 function getTerrainCostMatrix(room: string) {
-  const costMatrix = new PathFinder.CostMatrix();
+  const costMatrix = new ClockworkCostMatrix();
   const terrain = Game.map.getRoomTerrain(room);
   for (let x = 0; x < 50; x++) {
     for (let y = 0; y < 50; y++) {

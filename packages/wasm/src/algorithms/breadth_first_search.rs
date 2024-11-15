@@ -1,9 +1,10 @@
 use std::collections::{HashSet, VecDeque};
 
 use screeps::objects::CostMatrix;
-use screeps::{LocalCostMatrix, Position, RoomXY};
+use screeps::{LocalCostMatrix, Position, RoomPosition, RoomXY};
 use wasm_bindgen::prelude::*;
 
+use crate::cost_matrix::ClockworkCostMatrix;
 use crate::DistanceMap;
 
 /**
@@ -39,12 +40,15 @@ pub fn bfs_distance_map(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Di
 /**
  * WASM wrapper for the BFS distance map function.
  */
-#[wasm_bindgen(js_name = bfs_distance_map)]
-pub fn js_bfs_distance_map(start_packed: Vec<u32>, cost_matrix: CostMatrix) -> DistanceMap {
+#[wasm_bindgen(js_name = bfsDistanceMap)]
+pub fn js_bfs_distance_map(
+    start_packed: Vec<RoomPosition>,
+    cost_matrix: &ClockworkCostMatrix,
+) -> DistanceMap {
     let start_room_xy = start_packed
         .iter()
-        .map(|packed| RoomXY::from(Position::from_packed(*packed)))
+        .map(|pos| RoomXY::from(Position::from(pos)))
         .collect();
-    let local_cost_matrix = LocalCostMatrix::from(&cost_matrix);
+    let local_cost_matrix = cost_matrix.get_internal();
     bfs_distance_map(start_room_xy, &local_cost_matrix)
 }
