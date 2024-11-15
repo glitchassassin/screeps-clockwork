@@ -1,11 +1,13 @@
 mod algorithms;
 mod datatypes;
+mod helpers;
 mod utils;
 
 pub use algorithms::breadth_first_search;
 pub use datatypes::DistanceMap;
 pub use datatypes::FlowField;
 pub use datatypes::Path;
+pub use helpers::cost_matrix;
 use screeps::Position;
 use wasm_bindgen::prelude::*;
 

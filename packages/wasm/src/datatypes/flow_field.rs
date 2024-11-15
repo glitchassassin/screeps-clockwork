@@ -1,9 +1,10 @@
-use screeps::Direction;
+use screeps::{Direction, RoomCoordinate};
 
 /**
  * A flow field is a 50x50 grid (representing a room), representing viable directions
  * to travel to reach a particular target (or targets). A given tile may have multiple
- * equally valid directions, so we represent this as a bitfield.
+ * equally valid directions, so we represent this as a bitfield (where each bit in an
+ * 8-bit unsigned integer represents a direction that is either viable or not).
  */
 pub struct FlowField {
     data: [u8; 2500],
@@ -20,38 +21,29 @@ impl FlowField {
     /**
      * Get the internal value for a given coordinate.
      */
-    pub fn get(&self, x: usize, y: usize) -> Option<u8> {
-        if x < 50 && y < 50 {
-            Some(self.data[y * 50 + x])
-        } else {
-            None
-        }
+    pub fn get(&self, x: RoomCoordinate, y: RoomCoordinate) -> u8 {
+        self.data[(y.u8() as usize) * 50 + (x.u8() as usize)]
     }
 
     /**
      * Set the internal value for a given coordinate.
      */
-    pub fn set(&mut self, x: usize, y: usize, value: u8) -> Result<(), &'static str> {
-        if x < 50 && y < 50 {
-            self.data[y * 50 + x] = value;
-            Ok(())
-        } else {
-            Err("Coordinates out of bounds")
-        }
+    pub fn set(&mut self, x: RoomCoordinate, y: RoomCoordinate, value: u8) {
+        self.data[(y.u8() as usize) * 50 + (x.u8() as usize)] = value;
     }
 
     /**
      * Get the list of valid directions for a given coordinate.
      */
-    pub fn get_directions(&self, x: usize, y: usize) -> Result<Vec<Direction>, &'static str> {
-        let value = self.get(x, y).ok_or("Coordinates out of bounds")?;
+    pub fn get_directions(&self, x: RoomCoordinate, y: RoomCoordinate) -> Vec<Direction> {
+        let value = self.get(x, y);
         let mut directions = Vec::new();
         for direction in Direction::iter().cloned() {
             if value & (1 << direction as u8) != 0 {
                 directions.push(direction);
             }
         }
-        Ok(directions)
+        directions
     }
 
     /**
@@ -59,10 +51,10 @@ impl FlowField {
      */
     pub fn set_directions(
         &mut self,
-        x: usize,
-        y: usize,
+        x: RoomCoordinate,
+        y: RoomCoordinate,
         directions: Vec<Direction>,
-    ) -> Result<(), &'static str> {
+    ) {
         let mut value = 0;
         for direction in directions {
             value |= 1 << direction as u8;
