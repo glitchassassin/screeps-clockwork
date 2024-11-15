@@ -1,8 +1,10 @@
 import 'fastestsmallesttextencoderdecoder-encodeinto/EncoderDecoderTogether.min.js';
 
-import { type InitOutput, bfsDistanceMap, ClockworkCostMatrix, initSync, version } from '../wasm';
-export { bfsDistanceMap, ClockworkCostMatrix };
+import { type InitOutput, ClockworkCostMatrix, initSync, version } from '../wasm';
+export { ClockworkCostMatrix };
 
+export * from './wrappers/bfsDistanceMap';
+export * from './wrappers/bfsFlowField';
 export * from './wrappers/getRange';
 
 declare namespace WebAssembly {

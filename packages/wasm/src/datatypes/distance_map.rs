@@ -11,6 +11,15 @@ pub struct DistanceMap {
     data: [usize; 2500],
 }
 
+impl<'a> IntoIterator for &'a DistanceMap {
+    type Item = &'a usize;
+    type IntoIter = std::slice::Iter<'a, usize>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.data.iter()
+    }
+}
+
 impl DistanceMap {
     /**
      * Create a new distance map.

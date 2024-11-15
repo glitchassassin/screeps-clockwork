@@ -1,5 +1,6 @@
-import { visualizeBfsDistanceMap } from './bfs';
+import { visualizeBfsDistanceMap, visualizeBfsFlowField } from './bfs';
 
 export function visualize() {
   visualizeBfsDistanceMap();
+  visualizeBfsFlowField();
 }
