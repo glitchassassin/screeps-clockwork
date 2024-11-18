@@ -1,45 +1,108 @@
-use screeps::RoomCoordinate;
+// Original under MIT license from: https://github.com/einargs/rust-screeps-code/blob/main/src/rooms/tile_slice.rs
+
+use screeps::{xy_to_linear_index, RoomCoordinate, RoomXY};
+use std::ops::{Index, IndexMut};
 use wasm_bindgen::prelude::*;
 
-/**
- * A distance map is a 50x50 grid (representing a room), representing the distance to
- * the nearest target. This distance may be calculated with arbitrary cost functions,
- * so we're using `usize` instead of `u8` to allow maximum flexibility.
- */
+use screeps::constants::extra::{ROOM_AREA, ROOM_SIZE};
+
+/// Maps arbitrary data onto individual room tile positions.
 #[wasm_bindgen]
-pub struct DistanceMap {
-    data: [usize; 2500],
+#[derive(Debug, Clone)]
+pub struct DistanceMap([usize; ROOM_AREA]);
+
+impl DistanceMap {
+    #[inline]
+    pub fn new() -> DistanceMap {
+        DistanceMap([usize::MAX; ROOM_AREA])
+    }
+
+    pub fn to_vec(&self) -> Vec<usize> {
+        self.0.to_vec()
+    }
 }
 
-impl<'a> IntoIterator for &'a DistanceMap {
-    type Item = &'a usize;
-    type IntoIter = std::slice::Iter<'a, usize>;
+impl Default for DistanceMap {
+    fn default() -> DistanceMap {
+        DistanceMap([usize::MAX; ROOM_AREA])
+    }
+}
 
-    fn into_iter(self) -> Self::IntoIter {
-        self.data.iter()
+impl Index<usize> for DistanceMap {
+    type Output = usize;
+    fn index(&self, index: usize) -> &usize {
+        &self.0[index]
+    }
+}
+
+/// Allows indexing by raw linear index
+impl IndexMut<usize> for DistanceMap {
+    fn index_mut(&mut self, index: usize) -> &mut usize {
+        &mut self.0[index]
+    }
+}
+
+/// Allows indexing by RoomXY directly
+impl Index<RoomXY> for DistanceMap {
+    type Output = usize;
+    fn index(&self, index: RoomXY) -> &usize {
+        &self.0[xy_to_linear_index(index)]
+    }
+}
+
+/// Allows indexing by RoomXY to get a mutable copy of the associated data
+impl IndexMut<RoomXY> for DistanceMap {
+    fn index_mut(&mut self, index: RoomXY) -> &mut usize {
+        &mut self.0[xy_to_linear_index(index)]
+    }
+}
+
+/// Allows indexing by RoomXY references
+impl Index<&RoomXY> for DistanceMap {
+    type Output = usize;
+    fn index(&self, index: &RoomXY) -> &usize {
+        &self.0[xy_to_linear_index(*index)]
+    }
+}
+
+/// Allows indexing by RoomXY references to get a mutable copy of the associated data
+impl IndexMut<&RoomXY> for DistanceMap {
+    fn index_mut(&mut self, index: &RoomXY) -> &mut usize {
+        &mut self.0[xy_to_linear_index(*index)]
+    }
+}
+
+/// Iterator that yields (RoomXY, &T) pairs
+pub struct DistanceMapEnumerate<'a> {
+    tile_map: &'a DistanceMap,
+    current_index: usize,
+}
+
+impl<'a> Iterator for DistanceMapEnumerate<'a> {
+    type Item = (RoomXY, &'a usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.current_index >= ROOM_AREA {
+            return None;
+        }
+
+        let x = RoomCoordinate::new((self.current_index % ROOM_SIZE as usize) as u8).unwrap();
+        let y = RoomCoordinate::new((self.current_index / ROOM_SIZE as usize) as u8).unwrap();
+        let xy = RoomXY::new(x, y);
+        let value = &self.tile_map.0[self.current_index];
+
+        self.current_index += 1;
+        Some((xy, value))
     }
 }
 
 impl DistanceMap {
-    /**
-     * Create a new distance map.
-     */
-    pub fn new() -> Self {
-        DistanceMap { data: [0; 2500] }
-    }
-
-    /**
-     * Get the distance for a given coordinate.
-     */
-    pub fn get(&self, x: RoomCoordinate, y: RoomCoordinate) -> usize {
-        self.data[(y.u8() as usize) * 50 + (x.u8() as usize)]
-    }
-
-    /**
-     * Set the distance for a given coordinate.
-     */
-    pub fn set(&mut self, x: RoomCoordinate, y: RoomCoordinate, value: usize) {
-        self.data[(y.u8() as usize) * 50 + (x.u8() as usize)] = value;
+    /// Returns an iterator that yields (RoomXY, &T) pairs
+    pub fn enumerate(&self) -> DistanceMapEnumerate {
+        DistanceMapEnumerate {
+            tile_map: self,
+            current_index: 0,
+        }
     }
 }
 
@@ -47,6 +110,6 @@ impl DistanceMap {
 impl DistanceMap {
     #[wasm_bindgen(js_name = toArray)]
     pub fn to_array(&self) -> Vec<usize> {
-        self.data.to_vec()
+        self.0.to_vec()
     }
 }

@@ -1,6 +1,6 @@
 use std::collections::{HashSet, VecDeque};
 
-use screeps::{LocalCostMatrix, Position, RoomCoordinate, RoomPosition, RoomXY};
+use screeps::{LocalCostMatrix, Position, RoomPosition, RoomXY};
 use wasm_bindgen::prelude::*;
 
 use crate::cost_matrix::ClockworkCostMatrix;
@@ -20,11 +20,16 @@ pub fn bfs_distance_map(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Di
     let mut visited = start.iter().cloned().collect::<HashSet<_>>();
     let mut distance_map = DistanceMap::new();
 
+    // initialize the distance map with the start positions
+    for position in start {
+        distance_map[position] = 0;
+    }
+
     while let Some(position) = frontier.pop_front() {
-        let current_distance = distance_map.get(position.x, position.y);
+        let current_distance = distance_map[position];
         for neighbor in position.neighbors() {
             if cost_matrix.get(neighbor) < 255 && !visited.contains(&neighbor) {
-                distance_map.set(neighbor.x, neighbor.y, current_distance + 1);
+                distance_map[neighbor] = current_distance + 1;
                 frontier.push_back(neighbor);
                 visited.insert(neighbor);
             } else {
@@ -65,14 +70,7 @@ pub fn bfs_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Flow
     let distance_map = bfs_distance_map(start, cost_matrix);
     let mut flow_field = FlowField::new();
 
-    for (index, distance) in distance_map.into_iter().enumerate() {
-        let x = RoomCoordinate::new((index % 50) as u8).unwrap_or_else(|_| {
-            wasm_bindgen::throw_str(&format!("Invalid x coordinate: {}", index % 50))
-        });
-        let y = RoomCoordinate::new((index / 50) as u8).unwrap_or_else(|_| {
-            wasm_bindgen::throw_str(&format!("Invalid y coordinate: {}", index / 50))
-        });
-        let position = RoomXY::new(x, y);
+    for (position, _) in distance_map.enumerate() {
         if cost_matrix.get(position) >= 255 {
             continue;
         }
@@ -83,12 +81,12 @@ pub fn bfs_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Flow
             .collect();
         let min_distance = neighbors
             .iter()
-            .map(|neighbor| distance_map.get(neighbor.x, neighbor.y))
+            .map(|neighbor| distance_map[neighbor])
             .min();
         if let Some(min_distance) = min_distance {
             let directions = neighbors
                 .iter()
-                .filter(|neighbor| distance_map.get(neighbor.x, neighbor.y) == min_distance)
+                .filter(|neighbor| distance_map[**neighbor] == min_distance)
                 .map(|neighbor| neighbor.get_direction_to(position).unwrap())
                 .collect();
             flow_field.set_directions(position.x, position.y, directions);
