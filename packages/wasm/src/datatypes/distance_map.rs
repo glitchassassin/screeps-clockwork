@@ -86,8 +86,8 @@ impl<'a> Iterator for DistanceMapEnumerate<'a> {
             return None;
         }
 
-        let x = RoomCoordinate::new((self.current_index % ROOM_SIZE as usize) as u8).unwrap();
-        let y = RoomCoordinate::new((self.current_index / ROOM_SIZE as usize) as u8).unwrap();
+        let x = RoomCoordinate::new((self.current_index / ROOM_SIZE as usize) as u8).unwrap();
+        let y = RoomCoordinate::new((self.current_index % ROOM_SIZE as usize) as u8).unwrap();
         let xy = RoomXY::new(x, y);
         let value = &self.tile_map.0[self.current_index];
 

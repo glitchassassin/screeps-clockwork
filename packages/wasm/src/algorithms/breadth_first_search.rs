@@ -4,7 +4,7 @@ use screeps::{LocalCostMatrix, Position, RoomPosition, RoomXY};
 use wasm_bindgen::prelude::*;
 
 use crate::cost_matrix::ClockworkCostMatrix;
-use crate::{DistanceMap, FlowField};
+use crate::{log, DistanceMap, FlowField};
 
 /**
  * Creates a distance map for the given start positions, using a breadth-first search.
@@ -46,12 +46,12 @@ pub fn bfs_distance_map(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Di
  */
 #[wasm_bindgen]
 pub fn js_bfs_distance_map(
-    start_packed: Vec<RoomPosition>,
+    start_packed: Vec<u32>,
     cost_matrix: &ClockworkCostMatrix,
 ) -> DistanceMap {
     let start_room_xy = start_packed
         .iter()
-        .map(|pos| RoomXY::from(Position::from(pos)))
+        .map(|pos| RoomXY::from(Position::from_packed(*pos)))
         .collect();
     let local_cost_matrix = cost_matrix.get_internal();
     bfs_distance_map(start_room_xy, &local_cost_matrix)
@@ -70,9 +70,9 @@ pub fn bfs_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Flow
     let distance_map = bfs_distance_map(start, cost_matrix);
     let mut flow_field = FlowField::new();
 
-    for (position, _) in distance_map.enumerate() {
-        if cost_matrix.get(position) >= 255 {
-            continue;
+    for (position, &value) in distance_map.enumerate() {
+        if value == usize::MAX {
+            continue; // unreachable
         }
         let neighbors: Vec<RoomXY> = position
             .neighbors()

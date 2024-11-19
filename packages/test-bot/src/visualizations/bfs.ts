@@ -1,5 +1,7 @@
 import { bfsDistanceMap, bfsFlowField, ClockworkCostMatrix } from 'screeps-clockwork';
 
+const UNREACHABLE = 0xffffffff;
+
 function getTerrainCostMatrix(room: string) {
   const costMatrix = new ClockworkCostMatrix();
   const terrain = Game.map.getRoomTerrain(room);
@@ -21,6 +23,7 @@ export function visualizeBfsDistanceMap() {
   }, {} as Record<string, RoomPosition[]>);
   for (const room in rooms) {
     const flagPositions = rooms[room];
+    console.log(flagPositions);
     const costMatrix = getTerrainCostMatrix(room);
     const distanceMap = bfsDistanceMap(flagPositions, costMatrix);
     const distanceMapArray = distanceMap.toArray();
@@ -28,9 +31,10 @@ export function visualizeBfsDistanceMap() {
 
     const visual = Game.rooms[room].visual;
     distanceMapArray.forEach((distance, index) => {
-      const x = index % 50;
-      const y = Math.floor(index / 50);
-      if (distance) {
+      const y = index % 50;
+      const x = Math.floor(index / 50);
+      if (distance !== UNREACHABLE) {
+        console.log(x, y, distance);
         visual.text(`${distance}`, x, y);
       }
     });
