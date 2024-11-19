@@ -5,3 +5,4 @@
  */
 
 import './cases/bfsDistanceMap';
+import './cases/bfsFlowField';

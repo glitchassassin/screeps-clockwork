@@ -84,12 +84,14 @@ pub fn bfs_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Flow
             .map(|neighbor| distance_map[neighbor])
             .min();
         if let Some(min_distance) = min_distance {
-            let directions = neighbors
-                .iter()
-                .filter(|neighbor| distance_map[**neighbor] == min_distance)
-                .map(|neighbor| neighbor.get_direction_to(position).unwrap())
-                .collect();
-            flow_field.set_directions(position.x, position.y, directions);
+            if min_distance < value {
+                let directions = neighbors
+                    .iter()
+                    .filter(|neighbor| distance_map[**neighbor] == min_distance)
+                    .map(|neighbor| position.get_direction_to(*neighbor).unwrap())
+                    .collect();
+                flow_field.set_directions(position.x, position.y, directions);
+            }
         }
     }
 

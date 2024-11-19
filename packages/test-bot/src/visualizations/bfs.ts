@@ -42,14 +42,14 @@ export function visualizeBfsDistanceMap() {
 }
 
 const DIRECTION_OFFSET = {
-  [TOP]: { x: 0, y: 0.5 },
-  [TOP_RIGHT]: { x: -0.5, y: 0.5 },
-  [RIGHT]: { x: -0.5, y: 0 },
-  [BOTTOM_RIGHT]: { x: -0.5, y: -0.5 },
-  [BOTTOM]: { x: 0, y: -0.5 },
-  [BOTTOM_LEFT]: { x: 0.5, y: -0.5 },
-  [LEFT]: { x: 0.5, y: 0 },
-  [TOP_LEFT]: { x: 0.5, y: 0.5 }
+  [TOP]: { x: 0, y: -0.5 },
+  [TOP_RIGHT]: { x: 0.5, y: -0.5 },
+  [RIGHT]: { x: 0.5, y: 0 },
+  [BOTTOM_RIGHT]: { x: 0.5, y: 0.5 },
+  [BOTTOM]: { x: 0, y: 0.5 },
+  [BOTTOM_LEFT]: { x: -0.5, y: 0.5 },
+  [LEFT]: { x: -0.5, y: 0 },
+  [TOP_LEFT]: { x: -0.5, y: -0.5 }
 };
 
 export function visualizeBfsFlowField() {
