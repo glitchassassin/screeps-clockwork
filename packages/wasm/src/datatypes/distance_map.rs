@@ -112,4 +112,22 @@ impl DistanceMap {
     pub fn to_array(&self) -> Vec<usize> {
         self.0.to_vec()
     }
+
+    #[wasm_bindgen(js_name = get)]
+    pub fn js_get(&self, x: u8, y: u8) -> usize {
+        let x = RoomCoordinate::new(x)
+            .unwrap_or_else(|_| wasm_bindgen::throw_str(&format!("Invalid x coordinate: {}", x)));
+        let y = RoomCoordinate::new(y)
+            .unwrap_or_else(|_| wasm_bindgen::throw_str(&format!("Invalid y coordinate: {}", y)));
+        self.0[xy_to_linear_index(RoomXY::new(x, y))]
+    }
+
+    #[wasm_bindgen(js_name = set)]
+    pub fn js_set(&mut self, x: u8, y: u8, value: usize) {
+        let x = RoomCoordinate::new(x)
+            .unwrap_or_else(|_| wasm_bindgen::throw_str(&format!("Invalid x coordinate: {}", x)));
+        let y = RoomCoordinate::new(y)
+            .unwrap_or_else(|_| wasm_bindgen::throw_str(&format!("Invalid y coordinate: {}", y)));
+        self.0[xy_to_linear_index(RoomXY::new(x, y))] = value;
+    }
 }

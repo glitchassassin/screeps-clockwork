@@ -44,19 +44,20 @@
   },
   "dependencies": {
     "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22",
-    "screeps-clockwork": "file:../screeps-clockwork"
+    "screeps-clockwork": "file:../screeps-clockwork",
+    "source-map": "^0.6.1"
   },
   "nx": {
-      "targets": {
-          "build": {
-              "inputs": [
-                  "{workspaceRoot}/packages/screeps-clockwork/dist"
-              ],
-              "dependsOn": [
-                  "^build"
-              ]
-          }
+    "targets": {
+      "build": {
+        "inputs": [
+          "{workspaceRoot}/packages/screeps-clockwork/dist"
+        ],
+        "dependsOn": [
+          "^build"
+        ]
       }
+    }
   },
-    "type": "module"
+  "type": "module"
 }

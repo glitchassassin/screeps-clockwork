@@ -1,10 +1,10 @@
 use std::collections::{HashSet, VecDeque};
 
-use screeps::{LocalCostMatrix, Position, RoomPosition, RoomXY};
+use screeps::{LocalCostMatrix, Position, RoomXY};
 use wasm_bindgen::prelude::*;
 
 use crate::cost_matrix::ClockworkCostMatrix;
-use crate::{log, DistanceMap, FlowField};
+use crate::{DistanceMap, FlowField};
 
 /**
  * Creates a distance map for the given start positions, using a breadth-first search.
