@@ -56,10 +56,12 @@ export function skip(name: string, fn: TestFunction, timeout?: number) {
 }
 
 export function run(cpuThreshold = 20): TestResult {
+  let someRan = false;
   for (const suiteKey of suites.keys()) {
     if (ranSuites.has(suiteKey)) continue;
     const suite = suites.get(suiteKey);
     if (!suite) break;
+    someRan = true;
 
     while (currentTestIndex < suite.tests.length) {
       const { skip, fn, name, timeout } = suite.tests[currentTestIndex];
@@ -113,7 +115,13 @@ export function run(cpuThreshold = 20): TestResult {
     ranSuites.add(suiteKey);
   }
 
-  return hasFailures ? 'failure' : 'success';
+  if (hasFailures) {
+    if (someRan) console.log('❌ Some tests failed');
+    return 'failure';
+  } else {
+    if (someRan) console.log('✅ All tests passed');
+    return 'success';
+  }
 }
 
 export interface Matchers<T> {
