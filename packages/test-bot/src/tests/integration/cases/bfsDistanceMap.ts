@@ -1,5 +1,8 @@
 import { bfsDistanceMap, ClockworkCostMatrix } from 'screeps-clockwork';
+import { DistanceMap } from 'screeps-clockwork/wasm';
 import { describe, expect, it } from 'tests/helpers';
+import { referenceBfsDistanceMap, ReferenceDistanceMap } from 'tests/referenceAlgorithms/bfsDistanceMap';
+import { cpuTime } from 'utils/cpuTime';
 
 describe('bfsDistanceMap', () => {
   it('should calculate the distance map for an empty room', () => {
@@ -65,4 +68,21 @@ describe('bfsDistanceMap', () => {
     expect(distanceMap.get(35, 26)).toBe(0);
     expect(distanceMap.get(35, 24)).toBe(10);
   });
+  it('should match the reference implementation', () => {
+    let referenceDistanceMap: ReferenceDistanceMap | undefined;
+    const referenceTime = cpuTime(() => {
+      referenceDistanceMap = referenceBfsDistanceMap([new RoomPosition(25, 26, 'W1N1')], new PathFinder.CostMatrix());
+    });
+    let clockworkDistanceMap: DistanceMap | undefined;
+    const clockworkTime = cpuTime(() => {
+      clockworkDistanceMap = bfsDistanceMap([new RoomPosition(25, 26, 'W1N1')], new ClockworkCostMatrix());
+    });
+    expect(clockworkDistanceMap?.get(0, 0)).toEqual(referenceDistanceMap?.get(0, 0));
+    expect(clockworkDistanceMap?.get(25, 26)).toEqual(referenceDistanceMap?.get(25, 26));
+    expect(clockworkDistanceMap?.get(49, 49)).toEqual(referenceDistanceMap?.get(49, 49));
+
+    console.log('referenceTime', referenceTime);
+    console.log('clockworkTime', clockworkTime);
+    expect(clockworkTime).toBeLessThan(referenceTime * 2);
+  }, 20);
 });

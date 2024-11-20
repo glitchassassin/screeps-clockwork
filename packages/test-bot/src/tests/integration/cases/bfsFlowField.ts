@@ -1,5 +1,8 @@
 import { bfsFlowField, ClockworkCostMatrix } from 'screeps-clockwork';
+import { FlowField } from 'screeps-clockwork/wasm';
 import { describe, expect, it } from 'tests/helpers';
+import { referenceBfsFlowField, ReferenceFlowField } from 'tests/referenceAlgorithms/bfsFlowField';
+import { cpuTime } from 'utils/cpuTime';
 
 describe('bfsFlowField', () => {
   it('should calculate the flow field for an empty room', () => {
@@ -45,4 +48,22 @@ describe('bfsFlowField', () => {
     expect(flowField.getDirections(25, 25)).toEqual([BOTTOM]);
     expect(flowField.getDirections(25, 24)).toEqual([BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT]);
   });
+  it('should match the reference implementation', () => {
+    let referenceFlowField: ReferenceFlowField | undefined;
+    const referenceTime = cpuTime(() => {
+      referenceFlowField = referenceBfsFlowField([new RoomPosition(25, 26, 'W1N1')], new PathFinder.CostMatrix());
+    });
+    let clockworkFlowField: FlowField | undefined;
+    const clockworkTime = cpuTime(() => {
+      clockworkFlowField = bfsFlowField([new RoomPosition(25, 26, 'W1N1')], new ClockworkCostMatrix());
+    });
+
+    expect(clockworkFlowField?.getDirections(25, 26).sort()).toEqual(referenceFlowField?.getDirections(25, 26).sort());
+    expect(clockworkFlowField?.getDirections(25, 25).sort()).toEqual(referenceFlowField?.getDirections(25, 25).sort());
+    expect(clockworkFlowField?.getDirections(49, 49).sort()).toEqual(referenceFlowField?.getDirections(49, 49).sort());
+
+    console.log('referenceTime', referenceTime);
+    console.log('clockworkTime', clockworkTime);
+    expect(clockworkTime).toBeLessThan(referenceTime * 2);
+  }, 50);
 });
