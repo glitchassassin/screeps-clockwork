@@ -7,6 +7,6 @@ import { runTestScenarios } from './basicBot';
 export const loop = () => {
   runTestScenarios();
   initialize(true);
-  run();
+  const testResult = run();
   visualize();
 };
