@@ -1,4 +1,4 @@
-import { bfsDistanceMap, bfsFlowField, ClockworkCostMatrix } from 'screeps-clockwork';
+import { bfsDistanceMap, bfsFlowField, bfsMonoFlowField, ClockworkCostMatrix } from 'screeps-clockwork';
 
 const UNREACHABLE = 0xffffffff;
 
@@ -78,3 +78,40 @@ export function visualizeBfsFlowField() {
     flowField.free();
   }
 }
+
+export function visualizeBfsMonoFlowField() {
+  const rooms = Object.values(Game.flags).reduce((acc, flag) => {
+    if (flag.color === COLOR_BLUE && flag.secondaryColor === COLOR_WHITE) {
+      acc[flag.pos.roomName] ??= [];
+      acc[flag.pos.roomName].push(flag.pos);
+    }
+    return acc;
+  }, {} as Record<string, RoomPosition[]>);
+  for (const room in rooms) {
+    const flagPositions = rooms[room];
+    const costMatrix = getTerrainCostMatrix(room);
+    const flowField = bfsMonoFlowField(flagPositions, costMatrix);
+
+    const visual = Game.rooms[room].visual;
+    for (let x = 0; x < 50; x++) {
+      for (let y = 0; y < 50; y++) {
+        const direction = flowField.get(x, y);
+        if (direction) {
+          visual.text(DIRECTION_ARROWS[direction], x, y);
+        }
+      }
+    }
+    flowField.free();
+  }
+}
+
+const DIRECTION_ARROWS = {
+  [TOP]: '↑',
+  [TOP_RIGHT]: '↗',
+  [RIGHT]: '→',
+  [BOTTOM_RIGHT]: '↘',
+  [BOTTOM]: '↓',
+  [BOTTOM_LEFT]: '↙',
+  [LEFT]: '←',
+  [TOP_LEFT]: '↖'
+};

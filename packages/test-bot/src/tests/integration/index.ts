@@ -7,3 +7,4 @@
 import './cases/bfsClockworkCostMatrix';
 import './cases/bfsDistanceMap';
 import './cases/bfsFlowField';
+import './cases/bfsMonoFlowField';
