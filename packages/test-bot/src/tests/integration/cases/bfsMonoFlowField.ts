@@ -1,5 +1,4 @@
-import { bfsMonoFlowField, ClockworkCostMatrix } from 'screeps-clockwork';
-import { MonoFlowField } from 'screeps-clockwork/wasm';
+import { bfsMonoFlowField, ClockworkCostMatrix, MonoFlowField } from 'screeps-clockwork';
 import { describe, expect, it } from 'tests/helpers';
 import { referenceBfsMonoFlowField, ReferenceMonoFlowField } from 'tests/referenceAlgorithms/bfsMonoFlowField';
 import { cpuTime } from 'utils/cpuTime';

@@ -1,5 +1,4 @@
-import { bfsDistanceMap, ClockworkCostMatrix } from 'screeps-clockwork';
-import { DistanceMap } from 'screeps-clockwork/wasm';
+import { bfsDistanceMap, ClockworkCostMatrix, DistanceMap } from 'screeps-clockwork';
 import { describe, expect, it } from 'tests/helpers';
 import { referenceBfsDistanceMap, ReferenceDistanceMap } from 'tests/referenceAlgorithms/bfsDistanceMap';
 import { cpuTime } from 'utils/cpuTime';

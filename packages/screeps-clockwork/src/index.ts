@@ -1,7 +1,15 @@
 import 'fastestsmallesttextencoderdecoder-encodeinto/EncoderDecoderTogether.min.js';
 
-import { type InitOutput, ClockworkCostMatrix, initSync, version } from '../wasm';
-export { ClockworkCostMatrix };
+import {
+  type InitOutput,
+  ClockworkCostMatrix,
+  DistanceMap,
+  FlowField,
+  MonoFlowField,
+  initSync,
+  version
+} from '../wasm';
+export { ClockworkCostMatrix, DistanceMap, FlowField, MonoFlowField };
 
 export * from './wrappers/bfsDistanceMap';
 export * from './wrappers/bfsFlowField';

@@ -24,3 +24,5 @@ function roomPositionToCoords(pos: RoomPosition) {
   };
 }
 ```
+
+It should be noted that it's faster to compute this from the `__packedPos` property.
