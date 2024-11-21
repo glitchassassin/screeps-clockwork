@@ -9,6 +9,7 @@ config.yml
 .env
 *.log
 screeps.json
+!types.d.ts
 
 /target
 **/*.rs.bk
