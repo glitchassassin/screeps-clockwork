@@ -10,3 +10,7 @@ A set of highly-optimized primitives for routing, pathfinding, and traffic manag
 ## Development
 
 - [Testing](./testing.md): Philosophy and details around testing and visualizations
+
+## API Docs
+
+- [Screeps-Clockwork](./api) API docs
