@@ -17,6 +17,12 @@ jobs:
           targets: wasm32-unknown-unknown
           components: rust-src
 
+      # Add Rust caching
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: 'screeps-clockwork'
+          cache-directories: 'dist_lib/target/'
+
       - name: Install wasm-pack
         run: |
           curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -28,8 +34,24 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      # Add Node dependency caching
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
         run: npm ci
+
+      # Cache wasm-pack output
+      - name: Cache wasm-pack output
+        uses: actions/cache@v3
+        with:
+          path: wasm
+          key: ${{ runner.os }}-wasm-${{ hashFiles('lib/**') }}
 
       - name: Build
         run: npm run build
