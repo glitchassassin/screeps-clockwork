@@ -6,10 +6,8 @@ node_modules/
 dist/
 dist_test/
 dist_lib/
-config.yml
 .env
 *.log
-screeps.json
 !types.d.ts
 
 /target

@@ -1,0 +1,30 @@
+version: latest
+pinnedPackages:
+  ssri: 8.0.1
+  cacache: 16.1.3
+  passport-steam: 1.0.17
+  minipass-fetch: 3.0.3
+  psl: 1.10.0
+mods:
+  - screepsmod-mongo
+  - screepsmod-auth
+  - screepsmod-admin-utils
+  - screepsmod-history
+  - screepsmod-market
+  - screepsmod-cli
+# - screepsmod-map-tool
+bots:
+extraPackages:
+  morgan: '*'
+localMods: ./mods
+serverConfig:
+  welcomeText: |
+    <div>
+    <h1 style="text-align: center;">Screeps Clockwork Test Server</h1>
+    Welcome to the Screeps Clockwork test server.<br>
+    </div>
+  tickRate: 1000
+env:
+  backend:
+    MAPTOOL_USER: admin
+    MAPTOOL_PASS: password

@@ -1,0 +1,11 @@
+{
+  "pserver": {
+    "email": "clockwork@example.com",
+    "password": "passw0rd",
+    "protocol": "http",
+    "hostname": "localhost",
+    "port": 21025,
+    "path": "/",
+    "branch": "default"
+  }
+}
