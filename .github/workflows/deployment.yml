@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,6 +56,30 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Build docs
+        run: npm run build:docs
+
+      - name: Upload dist folder as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-artifact
+          path: dist
+
+      - name: Upload docs folder as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs-artifact
+          path: dist_docs
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist-artifact
+          path: dist
+
       - name: Check if version exists
         id: version-check
         run: |
@@ -74,3 +98,32 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-docs:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: docs-artifact
+          path: dist_docs
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  deploy-docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
