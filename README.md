@@ -1,5 +1,11 @@
 # Screeps Clockwork
 
+<div style="text-align: center;"><a href="https://glitchassassin.github.io/screeps-clockwork/">Understand the Theory</a> | <a href="https://glitchassassin.github.io/screeps-clockwork/api/">API Docs</a></div>
+
+## Usage
+
+(TODO)
+
 ## Dev Setup
 
 Dependencies to build and run the project:

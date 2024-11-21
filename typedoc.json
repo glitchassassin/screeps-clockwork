@@ -1,3 +1,4 @@
 {
-  "out": "./dist_docs"
+  "out": "./dist_docs",
+  "entryPoints": ["src/index.ts"]
 }
