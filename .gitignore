@@ -5,6 +5,7 @@ wasm/
 node_modules/
 dist/
 dist_test/
+dist_lib/
 config.yml
 .env
 *.log

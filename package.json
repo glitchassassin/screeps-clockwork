@@ -1,9 +1,9 @@
 {
     "name": "screeps-clockwork",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "A WASM movement library for Screeps",
     "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "types": "dist/src/index.d.ts",
     "scripts": {
         "build": "run-s build:lib build:src",
         "build:lib": "wasm-pack build --target web --out-dir wasm --config build.rustflags=[\\'-Ctarget-feature=-reference-types\\',\\'-Ctarget-feature=-multivalue\\',\\'-Ctarget-feature=-sign-ext\\'] -Z build-std=std,panic_abort",
@@ -24,7 +24,7 @@
         "pathfinding"
     ],
     "author": "Jon Winsley <jon.winsley@gmail.com>",
-    "license": "MIT",
+    "license": "SEE LICENSE IN LICENSE",
     "bugs": {
         "url": "https://github.com/glitchassassin/screeps-clockwork/issues"
     },
@@ -52,30 +52,11 @@
         "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22",
         "npm-run-all": "^4.1.5"
     },
-    "nx": {
-        "targets": {
-            "build": {
-                "inputs": [
-                    "{workspaceRoot}/packages/wasm/pkg"
-                ],
-                "dependsOn": [
-                    "^build"
-                ],
-                "executor": "nx:run-commands",
-                "options": {
-                    "cwd": "packages/screeps-clockwork",
-                    "commands": [
-                        "rm -rf ./wasm",
-                        "cp -r ../wasm/pkg ./wasm",
-                        "rollup -c"
-                    ],
-                    "parallel": false
-                }
-            }
-        },
-        "implicitDependencies": [
-            "wasm"
-        ]
-    },
-    "type": "module"
+    "type": "module",
+    "files": [
+        "dist/**/*"
+    ],
+    "publishConfig": {
+        "access": "public"
+    }
 }
