@@ -25,6 +25,14 @@ let wasm_bytes: Uint8Array;
 let wasm_module: WebAssembly.Module;
 let wasm_instance: InitOutput;
 let initialized = false;
+/**
+ * The `initialize` function should be called in your main loop before
+ * using any other screeps-clockwork functions. Depending on available
+ * CPU, it may not load the WASM module completely in the first tick,
+ * but it will pick back up where it left off if the script times out.
+ *
+ * @param verbose - If true, will log the state of the WASM module as it loads.
+ */
 export function initialize(verbose = false) {
   if (!wasm_bytes) wasm_bytes = require('screeps_clockwork.wasm');
   if (verbose && !initialized) console.log('[clockwork] wasm_bytes loaded');
