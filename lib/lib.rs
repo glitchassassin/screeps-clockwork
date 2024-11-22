@@ -22,6 +22,7 @@ pub fn version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
 
+/// Exports the global range calculation between two positions.
 #[wasm_bindgen]
 pub fn get_range(packed_pos_1: u32, packed_pos_2: u32) -> u32 {
     let pos1 = Position::from_packed(packed_pos_1);

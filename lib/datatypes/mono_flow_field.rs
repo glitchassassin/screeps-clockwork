@@ -1,28 +1,22 @@
 use screeps::{Direction, RoomCoordinate, RoomXY};
 use wasm_bindgen::prelude::*;
 
-/**
- * A flow field is a 50x50 grid (representing a room), representing viable directions
- * to travel to reach a particular target (or targets). A mono flow field only stores
- * a single direction for each tile, so we represent this as 4 bits of an unsigned
- * integer (0 for no direction, 1 for TOP, etc.).
- */
+/// A flow field is a 50x50 grid (representing a room), representing viable directions
+/// to travel to reach a particular target (or targets). A mono flow field only stores
+/// a single direction for each tile, so we represent this as 4 bits of an unsigned
+/// integer (0 for no direction, 1 for TOP, etc.).
 #[wasm_bindgen]
 pub struct MonoFlowField {
     data: [u8; 1250],
 }
 
 impl MonoFlowField {
-    /**
-     * Create a new flow field.
-     */
+    /// Create a new flow field.
     pub fn new() -> Self {
         MonoFlowField { data: [0; 1250] }
     }
 
-    /**
-     * Get the direction for a given coordinate.
-     */
+    /// Get the direction for a given coordinate.
     pub fn get(&self, pos: RoomXY) -> Option<Direction> {
         let index = (pos.y.u8() as usize) * 50 + (pos.x.u8() as usize);
         let nibble = index / 2;
@@ -42,9 +36,7 @@ impl MonoFlowField {
         }
     }
 
-    /**
-     * Set the direction for a given coordinate.
-     */
+    /// Set the direction for a given coordinate.
     pub fn set(&mut self, pos: RoomXY, value: Option<Direction>) {
         let index = (pos.y.u8() as usize) * 50 + (pos.x.u8() as usize);
         let nibble = index / 2;
@@ -56,9 +48,7 @@ impl MonoFlowField {
 
 #[wasm_bindgen]
 impl MonoFlowField {
-    /**
-     * Get the direction for a given coordinate.
-     */
+    /// Get the direction for a given coordinate.
     #[wasm_bindgen(js_name = get)]
     pub fn js_get(&self, x: u8, y: u8) -> Option<Direction> {
         let x = RoomCoordinate::new(x)
@@ -68,9 +58,7 @@ impl MonoFlowField {
         self.get(RoomXY::new(x, y))
     }
 
-    /**
-     * Set the direction for a given coordinate.
-     */
+    /// Set the direction for a given coordinate.
     #[wasm_bindgen(js_name = set)]
     pub fn js_set(&mut self, x: u8, y: u8, value: Option<Direction>) {
         let x = RoomCoordinate::new(x)

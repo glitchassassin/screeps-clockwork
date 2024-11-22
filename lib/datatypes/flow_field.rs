@@ -1,42 +1,32 @@
 use screeps::{Direction, RoomCoordinate};
 use wasm_bindgen::prelude::*;
 
-/**
- * A flow field is a 50x50 grid (representing a room), representing viable directions
- * to travel to reach a particular target (or targets). A given tile may have multiple
- * equally valid directions, so we represent this as a bitfield (where each bit in an
- * 8-bit unsigned integer represents a direction that is either viable or not).
- */
+/// A flow field is a 50x50 grid (representing a room), representing viable directions
+/// to travel to reach a particular target (or targets). A given tile may have multiple
+/// equally valid directions, so we represent this as a bitfield (where each bit in an
+/// 8-bit unsigned integer represents a direction that is either viable or not).
 #[wasm_bindgen]
 pub struct FlowField {
     data: [u8; 2500],
 }
 
 impl FlowField {
-    /**
-     * Create a new flow field.
-     */
+    /// Create a new flow field.
     pub fn new() -> Self {
         FlowField { data: [0; 2500] }
     }
 
-    /**
-     * Get the internal value for a given coordinate.
-     */
+    /// Get the internal value for a given coordinate.
     pub fn get(&self, x: RoomCoordinate, y: RoomCoordinate) -> u8 {
         self.data[(y.u8() as usize) * 50 + (x.u8() as usize)]
     }
 
-    /**
-     * Set the internal value for a given coordinate.
-     */
+    /// Set the internal value for a given coordinate.
     pub fn set(&mut self, x: RoomCoordinate, y: RoomCoordinate, value: u8) {
         self.data[(y.u8() as usize) * 50 + (x.u8() as usize)] = value;
     }
 
-    /**
-     * Get the list of valid directions for a given coordinate.
-     */
+    /// Get the list of valid directions for a given coordinate.
     pub fn get_directions(&self, x: RoomCoordinate, y: RoomCoordinate) -> Vec<Direction> {
         let value = self.get(x, y);
         let mut directions = Vec::new();
@@ -48,9 +38,7 @@ impl FlowField {
         directions
     }
 
-    /**
-     * Set the list of valid directions for a given coordinate.
-     */
+    /// Set the list of valid directions for a given coordinate.
     pub fn set_directions(
         &mut self,
         x: RoomCoordinate,
@@ -72,9 +60,7 @@ impl FlowField {
 
 #[wasm_bindgen]
 impl FlowField {
-    /**
-     * Get the internal value for a given coordinate.
-     */
+    /// Get the internal value for a given coordinate.
     #[wasm_bindgen(js_name = get)]
     pub fn js_get(&self, x: u8, y: u8) -> u8 {
         let x = RoomCoordinate::new(x)
@@ -84,9 +70,8 @@ impl FlowField {
         self.get(x, y)
     }
 
-    /**
-     * Set the internal value for a given coordinate.
-     */
+    /// Set the internal value for a given coordinate.
+    #[wasm_bindgen(js_name = set)]
     #[wasm_bindgen(js_name = set)]
     pub fn js_set(&mut self, x: u8, y: u8, value: u8) {
         let x = RoomCoordinate::new(x)
@@ -96,9 +81,7 @@ impl FlowField {
         self.set(x, y, value);
     }
 
-    /**
-     * Get the list of valid directions for a given coordinate.
-     */
+    /// Get the list of valid directions for a given coordinate.
     #[wasm_bindgen(js_name = getDirections)]
     pub fn js_get_directions(&self, x: u8, y: u8) -> Vec<Direction> {
         let x = RoomCoordinate::new(x)
@@ -108,9 +91,7 @@ impl FlowField {
         self.get_directions(x, y)
     }
 
-    /**
-     * Set the list of valid directions for a given coordinate.
-     */
+    /// Set the list of valid directions for a given coordinate.
     #[wasm_bindgen(js_name = setDirections)]
     pub fn js_set_directions(&mut self, x: u8, y: u8, directions: Vec<Direction>) {
         let x = RoomCoordinate::new(x)
@@ -120,6 +101,7 @@ impl FlowField {
         self.set_directions(x, y, directions);
     }
 
+    /// Add a direction to the list of valid directions for a given coordinate.
     #[wasm_bindgen(js_name = addDirection)]
     pub fn js_add_direction(&mut self, x: u8, y: u8, direction: Direction) {
         let x = RoomCoordinate::new(x)

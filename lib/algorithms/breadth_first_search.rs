@@ -7,14 +7,12 @@ use crate::cost_matrix::ClockworkCostMatrix;
 use crate::datatypes::MonoFlowField;
 use crate::{DistanceMap, FlowField};
 
-/**
- * Creates a distance map for the given start positions, using a breadth-first search.
- * This does not factor in terrain costs (treating anything less than 255 in the cost
- * matrix as passable), so it's faster but less useful than Dijkstra's algorithm.
- *
- * This calculates a distance map for a single room (where the starting position(s) are
- * located).
- */
+/// Creates a distance map for the given start positions, using a breadth-first search.
+/// This does not factor in terrain costs (treating anything less than 255 in the cost
+/// matrix as passable), so it's faster but less useful than Dijkstra's algorithm.
+///
+/// This calculates a distance map for a single room (where the starting position(s) are
+/// located).
 pub fn bfs_distance_map(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> DistanceMap {
     // Initialize the frontier with the passable positions surrounding the start positions
     let mut frontier = VecDeque::from(start.clone());
@@ -42,9 +40,7 @@ pub fn bfs_distance_map(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Di
     distance_map
 }
 
-/**
- * WASM wrapper for the BFS distance map function.
- */
+/// WASM wrapper for the BFS distance map function.
 #[wasm_bindgen]
 pub fn js_bfs_distance_map(
     start_packed: Vec<u32>,
@@ -58,14 +54,12 @@ pub fn js_bfs_distance_map(
     bfs_distance_map(start_room_xy, &local_cost_matrix)
 }
 
-/**
- * Creates a flow field for the given start positions, using a breadth-first search.
- * This does not factor in terrain costs (treating anything less than 255 in the cost
- * matrix as passable), so it's faster but less useful than Dijkstra's algorithm.
- *
- * This calculates a flow field for a single room (where the starting position(s) are
- * located).
- */
+/// Creates a flow field for the given start positions, using a breadth-first search.
+/// This does not factor in terrain costs (treating anything less than 255 in the cost
+/// matrix as passable), so it's faster but less useful than Dijkstra's algorithm.
+///
+/// This calculates a flow field for a single room (where the starting position(s) are
+/// located).
 pub fn bfs_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> FlowField {
     // Initialize the frontier with the passable positions surrounding the start positions
     let distance_map = bfs_distance_map(start, cost_matrix);
@@ -99,9 +93,7 @@ pub fn bfs_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Flow
     flow_field
 }
 
-/**
- * WASM wrapper for the BFS flow field function.
- */
+/// WASM wrapper for the BFS flow field function.
 #[wasm_bindgen]
 pub fn js_bfs_flow_field(start_packed: Vec<u32>, cost_matrix: &ClockworkCostMatrix) -> FlowField {
     let start_room_xy = start_packed
@@ -112,14 +104,12 @@ pub fn js_bfs_flow_field(start_packed: Vec<u32>, cost_matrix: &ClockworkCostMatr
     bfs_flow_field(start_room_xy, &local_cost_matrix)
 }
 
-/**
- * Creates a flow field for the given start positions, using a breadth-first search.
- * This does not factor in terrain costs (treating anything less than 255 in the cost
- * matrix as passable), so it's faster but less useful than Dijkstra's algorithm.
- *
- * This calculates a flow field for a single room (where the starting position(s) are
- * located).
- */
+/// Creates a flow field for the given start positions, using a breadth-first search.
+/// This does not factor in terrain costs (treating anything less than 255 in the cost
+/// matrix as passable), so it's faster but less useful than Dijkstra's algorithm.
+///
+/// This calculates a flow field for a single room (where the starting position(s) are
+/// located).
 pub fn bfs_mono_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> MonoFlowField {
     // Initialize the frontier with the passable positions surrounding the start positions
     let mut frontier = VecDeque::from(start.clone());
@@ -147,9 +137,7 @@ pub fn bfs_mono_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) ->
     flow_field
 }
 
-/**
- * WASM wrapper for the BFS mono flow field function.
- */
+/// WASM wrapper for the BFS mono flow field function.
 #[wasm_bindgen]
 pub fn js_bfs_mono_flow_field(
     start_packed: Vec<u32>,

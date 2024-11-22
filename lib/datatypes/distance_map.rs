@@ -6,23 +6,26 @@ use wasm_bindgen::prelude::*;
 
 use screeps::constants::extra::{ROOM_AREA, ROOM_SIZE};
 
-/// Maps arbitrary data onto individual room tile positions.
+/// Maps a distance value onto individual room tile positions.
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct DistanceMap([usize; ROOM_AREA]);
 
 impl DistanceMap {
+    /// Creates a new distance map with all values defaulted to `usize::MAX`.
     #[inline]
     pub fn new() -> DistanceMap {
         DistanceMap([usize::MAX; ROOM_AREA])
     }
 
+    /// Converts the distance map into a vector of distances.
     pub fn to_vec(&self) -> Vec<usize> {
         self.0.to_vec()
     }
 }
 
 impl Default for DistanceMap {
+    /// Creates a new distance map with all values defaulted to `usize::MAX`.
     fn default() -> DistanceMap {
         DistanceMap([usize::MAX; ROOM_AREA])
     }
@@ -30,6 +33,7 @@ impl Default for DistanceMap {
 
 impl Index<usize> for DistanceMap {
     type Output = usize;
+    /// Gets the distance value at a given index.
     fn index(&self, index: usize) -> &usize {
         &self.0[index]
     }
@@ -108,11 +112,13 @@ impl DistanceMap {
 
 #[wasm_bindgen]
 impl DistanceMap {
+    /// Converts the distance map into a flat array of distances.
     #[wasm_bindgen(js_name = toArray)]
     pub fn to_array(&self) -> Vec<usize> {
         self.0.to_vec()
     }
 
+    /// Gets the distance value at a given position.
     #[wasm_bindgen(js_name = get)]
     pub fn js_get(&self, x: u8, y: u8) -> usize {
         let x = RoomCoordinate::new(x)
@@ -122,6 +128,7 @@ impl DistanceMap {
         self.0[xy_to_linear_index(RoomXY::new(x, y))]
     }
 
+    /// Sets the distance value at a given position.
     #[wasm_bindgen(js_name = set)]
     pub fn js_set(&mut self, x: u8, y: u8, value: usize) {
         let x = RoomCoordinate::new(x)
