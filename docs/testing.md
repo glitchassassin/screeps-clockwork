@@ -16,6 +16,4 @@ Some of these integration tests also time the Clockwork code vs. a Javascript re
 
 The test-bot project also has visualization logic, triggered by placing different-colored flags.
 
-- BLUE/BLUE: Displays a distance map, using all flags in the room as starting points.
-- BLUE/CYAN: Displays a flow field, using all flags in the room as starting points.
-- BLUE/WHITE: Displays a mono flow field, using all flags in the room as starting points.
+For more details, see the visualizations section of [the API docs](https://glitchassassin.github.io/screeps-clockwork/api/).

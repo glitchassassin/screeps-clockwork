@@ -1,4 +1,5 @@
 {
   "out": "./dist_docs",
-  "entryPoints": ["src/index.ts"]
+  "entryPoints": ["src/index.ts", "test/visualizations/breadthFirstSearch.ts"],
+  "tsconfig": "tsconfig.test.json"
 }

@@ -16,6 +16,8 @@ function getTerrainCostMatrix(room: string) {
 /**
  * Visualization of a distance map, where each cell tracks the distance to
  * the nearest flag.
+ *
+ * Place a BLUE/BLUE flag in a room to trigger this visualization.
  */
 export function visualizeBfsDistanceMap() {
   const rooms = Object.values(Game.flags).reduce(
@@ -62,6 +64,8 @@ const DIRECTION_OFFSET = {
 /**
  * Visualization of a flow field, where each cell may have zero to eight
  * viable directions.
+ *
+ * Place a BLUE/CYAN flag in a room to trigger this visualization.
  */
 export function visualizeBfsFlowField() {
   const rooms = Object.values(Game.flags).reduce(
@@ -96,6 +100,8 @@ export function visualizeBfsFlowField() {
 /**
  * Visualization of a mono-directional flow field, where each cell has a
  * single direction.
+ *
+ * Place a BLUE/WHITE flag in a room to trigger this visualization.
  */
 export function visualizeBfsMonoFlowField() {
   const rooms = Object.values(Game.flags).reduce(
@@ -139,6 +145,8 @@ const DIRECTION_ARROWS = {
 
 /**
  * Visualization of "basins," areas that are furthest from terrain walls.
+ *
+ * Place a BLUE/RED flag in a room to trigger this visualization.
  */
 export function visualizeBfsDistanceMapBasin() {
   const rooms = Object.values(Game.flags).reduce(

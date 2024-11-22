@@ -3,7 +3,7 @@ import {
   visualizeBfsDistanceMapBasin,
   visualizeBfsFlowField,
   visualizeBfsMonoFlowField
-} from './bfs';
+} from './breadthFirstSearch';
 
 export function visualize() {
   visualizeBfsDistanceMap();
