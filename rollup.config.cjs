@@ -29,7 +29,7 @@ module.exports = [
       copy({
         targets: [
           {
-            src: 'wasm/screeps_clockwork_core_bg.wasm',
+            src: 'wasm/screeps_clockwork_bg.wasm',
             dest: 'dist',
             rename: 'screeps_clockwork.wasm'
           }
@@ -58,7 +58,7 @@ module.exports = [
       copy({
         targets: [
           {
-            src: 'wasm/screeps_clockwork_core_bg.wasm',
+            src: 'wasm/screeps_clockwork_bg.wasm',
             dest: 'dist_test',
             rename: 'screeps_clockwork.wasm'
           }
