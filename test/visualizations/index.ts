@@ -1,7 +1,13 @@
-import { visualizeBfsDistanceMap, visualizeBfsFlowField, visualizeBfsMonoFlowField } from './bfs';
+import {
+  visualizeBfsDistanceMap,
+  visualizeBfsDistanceMapBasin,
+  visualizeBfsFlowField,
+  visualizeBfsMonoFlowField
+} from './bfs';
 
 export function visualize() {
   visualizeBfsDistanceMap();
   visualizeBfsFlowField();
   visualizeBfsMonoFlowField();
+  visualizeBfsDistanceMapBasin();
 }
