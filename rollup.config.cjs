@@ -1,10 +1,10 @@
-import commonjs from '@rollup/plugin-commonjs';
-import resolve from '@rollup/plugin-node-resolve';
-import typescript from '@rollup/plugin-typescript';
-import wasm from '@rollup/plugin-wasm';
-import clear from 'rollup-plugin-clear';
-import copy from 'rollup-plugin-copy';
-import screeps from 'rollup-plugin-screeps';
+const commonjs = require('@rollup/plugin-commonjs');
+const resolve = require('@rollup/plugin-node-resolve');
+const typescript = require('@rollup/plugin-typescript');
+const wasm = require('@rollup/plugin-wasm');
+const clear = require('rollup-plugin-clear');
+const copy = require('rollup-plugin-copy');
+const screeps = require('rollup-plugin-screeps');
 
 let cfg;
 const dest = process.env.DEST;
@@ -18,7 +18,7 @@ if (config) {
   throw new Error('Invalid upload destination');
 }
 
-export default [
+module.exports = [
   {
     input: 'src/index.ts',
     external: ['screeps_clockwork.wasm'],
