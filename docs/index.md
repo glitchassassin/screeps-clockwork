@@ -9,6 +9,7 @@ A set of highly-optimized primitives for routing, pathfinding, and traffic manag
 
 ## Development
 
+- [WASM details](./wasm/index.md): Notes around the WASM implementation
 - [Testing](./testing.md): Philosophy and details around testing and visualizations
 
 ## API Docs
