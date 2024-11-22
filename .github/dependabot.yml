@@ -13,3 +13,7 @@ updates:
       interval: daily
       time: '08:00'
     open-pull-requests-limit: 10
+    ignore:
+      # source-map v0.6.1 is the last version that supports synchronous API
+      - dependency-name: source-map
+        versions: ['*']
