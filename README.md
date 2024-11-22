@@ -52,3 +52,11 @@ To deploy the test codebase, once the server is running:
 ```bash
 npm run watch
 ```
+
+Set up commitizen and pre-commit for conventional commits:
+
+```bash
+# requires Python 3.8+
+pip install --user -U commitizen pre-commit
+pre-commit install
+```
