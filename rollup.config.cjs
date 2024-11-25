@@ -29,9 +29,13 @@ module.exports = [
       copy({
         targets: [
           {
-            src: 'wasm/screeps_clockwork_bg.wasm',
+            src: 'src/wasm/screeps_clockwork_bg.wasm',
             dest: 'dist',
             rename: 'screeps_clockwork.wasm'
+          },
+          {
+            src: 'src/wasm/screeps_clockwork.d.ts',
+            dest: 'dist/src/wasm'
           }
         ]
       }),
@@ -44,7 +48,7 @@ module.exports = [
       sourcemap: true
     },
     watch: {
-      include: ['src/**', 'wasm/**'],
+      include: ['src/**', 'src/wasm/**'],
       clearScreen: false
     }
   },
@@ -58,7 +62,7 @@ module.exports = [
       copy({
         targets: [
           {
-            src: 'wasm/screeps_clockwork_bg.wasm',
+            src: 'src/wasm/screeps_clockwork_bg.wasm',
             dest: 'dist_test',
             rename: 'screeps_clockwork.wasm'
           }
@@ -74,7 +78,7 @@ module.exports = [
       sourcemap: true
     },
     watch: {
-      include: ['src/**', 'wasm/**', 'test/**'],
+      include: ['src/**', 'src/wasm/**', 'test/**'],
       clearScreen: false
     }
   }

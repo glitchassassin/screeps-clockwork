@@ -4,7 +4,45 @@
 
 ## Usage
 
-(TODO)
+This guide will assume you're using Rollup along the lines of the Screeps Typescript starter kit.
+
+Set up dependencies:
+
+```
+npm install screeps-clockwork
+npm install -D @rollup/plugin-wasm rollup-plugin-copy
+```
+
+Update your Rollup build script to copy the WASM binary to your dist folder:
+
+```js
+// add to existing dependencies
+import wasm from '@rollup/plugin-wasm';
+import copy from 'rollup-plugin-copy';
+
+// ...
+
+export default {
+  // ...
+  external: ['screeps_clockwork.wasm'],
+  plugins: [
+    clear({ targets: ['dist'] }),
+    wasm(),
+    copy({
+      targets: [
+        {
+          src: 'node_modules/screeps-clockwork/dist/screeps_clockwork.wasm',
+          dest: 'dist'
+        }
+      ]
+    }),
+    // ...
+    screeps({ config: cfg, dryRun: cfg == null })
+  ]
+};
+```
+
+`rollup-plugin-screeps` will automatically push the wasm file out when it deploys.
 
 ## Dev Setup
 

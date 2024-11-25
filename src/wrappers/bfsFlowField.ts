@@ -1,4 +1,4 @@
-import { ClockworkCostMatrix, js_bfs_flow_field, js_bfs_mono_flow_field } from '../../wasm';
+import { ClockworkCostMatrix, js_bfs_flow_field, js_bfs_mono_flow_field } from '../wasm/screeps_clockwork';
 
 /**
  * Generate a [flow field](https://glitchassassin.github.io/screeps-clockwork/primitives/flowfield.html) for a set of positions
@@ -31,6 +31,9 @@ export function bfsFlowField(start: RoomPosition[], costMatrix: ClockworkCostMat
  *
  * This might be useful for creeps with only MOVE parts and/or empty
  * CARRY parts, which don't generate fatigue.
+ *
+ * Note that the `roomName` on start positions is ignored - all positions
+ * are assumed to be in the same room as the cost matrix.
  *
  * @param start - The starting positions.
  * @param costMatrix - The cost matrix to use for the flow field.

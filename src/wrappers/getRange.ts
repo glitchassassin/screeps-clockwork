@@ -1,4 +1,4 @@
-import { get_range } from '../../wasm';
+import { get_range } from '../wasm/screeps_clockwork';
 
 /**
  * Get the global range between two positions. This is different

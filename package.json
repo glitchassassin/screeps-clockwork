@@ -6,12 +6,12 @@
   "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "run-s build:lib build:src",
-    "build:lib": "wasm-pack build --target web --out-dir wasm --config build.rustflags=[\\'-Ctarget-feature=-reference-types\\',\\'-Ctarget-feature=-multivalue\\',\\'-Ctarget-feature=-sign-ext\\'] -Z build-std=std,panic_abort",
+    "build:lib": "wasm-pack build --target web --out-dir src/wasm --config build.rustflags=[\\'-Ctarget-feature=-reference-types\\',\\'-Ctarget-feature=-multivalue\\',\\'-Ctarget-feature=-sign-ext\\'] -Z build-std=std,panic_abort",
     "build:src": "rollup -c",
     "build:docs": "typedoc",
     "watch": "run-s build watch:both",
     "watch:lib": "cargo-watch -w lib -s \"npm run build:lib\"",
-    "watch:src": "wait-on wasm/screeps_clockwork_bg.wasm && rollup -cw",
+    "watch:src": "wait-on src/wasm/screeps_clockwork_bg.wasm && rollup -cw",
     "watch:pserver": "rollup -cw --environment DEST:pserver",
     "watch:both": "run-p watch:lib watch:pserver"
   },

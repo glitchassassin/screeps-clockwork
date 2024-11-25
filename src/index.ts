@@ -8,7 +8,7 @@ import {
   MonoFlowField,
   initSync,
   version
-} from '../wasm';
+} from './wasm/screeps_clockwork';
 export { ClockworkCostMatrix, DistanceMap, FlowField, MonoFlowField };
 
 export * from './wrappers/bfsDistanceMap';

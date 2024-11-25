@@ -8,5 +8,5 @@
     "baseUrl": "src/"
   },
   "include": ["src/**/*", "types.d.ts"],
-  "exclude": ["node_modules", "dist", "dist_test", "*.config.js", "wasm", "test"]
+  "exclude": ["node_modules", "dist", "dist_test", "*.config.js", "test"]
 }

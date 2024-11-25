@@ -1,4 +1,4 @@
-import { ClockworkCostMatrix, js_bfs_distance_map } from '../../wasm';
+import { ClockworkCostMatrix, js_bfs_distance_map } from '../wasm/screeps_clockwork';
 
 /**
  * Generate a [distance map](https://glitchassassin.github.io/screeps-clockwork/primitives/flowfield.html) for a set of positions
@@ -10,6 +10,9 @@ import { ClockworkCostMatrix, js_bfs_distance_map } from '../../wasm';
  *
  * This might be useful for creeps with only MOVE parts and/or empty
  * CARRY parts, which don't generate fatigue.
+ *
+ * Note that the `roomName` on start positions is ignored - all positions
+ * are assumed to be in the same room as the cost matrix.
  *
  * @param start - The starting positions.
  * @param costMatrix - The cost matrix to use for the flow field.
