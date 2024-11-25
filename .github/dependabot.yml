@@ -17,3 +17,6 @@ updates:
       # source-map v0.6.1 is the last version that supports synchronous API
       - dependency-name: source-map
         versions: ['*']
+      # rollup versions after 2.79.2 break things
+      - dependency-name: rollup
+        versions: ['*']
