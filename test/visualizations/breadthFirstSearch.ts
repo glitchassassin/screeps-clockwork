@@ -1,6 +1,7 @@
 import { bfsDistanceMap, bfsFlowField, bfsMonoFlowField, ClockworkCostMatrix } from '../../src/index';
-
-const UNREACHABLE = 0xffffffff;
+import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
+import { visualizeFlowField } from './helpers/visualizeFlowField';
+import { visualizeMonoFlowField } from './helpers/visualizeMonoFlowField';
 
 function getTerrainCostMatrix(room: string) {
   const costMatrix = new ClockworkCostMatrix();
@@ -35,31 +36,10 @@ export function visualizeBfsDistanceMap() {
     console.log(flagPositions);
     const costMatrix = getTerrainCostMatrix(room);
     const distanceMap = bfsDistanceMap(flagPositions, costMatrix);
-    const distanceMapArray = distanceMap.toArray();
+    visualizeDistanceMap(room, distanceMap);
     distanceMap.free();
-
-    const visual = Game.rooms[room].visual;
-    distanceMapArray.forEach((distance, index) => {
-      const y = index % 50;
-      const x = Math.floor(index / 50);
-      if (distance !== UNREACHABLE) {
-        console.log(x, y, distance);
-        visual.text(`${distance}`, x, y);
-      }
-    });
   }
 }
-
-const DIRECTION_OFFSET = {
-  [TOP]: { x: 0, y: -0.5 },
-  [TOP_RIGHT]: { x: 0.5, y: -0.5 },
-  [RIGHT]: { x: 0.5, y: 0 },
-  [BOTTOM_RIGHT]: { x: 0.5, y: 0.5 },
-  [BOTTOM]: { x: 0, y: 0.5 },
-  [BOTTOM_LEFT]: { x: -0.5, y: 0.5 },
-  [LEFT]: { x: -0.5, y: 0 },
-  [TOP_LEFT]: { x: -0.5, y: -0.5 }
-};
 
 /**
  * Visualization of a flow field, where each cell may have zero to eight
@@ -82,17 +62,7 @@ export function visualizeBfsFlowField() {
     const flagPositions = rooms[room];
     const costMatrix = getTerrainCostMatrix(room);
     const flowField = bfsFlowField(flagPositions, costMatrix);
-
-    const visual = Game.rooms[room].visual;
-    for (let x = 0; x < 50; x++) {
-      for (let y = 0; y < 50; y++) {
-        const directions = flowField.getDirections(x, y) as DirectionConstant[];
-        for (const direction of directions) {
-          const offset = DIRECTION_OFFSET[direction];
-          visual.line(x, y, x + offset.x, y + offset.y);
-        }
-      }
-    }
+    visualizeFlowField(room, flowField);
     flowField.free();
   }
 }
@@ -118,30 +88,10 @@ export function visualizeBfsMonoFlowField() {
     const flagPositions = rooms[room];
     const costMatrix = getTerrainCostMatrix(room);
     const flowField = bfsMonoFlowField(flagPositions, costMatrix);
-
-    const visual = Game.rooms[room].visual;
-    for (let x = 0; x < 50; x++) {
-      for (let y = 0; y < 50; y++) {
-        const direction = flowField.get(x, y);
-        if (direction) {
-          visual.text(DIRECTION_ARROWS[direction], x, y);
-        }
-      }
-    }
+    visualizeMonoFlowField(room, flowField);
     flowField.free();
   }
 }
-
-const DIRECTION_ARROWS = {
-  [TOP]: '↑',
-  [TOP_RIGHT]: '↗',
-  [RIGHT]: '→',
-  [BOTTOM_RIGHT]: '↘',
-  [BOTTOM]: '↓',
-  [BOTTOM_LEFT]: '↙',
-  [LEFT]: '←',
-  [TOP_LEFT]: '↖'
-};
 
 /**
  * Visualization of "basins," areas that are furthest from terrain walls.
@@ -175,17 +125,7 @@ export function visualizeBfsDistanceMapBasin() {
     }
 
     const distanceMap = bfsDistanceMap(walls, costMatrix);
-    const distanceMapArray = distanceMap.toArray();
+    visualizeDistanceMap(room, distanceMap);
     distanceMap.free();
-
-    const visual = Game.rooms[room].visual;
-    distanceMapArray.forEach((distance, index) => {
-      const y = index % 50;
-      const x = Math.floor(index / 50);
-      if (distance !== UNREACHABLE && distance !== 0) {
-        console.log(x, y, distance);
-        visual.text(`${distance}`, x, y);
-      }
-    });
   }
 }

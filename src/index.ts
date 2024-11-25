@@ -13,6 +13,8 @@ export { ClockworkCostMatrix, DistanceMap, FlowField, MonoFlowField };
 
 export * from './wrappers/bfsDistanceMap';
 export * from './wrappers/bfsFlowField';
+export * from './wrappers/dijkstraDistanceMap';
+export * from './wrappers/dijkstraFlowField';
 export * from './wrappers/getRange';
 
 declare namespace WebAssembly {

@@ -57,6 +57,8 @@ export function skip(name: string, fn: TestFunction, timeout?: number) {
 
 export function run(cpuThreshold = 20): TestResult {
   let someRan = false;
+  const startTime = Game.cpu.getUsed();
+
   for (const suiteKey of suites.keys()) {
     if (ranSuites.has(suiteKey)) continue;
     const suite = suites.get(suiteKey);
@@ -64,6 +66,10 @@ export function run(cpuThreshold = 20): TestResult {
     someRan = true;
 
     while (currentTestIndex < suite.tests.length) {
+      if (Game.cpu.getUsed() - startTime > cpuThreshold) {
+        return 'pending';
+      }
+
       const { skip, fn, name, timeout } = suite.tests[currentTestIndex];
       if (skip) {
         console.log(`[ ${yellow('SKIP')}    ] ${suite.name} - ${name}`);
@@ -100,15 +106,6 @@ export function run(cpuThreshold = 20): TestResult {
       }
 
       console.log(`[ ${green('PASS')}    ] ${suite.name} - ${name} (${cpuUsed.toFixed(2)} CPU)`);
-
-      if (Game.cpu.getUsed() > cpuThreshold) {
-        if (currentTestIndex === suite.tests.length) {
-          // mark this suite as finished
-          currentTestIndex = 0;
-          ranSuites.add(suiteKey);
-        }
-        return 'pending';
-      }
     }
 
     currentTestIndex = 0;

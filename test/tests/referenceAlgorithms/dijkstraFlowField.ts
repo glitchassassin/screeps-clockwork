@@ -1,4 +1,4 @@
-import { Coord, referenceBfsDistanceMap } from './bfsDistanceMap';
+import { Coord, referenceDijkstraDistanceMap } from './dijkstraDistanceMap';
 
 export class ReferenceFlowField {
   // Using a Map to store directions for each position
@@ -22,8 +22,8 @@ export class ReferenceFlowField {
  * @param costMatrix Cost matrix representing the terrain/obstacles
  * @returns A flow field where keys are packed positions and values are arrays of directions
  */
-export function referenceBfsFlowField(startPositions: RoomPosition[], costMatrix: CostMatrix): ReferenceFlowField {
-  const distanceMap = referenceBfsDistanceMap(startPositions, costMatrix);
+export function referenceDijkstraFlowField(startPositions: RoomPosition[], costMatrix: CostMatrix): ReferenceFlowField {
+  const distanceMap = referenceDijkstraDistanceMap(startPositions, costMatrix);
   const flowField = new ReferenceFlowField();
 
   // Helper to get direction between two positions

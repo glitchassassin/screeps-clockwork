@@ -2,7 +2,7 @@ import { ClockworkCostMatrix } from '../../../../src/index';
 import { cpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
 
-describe('bfsClockworkCostMatrix', () => {
+describe('clockworkCostMatrix', () => {
   it('should work', () => {
     const matrix = new ClockworkCostMatrix();
     matrix.set(0, 0, 1);

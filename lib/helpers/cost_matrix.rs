@@ -11,11 +11,17 @@ pub struct ClockworkCostMatrix {
 
 #[wasm_bindgen]
 impl ClockworkCostMatrix {
-    /// Creates a new cost matrix within the WASM module.
+    /// Creates a new cost matrix within the WASM module. Optionally, a default value
+    /// can be provided to initialize all cells in the matrix to that value.
     #[wasm_bindgen(constructor)]
-    pub fn new() -> ClockworkCostMatrix {
-        ClockworkCostMatrix {
-            internal: LocalCostMatrix::new(),
+    pub fn new(default: Option<u8>) -> ClockworkCostMatrix {
+        match default {
+            Some(default) => ClockworkCostMatrix {
+                internal: LocalCostMatrix::new_with_value(default),
+            },
+            None => ClockworkCostMatrix {
+                internal: LocalCostMatrix::new(),
+            },
         }
     }
 

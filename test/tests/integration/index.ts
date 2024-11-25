@@ -4,7 +4,10 @@
  * require creeps or other additional setup.
  */
 
-import './cases/bfsClockworkCostMatrix';
 import './cases/bfsDistanceMap';
 import './cases/bfsFlowField';
 import './cases/bfsMonoFlowField';
+import './cases/clockworkCostMatrix';
+import './cases/dijkstraDistanceMap';
+import './cases/dijkstraFlowField';
+import './cases/dijkstraMonoFlowField';
