@@ -4,7 +4,7 @@
 
 ## Usage
 
-This guide will assume you're using Rollup along the lines of the Screeps Typescript starter kit.
+This guide will assume you're using Rollup along the lines of the [Screeps Typescript starter kit](https://github.com/screepers/screeps-typescript-starter).
 
 Set up dependencies:
 
