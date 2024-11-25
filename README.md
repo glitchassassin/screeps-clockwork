@@ -44,6 +44,16 @@ export default {
 
 `rollup-plugin-screeps` will automatically push the wasm file out when it deploys.
 
+Then, in your main loop, call the `initialize` function before running anything else:
+
+```js
+import { initialize } from 'screeps-clockwork';
+export const loop = () => {
+  initialize();
+  // ...
+};
+```
+
 ## Dev Setup
 
 Dependencies to build and run the project:
