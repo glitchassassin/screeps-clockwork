@@ -72,7 +72,6 @@ impl FlowField {
 
     /// Set the internal value for a given coordinate.
     #[wasm_bindgen(js_name = set)]
-    #[wasm_bindgen(js_name = set)]
     pub fn js_set(&mut self, x: u8, y: u8, value: u8) {
         let x = RoomCoordinate::new(x)
             .unwrap_or_else(|_| wasm_bindgen::throw_str(&format!("Invalid x coordinate: {}", x)));
