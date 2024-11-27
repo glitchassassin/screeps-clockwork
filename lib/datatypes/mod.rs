@@ -6,4 +6,4 @@ mod path;
 pub use distance_map::DistanceMap;
 pub use flow_field::FlowField;
 pub use mono_flow_field::MonoFlowField;
-pub use path::Path;
+pub use path::{Fatigue, Path, PathFatigue};
