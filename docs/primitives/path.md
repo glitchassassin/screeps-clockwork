@@ -45,13 +45,13 @@ To measure distance without terrain (for a path with roads, e.g.) just take the 
 
 To measure move-distance with terrain, iterate over the list, getting the terrain cost at each position, and calculate the creep's speed for each tile. This can be optimized further by caching the terrain cost when the path is generated, and storing it alongside the position.
 
-The data type might look like this:
+We probably don't want to store the fatigue _in_ the path, as it's likely to be updated separately (when roads are built/destroyed/become visible).
+
+The data types might look like this:
 
 ```ts
-type Path = Array<{
-  pos: RoomPosition;
-  fatigue: 0 | 1 | 2 | 10;
-}>;
+type Path = Array<RoomPosition>;
+type PathFatigue = Array<0 | 1 | 2 | 10>;
 type PathCursor = {
   index: number;
   direction: 'forward' | 'backward';
@@ -70,7 +70,6 @@ A more efficient way to store a path is as an origin (RoomPosition) and list of 
 type CondensedPath = {
   origin: RoomPosition;
   directions: Array<Direction>;
-  fatigue: Array<0 | 1 | 2 | 10>;
 };
 ```
 
