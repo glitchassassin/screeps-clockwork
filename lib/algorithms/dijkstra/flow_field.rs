@@ -19,10 +19,13 @@ pub fn dijkstra_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) ->
         if value == usize::MAX {
             continue; // unreachable
         }
+        let position_is_edge = position.is_room_edge();
         let neighbors: Vec<RoomXY> = position
             .neighbors()
             .into_iter()
             .filter(|neighbor| cost_matrix.get(*neighbor) < 255)
+            // Cannot move from one edge tile to another
+            .filter(|neighbor| !position_is_edge || !neighbor.is_room_edge())
             .collect();
         let min_distance = neighbors
             .iter()

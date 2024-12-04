@@ -24,6 +24,8 @@ pub fn bfs_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Flow
             .neighbors()
             .into_iter()
             .filter(|neighbor| cost_matrix.get(*neighbor) < 255)
+            // Cannot move from one edge tile to another
+            .filter(|neighbor| !position.is_room_edge() || !neighbor.is_room_edge())
             .collect();
         let min_distance = neighbors
             .iter()

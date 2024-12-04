@@ -25,6 +25,10 @@ pub fn bfs_mono_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) ->
 
     while let Some(position) = frontier.pop_front() {
         for neighbor in position.neighbors() {
+            if position.is_room_edge() && neighbor.is_room_edge() {
+                // Cannot move from one edge tile to another
+                continue;
+            }
             if cost_matrix.get(neighbor) < 255 && !visited.contains(&neighbor) {
                 let direction = neighbor.get_direction_to(position).unwrap();
                 flow_field.set(neighbor, Some(direction));

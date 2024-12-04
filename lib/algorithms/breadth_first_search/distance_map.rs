@@ -27,6 +27,10 @@ pub fn bfs_distance_map(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> Di
     while let Some(position) = frontier.pop_front() {
         let current_distance = distance_map[position];
         for neighbor in position.neighbors() {
+            if position.is_room_edge() && neighbor.is_room_edge() {
+                // Cannot move from one edge tile to another
+                continue;
+            }
             if cost_matrix.get(neighbor) < 255 && !visited.contains(&neighbor) {
                 distance_map[neighbor] = current_distance + 1;
                 frontier.push_back(neighbor);
