@@ -20,6 +20,10 @@ type State = {
   position: Coord;
 };
 
+function isEdge(pos: Coord) {
+  return pos.x === 0 || pos.x === 49 || pos.y === 0 || pos.y === 49;
+}
+
 /**
  * Creates a distance map for the given start positions, using a breadth-first search.
  * This does not factor in terrain costs (treating anything less than 255 in the cost
@@ -62,6 +66,8 @@ export function referenceDijkstraDistanceMap(
       continue;
     }
 
+    const positionIsEdge = isEdge(current.position);
+
     // Check all neighboring positions
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
@@ -69,6 +75,9 @@ export function referenceDijkstraDistanceMap(
 
         const newX = current.position.x + dx;
         const newY = current.position.y + dy;
+
+        // Cannot move from one edge tile to another
+        if (positionIsEdge && isEdge({ x: newX, y: newY })) continue;
 
         // Skip if out of bounds
         if (newX < 0 || newX > 49 || newY < 0 || newY > 49) continue;

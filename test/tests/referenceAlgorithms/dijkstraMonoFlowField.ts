@@ -22,6 +22,10 @@ type State = {
   pos: Coord;
 };
 
+function isEdge(pos: Coord) {
+  return pos.x === 0 || pos.x === 49 || pos.y === 0 || pos.y === 49;
+}
+
 /**
  * Creates a mono flow field using Dijkstra's algorithm.
  * Each tile stores a single direction pointing back towards the nearest target,
@@ -58,6 +62,8 @@ export function referenceDijkstraMonoFlowField(
       continue;
     }
 
+    const positionIsEdge = isEdge(current.pos);
+
     // Check all neighboring positions
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
@@ -66,6 +72,9 @@ export function referenceDijkstraMonoFlowField(
         const newX = current.pos.x + dx;
         const newY = current.pos.y + dy;
         const neighborKey = newX * 50 + newY;
+
+        // Cannot move from one edge tile to another
+        if (positionIsEdge && isEdge({ x: newX, y: newY })) continue;
 
         // Skip if out of bounds
         if (newX < 0 || newX > 49 || newY < 0 || newY > 49) continue;

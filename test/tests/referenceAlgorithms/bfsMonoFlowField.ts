@@ -17,6 +17,10 @@ type Coord = {
   y: number;
 };
 
+function isEdge(pos: Coord) {
+  return pos.x === 0 || pos.x === 49 || pos.y === 0 || pos.y === 49;
+}
+
 /**
  * Creates a mono flow field for the given start positions, using a breadth-first search.
  * Each tile stores a single direction pointing back towards the nearest target.
@@ -43,6 +47,8 @@ export function referenceBfsMonoFlowField(
   while (frontier.length > 0) {
     const currentPos = frontier.shift()!;
 
+    const positionIsEdge = isEdge(currentPos);
+
     // Check all neighboring positions
     for (let dx = -1; dx <= 1; dx++) {
       for (let dy = -1; dy <= 1; dy++) {
@@ -53,6 +59,9 @@ export function referenceBfsMonoFlowField(
 
         // Skip if out of bounds
         if (newX < 0 || newX > 49 || newY < 0 || newY > 49) continue;
+
+        // Cannot move from one edge tile to another
+        if (positionIsEdge && isEdge({ x: newX, y: newY })) continue;
 
         // If position is passable and not visited (no direction set)
         if (costMatrix.get(newX, newY) < 255 && !visited.has(newX * 50 + newY)) {

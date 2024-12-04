@@ -1,5 +1,9 @@
 import { Coord, referenceBfsDistanceMap } from './bfsDistanceMap';
 
+function isEdge(pos: Coord) {
+  return pos.x === 0 || pos.x === 49 || pos.y === 0 || pos.y === 49;
+}
+
 export class ReferenceFlowField {
   // Using a Map to store directions for each position
   internal = new Map<number, DirectionConstant[]>();
@@ -47,6 +51,8 @@ export function referenceBfsFlowField(startPositions: RoomPosition[], costMatrix
       const value = distanceMap.get(x, y);
       if (value === Infinity) continue; // Skip unreachable positions
 
+      const positionIsEdge = isEdge({ x, y });
+
       // Get valid neighbors
       const neighbors: Coord[] = [];
       for (let dx = -1; dx <= 1; dx++) {
@@ -54,6 +60,7 @@ export function referenceBfsFlowField(startPositions: RoomPosition[], costMatrix
           if (dx === 0 && dy === 0) continue;
           const newX = x + dx;
           const newY = y + dy;
+          if (positionIsEdge && isEdge({ x: newX, y: newY })) continue;
           if (newX < 0 || newX > 49 || newY < 0 || newY > 49) continue;
           if (costMatrix.get(newX, newY) < 255) {
             neighbors.push({ x: newX, y: newY });

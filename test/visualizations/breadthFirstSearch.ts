@@ -4,7 +4,7 @@ import {
   bfsMonoFlowField,
   ClockworkCostMatrix,
   pathToArray,
-  toFlowFieldOrigin
+  pathToFlowFieldOrigin
 } from '../../src/index';
 import { getFlagPositionsByRoom } from './helpers/getFlagPositionsByRoom';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
@@ -165,7 +165,7 @@ export function visualizeBfsPath() {
     const [targetPosition] = targetFlags[room];
     const flowField = bfsFlowField([targetPosition], costMatrix);
     for (const originPosition of originFlags[room]) {
-      const clockworkPath = toFlowFieldOrigin(originPosition, flowField);
+      const clockworkPath = pathToFlowFieldOrigin(originPosition, flowField);
       const path = pathToArray(clockworkPath);
       visualizePath(path);
       clockworkPath.free();

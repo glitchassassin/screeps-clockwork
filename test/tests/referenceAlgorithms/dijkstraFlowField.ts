@@ -13,6 +13,10 @@ export class ReferenceFlowField {
   }
 }
 
+function isEdge(pos: Coord) {
+  return pos.x === 0 || pos.x === 49 || pos.y === 0 || pos.y === 49;
+}
+
 /**
  * Creates a flow field for the given start positions, using a breadth-first search.
  * This does not factor in terrain costs (treating anything less than 255 in the cost
@@ -47,6 +51,8 @@ export function referenceDijkstraFlowField(startPositions: RoomPosition[], costM
       const value = distanceMap.get(x, y);
       if (value === Infinity) continue; // Skip unreachable positions
 
+      const positionIsEdge = isEdge({ x, y });
+
       // Get valid neighbors
       const neighbors: Coord[] = [];
       for (let dx = -1; dx <= 1; dx++) {
@@ -55,6 +61,7 @@ export function referenceDijkstraFlowField(startPositions: RoomPosition[], costM
           const newX = x + dx;
           const newY = y + dy;
           if (newX < 0 || newX > 49 || newY < 0 || newY > 49) continue;
+          if (positionIsEdge && isEdge({ x: newX, y: newY })) continue;
           if (costMatrix.get(newX, newY) < 255) {
             neighbors.push({ x: newX, y: newY });
           }

@@ -15,6 +15,10 @@ export type Coord = {
   y: number;
 };
 
+function isEdge(pos: Coord) {
+  return pos.x === 0 || pos.x === 49 || pos.y === 0 || pos.y === 49;
+}
+
 /**
  * Creates a distance map for the given start positions, using a breadth-first search.
  * This does not factor in terrain costs (treating anything less than 255 in the cost
@@ -41,6 +45,7 @@ export function referenceBfsDistanceMap(startPositions: RoomPosition[], costMatr
   while (frontier.length > 0) {
     const currentPos = frontier.shift()!;
     const currentDistance = distanceMap.get(currentPos.x, currentPos.y);
+    const positionIsEdge = isEdge(currentPos);
 
     // Check all neighboring positions
     for (let dx = -1; dx <= 1; dx++) {
@@ -49,6 +54,9 @@ export function referenceBfsDistanceMap(startPositions: RoomPosition[], costMatr
 
         const newX = currentPos.x + dx;
         const newY = currentPos.y + dy;
+
+        // Cannot move from one edge tile to another
+        if (positionIsEdge && isEdge({ x: newX, y: newY })) continue;
 
         // Skip if out of bounds
         if (newX < 0 || newX > 49 || newY < 0 || newY > 49) continue;
