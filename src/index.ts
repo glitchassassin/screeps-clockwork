@@ -16,6 +16,8 @@ export * from './wrappers/bfsFlowField';
 export * from './wrappers/dijkstraDistanceMap';
 export * from './wrappers/dijkstraFlowField';
 export * from './wrappers/getRange';
+export * from './wrappers/pathToArray';
+export * from './wrappers/toFlowFieldOrigin';
 
 declare namespace WebAssembly {
   class Module {

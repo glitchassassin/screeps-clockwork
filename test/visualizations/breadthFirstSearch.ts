@@ -1,7 +1,16 @@
-import { bfsDistanceMap, bfsFlowField, bfsMonoFlowField, ClockworkCostMatrix } from '../../src/index';
+import {
+  bfsDistanceMap,
+  bfsFlowField,
+  bfsMonoFlowField,
+  ClockworkCostMatrix,
+  pathToArray,
+  toFlowFieldOrigin
+} from '../../src/index';
+import { getFlagPositionsByRoom } from './helpers/getFlagPositionsByRoom';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
 import { visualizeFlowField } from './helpers/visualizeFlowField';
 import { visualizeMonoFlowField } from './helpers/visualizeMonoFlowField';
+import { visualizePath } from './helpers/visualizePath';
 
 function getTerrainCostMatrix(room: string) {
   const costMatrix = new ClockworkCostMatrix();
@@ -127,5 +136,40 @@ export function visualizeBfsDistanceMapBasin() {
     const distanceMap = bfsDistanceMap(walls, costMatrix);
     visualizeDistanceMap(room, distanceMap);
     distanceMap.free();
+  }
+}
+
+/**
+ * Visualization of a BFS path
+ *
+ * Place a BLUE/BROWN flag and a BLUE/GREY flag in a room to trigger this visualization.
+ */
+export function visualizeBfsPath() {
+  const originFlags = getFlagPositionsByRoom(COLOR_BLUE, COLOR_BROWN);
+  const targetFlags = getFlagPositionsByRoom(COLOR_BLUE, COLOR_GREY);
+
+  for (const room in originFlags) {
+    if (!(room in targetFlags)) continue;
+    const costMatrix = new ClockworkCostMatrix();
+    const terrain = Game.map.getRoomTerrain(room);
+    for (let x = 0; x < 50; x++) {
+      for (let y = 0; y < 50; y++) {
+        if (terrain.get(x, y) === TERRAIN_MASK_WALL) {
+          costMatrix.set(x, y, 255);
+        } else {
+          costMatrix.set(x, y, 0);
+        }
+      }
+    }
+
+    const [targetPosition] = targetFlags[room];
+    const flowField = bfsFlowField([targetPosition], costMatrix);
+    for (const originPosition of originFlags[room]) {
+      const clockworkPath = toFlowFieldOrigin(originPosition, flowField);
+      const path = pathToArray(clockworkPath);
+      visualizePath(path);
+      clockworkPath.free();
+    }
+    flowField.free();
   }
 }

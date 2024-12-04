@@ -11,4 +11,5 @@ import './cases/clockworkCostMatrix';
 import './cases/dijkstraDistanceMap';
 import './cases/dijkstraFlowField';
 import './cases/dijkstraMonoFlowField';
+import './cases/flowFieldPath';
 import './cases/getRange';

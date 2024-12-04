@@ -2,7 +2,8 @@ import {
   visualizeBfsDistanceMap,
   visualizeBfsDistanceMapBasin,
   visualizeBfsFlowField,
-  visualizeBfsMonoFlowField
+  visualizeBfsMonoFlowField,
+  visualizeBfsPath
 } from './breadthFirstSearch';
 import {
   visualizeDijkstraDistanceMap,
@@ -17,10 +18,10 @@ export function visualize() {
   visualizeBfsFlowField();
   visualizeBfsMonoFlowField();
   visualizeBfsDistanceMapBasin();
+  visualizeBfsPath();
   visualizeDijkstraDistanceMap();
   visualizeDijkstraFlowField();
   visualizeDijkstraMonoFlowField();
   visualizeDijkstraDistanceMapBasin();
-
   Object.keys(Game.rooms).forEach(showPersisted);
 }
