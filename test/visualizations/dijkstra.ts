@@ -3,7 +3,7 @@ import {
   dijkstraDistanceMap,
   dijkstraFlowField,
   dijkstraMonoFlowField,
-  pathToArray,
+  pathToDistanceMapOrigin,
   pathToFlowFieldOrigin
 } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
@@ -169,11 +169,11 @@ export default [
     }
   },
   {
-    name: 'Dijkstra Path',
+    name: 'Dijkstra Flow Field Path',
     color1: COLOR_GREEN,
     color2: COLOR_BROWN,
     /**
-     * Visualization of a BFS path.
+     * Visualization of a Dijkstra flow field-based path.
      */
     run(rooms) {
       for (const room in rooms) {
@@ -186,10 +186,33 @@ export default [
           targetFlags.map(flag => flag.pos),
           costMatrix
         );
-        const clockworkPath = pathToFlowFieldOrigin(originFlag.pos, flowField);
-        const path = pathToArray(clockworkPath);
+        const path = pathToFlowFieldOrigin(originFlag.pos, flowField);
         visualizePath(path);
-        clockworkPath.free();
+        path.free();
+      }
+    }
+  },
+  {
+    name: 'Dijkstra Distance Map Path',
+    color1: COLOR_GREEN,
+    color2: COLOR_GREY,
+    /**
+     * Visualization of a Dijkstra distance map-based path.
+     */
+    run(rooms) {
+      for (const room in rooms) {
+        const [originFlag, ...targetFlags] = rooms[room];
+        if (!originFlag || targetFlags.length === 0) {
+          continue;
+        }
+        const costMatrix = getTerrainCostMatrix(room);
+        const distanceMap = dijkstraDistanceMap(
+          targetFlags.map(flag => flag.pos),
+          costMatrix
+        );
+        const path = pathToDistanceMapOrigin(originFlag.pos, distanceMap);
+        visualizePath(path);
+        path.free();
       }
     }
   }

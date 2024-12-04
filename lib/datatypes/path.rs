@@ -82,10 +82,20 @@ impl Path {
     /// in the path. If the position is not in the path, the target is
     /// the next adjacent position closest to the end of the path. If
     /// the position is neither on nor adjacent to the path, return None.
-    #[wasm_bindgen(js_name = findNextIndex)]
+    #[wasm_bindgen(js_name = find_next_index)]
     pub fn js_find_next_index(&self, packed_position: u32) -> Option<usize> {
         let position = Position::from_packed(packed_position);
         self.find_next_index(&position)
+    }
+
+    #[wasm_bindgen(js_name = to_array)]
+    pub fn js_to_array(&self) -> Vec<u32> {
+        self.0.iter().map(|p| p.packed_repr()).collect()
+    }
+
+    #[wasm_bindgen(js_name = to_array_reversed)]
+    pub fn js_to_array_reversed(&self) -> Vec<u32> {
+        self.0.iter().rev().map(|p| p.packed_repr()).collect()
     }
 }
 

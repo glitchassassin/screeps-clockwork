@@ -1,9 +1,11 @@
+import { type Path } from '../../../src';
+
 /**
  * Visualize a path.
  * @param room - The room to visualize the path in.
  * @param path - The path to visualize.
  */
-export function visualizePath(path: RoomPosition[]) {
+export function visualizePath(path: Path) {
   // split the path into segments by room
   const segments: RoomPosition[][] = [];
   let currentSegment: RoomPosition[] = [];

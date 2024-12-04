@@ -1,15 +1,15 @@
 use std::collections::HashSet;
 
-use crate::datatypes::{FlowField, Path};
-use screeps::Position;
+use crate::datatypes::{MonoFlowField, Path};
+use screeps::{Position, RoomXY};
 use wasm_bindgen::{prelude::*, UnwrapThrowExt};
 
 // Maximum iterations to prevent infinite loops
 const MAX_STEPS: usize = 2500;
 
-pub fn path_to_flow_field_origin(
+pub fn path_to_mono_flow_field_origin(
     start: Position,
-    flow_field: &FlowField,
+    flow_field: &MonoFlowField,
 ) -> Result<Path, &'static str> {
     let mut path = Path::new();
     let mut visited = HashSet::new();
@@ -19,16 +19,15 @@ pub fn path_to_flow_field_origin(
     let mut steps = 0;
 
     while steps < MAX_STEPS {
-        let directions = flow_field.get_directions(current.x(), current.y());
+        let next_direction = flow_field.get(RoomXY::from(current));
 
         // No valid directions means we've reached the end of the flow field
-        if directions.is_empty() {
-            return Ok(path);
-        }
+        let direction = match next_direction {
+            None => return Ok(path),
+            Some(direction) => direction,
+        };
 
-        // Always take the first available direction
-        let next_direction = directions[0];
-        let next_pos = current.checked_add_direction(next_direction).unwrap_throw();
+        let next_pos = current.checked_add_direction(direction).unwrap_throw();
 
         // Check if we've already visited this position
         if visited.contains(&next_pos) {
@@ -46,6 +45,6 @@ pub fn path_to_flow_field_origin(
 }
 
 #[wasm_bindgen]
-pub fn js_path_to_flow_field_origin(start: u32, flow_field: &FlowField) -> Path {
-    path_to_flow_field_origin(Position::from_packed(start), flow_field).unwrap_throw()
+pub fn js_path_to_mono_flow_field_origin(start: u32, flow_field: &MonoFlowField) -> Path {
+    path_to_mono_flow_field_origin(Position::from_packed(start), flow_field).unwrap_throw()
 }

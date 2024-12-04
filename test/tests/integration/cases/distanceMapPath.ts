@@ -1,19 +1,19 @@
-import { bfsFlowField, ClockworkCostMatrix, pathToFlowFieldOrigin } from '../../../../src/index';
+import { bfsDistanceMap, ClockworkCostMatrix, pathToDistanceMapOrigin } from '../../../../src/index';
 import { describe, expect, it } from '../../helpers';
 
-describe('flowFieldPath', () => {
-  it('should calculate a path from a flow field', () => {
+describe('distanceMapPath', () => {
+  it('should calculate a path from a distance map', () => {
     /**
      * ........................*.........................
      * ........................^.........................
      * ........................1.........................
      */
     const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix);
-    const clockworkPath = pathToFlowFieldOrigin(new RoomPosition(0, 0, 'W1N1'), flowField);
+    const distanceMap = bfsDistanceMap([new RoomPosition(25, 25, 'W1N1')], costMatrix);
+    const clockworkPath = pathToDistanceMapOrigin(new RoomPosition(0, 0, 'W1N1'), distanceMap);
     const path = clockworkPath.toArray();
     clockworkPath.free();
-    flowField.free();
+    distanceMap.free();
 
     expect(path[0].isEqualTo(new RoomPosition(0, 0, 'W1N1'))).toBeTruthy();
     expect(path[path.length - 1].isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();
