@@ -16,6 +16,7 @@ pub fn bfs_mono_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) ->
     // Initialize the frontier with the passable positions surrounding the start positions
     let mut frontier = VecDeque::from(start.clone());
     let mut flow_field = MonoFlowField::new();
+    let targets = start.iter().cloned().collect::<HashSet<_>>();
     let mut visited = start.iter().cloned().collect::<HashSet<_>>();
 
     // initialize the distance map with the start positions
@@ -24,15 +25,17 @@ pub fn bfs_mono_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) ->
     }
 
     while let Some(position) = frontier.pop_front() {
-        for neighbor in position.neighbors() {
-            if position.is_room_edge() && neighbor.is_room_edge() {
-                // Cannot move from one edge tile to another
-                continue;
-            }
+        for neighbor in position
+            .neighbors()
+            .into_iter()
+            .filter(|n| !(n.is_room_edge() && position.is_room_edge()))
+        {
             if cost_matrix.get(neighbor) < 255 && !visited.contains(&neighbor) {
                 let direction = neighbor.get_direction_to(position).unwrap();
                 flow_field.set(neighbor, Some(direction));
-                frontier.push_back(neighbor);
+                if !neighbor.is_room_edge() || targets.contains(&neighbor) {
+                    frontier.push_back(neighbor);
+                }
                 visited.insert(neighbor);
             } else {
                 visited.insert(neighbor);

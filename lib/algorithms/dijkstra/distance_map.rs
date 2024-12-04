@@ -51,12 +51,11 @@ pub fn dijkstra_distance_map(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) 
             continue;
         }
 
-        let position_is_edge = position.is_room_edge();
-        for neighbor in position.neighbors() {
-            if position_is_edge && neighbor.is_room_edge() {
-                // Cannot move from one edge tile to another
-                continue;
-            }
+        for neighbor in position
+            .neighbors()
+            .into_iter()
+            .filter(|n| !(n.is_room_edge() && position.is_room_edge()))
+        {
             let terrain_cost = cost_matrix.get(neighbor);
             if terrain_cost >= 255 {
                 continue;

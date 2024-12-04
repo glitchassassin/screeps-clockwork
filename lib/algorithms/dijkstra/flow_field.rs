@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use super::distance_map::dijkstra_distance_map;
 use crate::cost_matrix::ClockworkCostMatrix;
 use crate::FlowField;
@@ -12,6 +14,7 @@ use wasm_bindgen::prelude::*;
 /// located).
 pub fn dijkstra_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) -> FlowField {
     // Initialize the frontier with the passable positions surrounding the start positions
+    let targets = start.iter().cloned().collect::<HashSet<_>>();
     let distance_map = dijkstra_distance_map(start, cost_matrix);
     let mut flow_field = FlowField::new();
 
@@ -19,13 +22,14 @@ pub fn dijkstra_flow_field(start: Vec<RoomXY>, cost_matrix: &LocalCostMatrix) ->
         if value == usize::MAX {
             continue; // unreachable
         }
-        let position_is_edge = position.is_room_edge();
         let neighbors: Vec<RoomXY> = position
             .neighbors()
             .into_iter()
             .filter(|neighbor| cost_matrix.get(*neighbor) < 255)
-            // Cannot move from one edge tile to another
-            .filter(|neighbor| !position_is_edge || !neighbor.is_room_edge())
+            // Cannot move to an edge tile unless it's a target AND the source is not also an edge tile
+            .filter(|neighbor| {
+                !neighbor.is_room_edge() || (!position.is_room_edge() && targets.contains(neighbor))
+            })
             .collect();
         let min_distance = neighbors
             .iter()

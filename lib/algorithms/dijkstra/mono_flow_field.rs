@@ -39,6 +39,7 @@ pub fn dijkstra_mono_flow_field(
     let mut flow_field = MonoFlowField::new();
     let mut visited = HashSet::new();
     let mut costs = HashMap::new();
+    let targets = start.iter().cloned().collect::<HashSet<_>>();
 
     // Initialize with start positions
     for position in start {
@@ -54,12 +55,11 @@ pub fn dijkstra_mono_flow_field(
             continue;
         }
 
-        let position_is_edge = position.is_room_edge();
-        for neighbor in position.neighbors() {
-            if position_is_edge && neighbor.is_room_edge() {
-                // Cannot move from one edge tile to another
-                continue;
-            }
+        for neighbor in position
+            .neighbors()
+            .into_iter()
+            .filter(|n| !(n.is_room_edge() && position.is_room_edge()))
+        {
             let terrain_cost = cost_matrix.get(neighbor);
             if terrain_cost >= 255 {
                 continue;
@@ -70,10 +70,12 @@ pub fn dijkstra_mono_flow_field(
             if !visited.contains(&neighbor)
                 || next_cost < *costs.get(&neighbor).unwrap_or(&usize::MAX)
             {
-                frontier.push(State {
-                    cost: next_cost,
-                    position: neighbor,
-                });
+                if !neighbor.is_room_edge() || targets.contains(&neighbor) {
+                    frontier.push(State {
+                        cost: next_cost,
+                        position: neighbor,
+                    });
+                }
                 let direction = neighbor.get_direction_to(position).unwrap();
                 flow_field.set(neighbor, Some(direction));
                 costs.insert(neighbor, next_cost);
