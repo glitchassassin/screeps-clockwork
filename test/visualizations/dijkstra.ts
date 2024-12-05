@@ -4,7 +4,8 @@ import {
   dijkstraFlowField,
   dijkstraMonoFlowField,
   pathToDistanceMapOrigin,
-  pathToFlowFieldOrigin
+  pathToFlowFieldOrigin,
+  pathToMonoFlowFieldOrigin
 } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
@@ -57,8 +58,8 @@ const DIRECTION_ARROWS = {
 export default [
   {
     name: 'Dijkstra Distance Map',
-    color1: COLOR_GREEN,
-    color2: COLOR_BLUE,
+    color1: COLOR_PURPLE,
+    color2: COLOR_RED,
     /**
      * Visualization of a distance map, where each cell tracks the distance to
      * the nearest flag.
@@ -78,8 +79,8 @@ export default [
   },
   {
     name: 'Dijkstra Flow Field',
-    color1: COLOR_GREEN,
-    color2: COLOR_CYAN,
+    color1: COLOR_PURPLE,
+    color2: COLOR_PURPLE,
     /**
      * Visualization of a flow field, where each cell may have zero to eight
      * viable directions.
@@ -109,8 +110,8 @@ export default [
   },
   {
     name: 'Dijkstra Mono Flow Field',
-    color1: COLOR_GREEN,
-    color2: COLOR_WHITE,
+    color1: COLOR_PURPLE,
+    color2: COLOR_BLUE,
     /**
      * Visualization of a mono-directional flow field, where each cell has a
      * single direction.
@@ -139,8 +140,8 @@ export default [
   },
   {
     name: 'Dijkstra Distance Map Basin',
-    color1: COLOR_GREEN,
-    color2: COLOR_RED,
+    color1: COLOR_PURPLE,
+    color2: COLOR_CYAN,
     run(rooms) {
       for (const room in rooms) {
         const costMatrix = new ClockworkCostMatrix();
@@ -170,8 +171,8 @@ export default [
   },
   {
     name: 'Dijkstra Flow Field Path',
-    color1: COLOR_GREEN,
-    color2: COLOR_BROWN,
+    color1: COLOR_PURPLE,
+    color2: COLOR_GREEN,
     /**
      * Visualization of a Dijkstra flow field-based path.
      */
@@ -194,8 +195,8 @@ export default [
   },
   {
     name: 'Dijkstra Distance Map Path',
-    color1: COLOR_GREEN,
-    color2: COLOR_GREY,
+    color1: COLOR_PURPLE,
+    color2: COLOR_YELLOW,
     /**
      * Visualization of a Dijkstra distance map-based path.
      */
@@ -211,6 +212,30 @@ export default [
           costMatrix
         );
         const path = pathToDistanceMapOrigin(originFlag.pos, distanceMap);
+        visualizePath(path);
+        path.free();
+      }
+    }
+  },
+  {
+    name: 'Dijkstra Mono Flow Field Path',
+    color1: COLOR_PURPLE,
+    color2: COLOR_ORANGE,
+    /**
+     * Visualization of a Dijkstra mono flow field-based path.
+     */
+    run(rooms) {
+      for (const room in rooms) {
+        const [originFlag, ...targetFlags] = rooms[room];
+        if (!originFlag || targetFlags.length === 0) {
+          continue;
+        }
+        const costMatrix = getTerrainCostMatrix(room);
+        const flowField = dijkstraMonoFlowField(
+          targetFlags.map(flag => flag.pos),
+          costMatrix
+        );
+        const path = pathToMonoFlowFieldOrigin(originFlag.pos, flowField);
         visualizePath(path);
         path.free();
       }

@@ -4,7 +4,8 @@ import {
   bfsMonoFlowField,
   ClockworkCostMatrix,
   pathToDistanceMapOrigin,
-  pathToFlowFieldOrigin
+  pathToFlowFieldOrigin,
+  pathToMonoFlowFieldOrigin
 } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
@@ -26,8 +27,8 @@ function getTerrainCostMatrix(room: string) {
 export default [
   {
     name: 'BFS Distance Map',
-    color1: COLOR_BLUE,
-    color2: COLOR_BLUE,
+    color1: COLOR_RED,
+    color2: COLOR_RED,
     /**
      * Visualization of a distance map, where each cell tracks the distance to
      * the nearest flag.
@@ -48,8 +49,8 @@ export default [
   },
   {
     name: 'BFS Flow Field',
-    color1: COLOR_BLUE,
-    color2: COLOR_CYAN,
+    color1: COLOR_RED,
+    color2: COLOR_PURPLE,
     /**
      * Visualization of a flow field, where each cell may have zero to eight
      * viable directions.
@@ -69,8 +70,8 @@ export default [
   },
   {
     name: 'BFS Mono Flow Field',
-    color1: COLOR_BLUE,
-    color2: COLOR_WHITE,
+    color1: COLOR_RED,
+    color2: COLOR_BLUE,
     /**
      * Visualization of a mono-directional flow field, where each cell has a
      * single direction.
@@ -90,8 +91,8 @@ export default [
   },
   {
     name: 'BFS Distance Map Basin',
-    color1: COLOR_BLUE,
-    color2: COLOR_RED,
+    color1: COLOR_RED,
+    color2: COLOR_CYAN,
     /**
      * Visualization of "basins," areas that are furthest from terrain walls.
      */
@@ -119,8 +120,8 @@ export default [
   },
   {
     name: 'BFS Flow Field Path',
-    color1: COLOR_BLUE,
-    color2: COLOR_BROWN,
+    color1: COLOR_RED,
+    color2: COLOR_GREEN,
     /**
      * Visualization of a BFS path.
      */
@@ -143,8 +144,8 @@ export default [
   },
   {
     name: 'BFS Distance Map Path',
-    color1: COLOR_BLUE,
-    color2: COLOR_GREY,
+    color1: COLOR_RED,
+    color2: COLOR_YELLOW,
     /**
      * Visualization of a BFS distance map-based path.
      */
@@ -160,6 +161,30 @@ export default [
           costMatrix
         );
         const path = pathToDistanceMapOrigin(originFlag.pos, distanceMap);
+        visualizePath(path);
+        path.free();
+      }
+    }
+  },
+  {
+    name: 'BFS Mono Flow Field Path',
+    color1: COLOR_RED,
+    color2: COLOR_ORANGE,
+    /**
+     * Visualization of a BFS mono flow field-based path.
+     */
+    run(rooms) {
+      for (const room in rooms) {
+        const [originFlag, ...targetFlags] = rooms[room];
+        if (!originFlag || targetFlags.length === 0) {
+          continue;
+        }
+        const costMatrix = getTerrainCostMatrix(room);
+        const flowField = bfsMonoFlowField(
+          targetFlags.map(flag => flag.pos),
+          costMatrix
+        );
+        const path = pathToMonoFlowFieldOrigin(originFlag.pos, flowField);
         visualizePath(path);
         path.free();
       }

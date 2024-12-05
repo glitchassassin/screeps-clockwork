@@ -19,6 +19,7 @@ export * from './wrappers/getRange';
 export * from './wrappers/path';
 export * from './wrappers/pathtoDistanceMapOrigin';
 export * from './wrappers/pathtoFlowFieldOrigin';
+export * from './wrappers/pathtoMonoFlowFieldOrigin';
 
 declare namespace WebAssembly {
   class Module {
