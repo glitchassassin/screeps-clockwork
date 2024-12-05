@@ -1,3 +1,16 @@
+## 0.4.0 (2024-12-05)
+
+### Feat
+
+- implement path-from-mono-flow-field
+- implement path-from-distance-map
+- add legend of visualizer options
+- implement path-from-flow-field algorithm
+
+### Fix
+
+- account for edge tile movement restrictions
+
 ## 0.3.0 (2024-12-04)
 
 ### Feat
