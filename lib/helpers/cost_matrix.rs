@@ -1,10 +1,12 @@
 use screeps::{LocalCostMatrix, RoomCoordinate, RoomXY};
+use wasm_bindgen::__rt::WasmRefCell;
 use wasm_bindgen::prelude::*;
 
 /// A wrapper around the `LocalCostMatrix` type from the Screeps API.
 /// Instances can be passed between WASM and JS as a pointer, using the
 /// methods to get and set values, rather than copying the entire matrix.
 #[wasm_bindgen]
+#[derive(Clone)]
 pub struct ClockworkCostMatrix {
     internal: LocalCostMatrix,
 }
@@ -50,5 +52,31 @@ impl ClockworkCostMatrix {
     /// Gets the internal `LocalCostMatrix` instance from the wrapper.
     pub fn get_internal(&self) -> &LocalCostMatrix {
         &self.internal
+    }
+}
+
+#[wasm_bindgen(inline_js = "
+    export function clockworkcostmatrix_get_pointer(value) {
+        if (!value || 
+            typeof value !== 'object' || 
+            !('__wbg_ptr' in value) ||
+            value.constructor.name !== 'ClockworkCostMatrix') {
+            throw new Error('Invalid ClockworkCostMatrix reference');
+        }
+        return value.__wbg_ptr;
+    }
+")]
+extern "C" {
+    fn clockworkcostmatrix_get_pointer(value: JsValue) -> u32;
+}
+
+impl From<JsValue> for &'static ClockworkCostMatrix {
+    fn from(value: JsValue) -> Self {
+        let ptr = clockworkcostmatrix_get_pointer(value);
+        let me = ptr as *mut WasmRefCell<ClockworkCostMatrix>;
+        wasm_bindgen::__rt::assert_not_null(me);
+        let me = unsafe { &*me };
+        let reference = me.borrow();
+        unsafe { std::mem::transmute(&*reference) }
     }
 }
