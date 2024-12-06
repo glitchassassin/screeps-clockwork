@@ -10,12 +10,12 @@ const UNREACHABLE = 0xffffffff;
 export function visualizeDistanceMap(room: string, distanceMap: DistanceMap) {
   const distanceMapArray = distanceMap.toArray();
 
-  const visual = Game.rooms[room].visual;
+  const viz = new RoomVisual(room);
   distanceMapArray.forEach((distance, index) => {
     const y = index % 50;
     const x = Math.floor(index / 50);
     if (distance !== UNREACHABLE && distance !== 0) {
-      visual.text(`${distance}`, x, y);
+      viz.text(`${distance}`, x, y);
     }
   });
 }
