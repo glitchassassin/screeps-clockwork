@@ -2,6 +2,7 @@ import {
   bfsDistanceMap,
   bfsFlowField,
   bfsMonoFlowField,
+  bfsMultiroomDistanceMap,
   ClockworkCostMatrix,
   pathToDistanceMapOrigin,
   pathToFlowFieldOrigin,
@@ -36,7 +37,6 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const flags = rooms[room];
-        console.log(flags);
         const costMatrix = getTerrainCostMatrix(room);
         const distanceMap = bfsDistanceMap(
           flags.map(flag => flag.pos),
@@ -187,6 +187,29 @@ export default [
         const path = pathToMonoFlowFieldOrigin(originFlag.pos, flowField);
         visualizePath(path);
         path.free();
+      }
+    }
+  },
+  {
+    name: 'BFS Multiroom Distance Map',
+    color1: COLOR_RED,
+    color2: COLOR_BROWN,
+    run(rooms) {
+      for (const room in rooms) {
+        const start = rooms[room].map(flag => flag.pos);
+        const distanceMap = bfsMultiroomDistanceMap(start, {
+          costMatrixCallback: room => {
+            // TODO: Need to free these cost matrices when we're done with them
+            const cm = getTerrainCostMatrix(room);
+            return cm;
+          },
+          maxRoomDistance: 1,
+          maxTileDistance: 10
+        });
+        for (const room of distanceMap.getRooms()) {
+          visualizeDistanceMap(room, distanceMap.getRoom(room)!);
+        }
+        distanceMap.free();
       }
     }
   }

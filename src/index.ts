@@ -13,6 +13,7 @@ export { ClockworkCostMatrix, DistanceMap, FlowField, MonoFlowField };
 
 export * from './wrappers/bfsDistanceMap';
 export * from './wrappers/bfsFlowField';
+export * from './wrappers/bfsMultiroomDistanceMap';
 export * from './wrappers/dijkstraDistanceMap';
 export * from './wrappers/dijkstraFlowField';
 export * from './wrappers/getRange';
@@ -40,6 +41,8 @@ let initialized = false;
  * @param verbose - If true, will log the state of the WASM module as it loads.
  */
 export function initialize(verbose = false) {
+  // need to freshly override the fake console object each tick
+  console.error = console_error;
   if (!wasm_bytes) wasm_bytes = require('screeps_clockwork.wasm');
   if (verbose && !initialized) console.log('[clockwork] wasm_bytes loaded');
   if (!wasm_module) wasm_module = new WebAssembly.Module(wasm_bytes);
@@ -50,4 +53,25 @@ export function initialize(verbose = false) {
     console.log(`[clockwork] version ${version()} initialized`);
   }
   initialized = true;
+}
+
+// This provides the function `console.error` that wasm_bindgen sometimes expects to exist,
+// especially with type checks in debug mode. An alternative is to have this be `function () {}`
+// and let the exception handler log the thrown JS exceptions, but there is some additional
+// information that wasm_bindgen only passes here.
+//
+// There is nothing special about this function and it may also be used by any JS/Rust code as a convenience.
+function console_error() {
+  const processedArgs = Array.from(arguments)
+    .map(arg => {
+      if (arg instanceof Error) {
+        // On this version of Node, the `stack` property of errors contains
+        // the message as well.
+        return arg.stack;
+      } else {
+        return arg;
+      }
+    })
+    .join(' ');
+  console.log('ERROR:', processedArgs);
 }

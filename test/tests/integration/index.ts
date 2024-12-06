@@ -7,6 +7,7 @@
 import './cases/bfsDistanceMap';
 import './cases/bfsFlowField';
 import './cases/bfsMonoFlowField';
+import './cases/bfsMultiroomDistanceMap';
 import './cases/clockworkCostMatrix';
 import './cases/dijkstraDistanceMap';
 import './cases/dijkstraFlowField';
