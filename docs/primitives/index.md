@@ -10,6 +10,7 @@ Basic algorithms and patterns can be composed into an optimized pathfinding stra
   - [Cost matrix](./costmatrix.md)
   - [Flow field/distance map](./flowfield.md)
   - [Path](./path.md)
+  - [Multi-room nuances](./multi-room.md)
 - Algorithms
   - [Distance](./distance.md)
   - [Breadth-first search](./breadth-first-search.md)

@@ -33,6 +33,10 @@ pub fn path_to_distance_map_origin(
         let mut min_distance = usize::MAX;
 
         for neighbor in neighbors(current) {
+            if neighbor.room_name() != current.room_name() {
+                continue; // skip neighbors in different rooms
+            }
+
             let neighbor_distance = distance_map[RoomXY::from(neighbor)];
             if neighbor_distance < min_distance {
                 min_distance = neighbor_distance;
