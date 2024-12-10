@@ -17,7 +17,7 @@ const DIRECTION_ARROWS = {
  * @param flowField - The flow field to visualize.
  */
 export function visualizeMonoFlowField(room: string, flowField: MonoFlowField) {
-  const visual = Game.rooms[room].visual;
+  const visual = new RoomVisual(room);
   for (let x = 0; x < 50; x++) {
     for (let y = 0; y < 50; y++) {
       const direction = flowField.get(x, y);

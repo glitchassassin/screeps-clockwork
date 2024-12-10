@@ -1,5 +1,4 @@
 use crate::algorithms::map::corresponding_room_edge;
-use crate::algorithms::map::neighbors;
 use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::Path;
 use crate::log;

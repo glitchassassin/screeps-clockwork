@@ -50,7 +50,7 @@ const DIRECTION_ARROWS = {
 export default [
   {
     name: 'Dijkstra Distance Map',
-    color1: COLOR_PURPLE,
+    color1: COLOR_BLUE,
     color2: COLOR_RED,
     /**
      * Visualization of a distance map, where each cell tracks the distance to
@@ -71,7 +71,7 @@ export default [
   },
   {
     name: 'Dijkstra Flow Field',
-    color1: COLOR_PURPLE,
+    color1: COLOR_BLUE,
     color2: COLOR_PURPLE,
     /**
      * Visualization of a flow field, where each cell may have zero to eight
@@ -102,7 +102,7 @@ export default [
   },
   {
     name: 'Dijkstra Mono Flow Field',
-    color1: COLOR_PURPLE,
+    color1: COLOR_BLUE,
     color2: COLOR_BLUE,
     /**
      * Visualization of a mono-directional flow field, where each cell has a
@@ -132,7 +132,7 @@ export default [
   },
   {
     name: 'Dijkstra Distance Map Basin',
-    color1: COLOR_PURPLE,
+    color1: COLOR_BLUE,
     color2: COLOR_CYAN,
     run(rooms) {
       for (const room in rooms) {
@@ -163,7 +163,7 @@ export default [
   },
   {
     name: 'Dijkstra Flow Field Path',
-    color1: COLOR_PURPLE,
+    color1: COLOR_BLUE,
     color2: COLOR_GREEN,
     /**
      * Visualization of a Dijkstra flow field-based path.
@@ -187,7 +187,7 @@ export default [
   },
   {
     name: 'Dijkstra Distance Map Path',
-    color1: COLOR_PURPLE,
+    color1: COLOR_BLUE,
     color2: COLOR_YELLOW,
     /**
      * Visualization of a Dijkstra distance map-based path.
@@ -211,7 +211,7 @@ export default [
   },
   {
     name: 'Dijkstra Mono Flow Field Path',
-    color1: COLOR_PURPLE,
+    color1: COLOR_BLUE,
     color2: COLOR_ORANGE,
     /**
      * Visualization of a Dijkstra mono flow field-based path.

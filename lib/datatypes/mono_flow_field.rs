@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 /// a single direction for each tile, so we represent this as 4 bits of an unsigned
 /// integer (0 for no direction, 1 for TOP, etc.).
 #[wasm_bindgen]
+#[derive(Debug, Clone)]
 pub struct MonoFlowField {
     data: [u8; 1250],
 }

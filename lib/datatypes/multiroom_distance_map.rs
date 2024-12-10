@@ -48,6 +48,11 @@ impl MultiroomDistanceMap {
     pub fn get_or_create_room_map(&mut self, room_name: RoomName) -> &mut DistanceMap {
         self.maps.entry(room_name).or_insert_with(DistanceMap::new)
     }
+
+    /// Gets the list of rooms in the map
+    pub fn rooms(&self) -> Vec<RoomName> {
+        self.maps.keys().cloned().collect()
+    }
 }
 
 #[wasm_bindgen]
@@ -75,7 +80,7 @@ impl MultiroomDistanceMap {
     /// Gets the list of rooms in the map
     #[wasm_bindgen(js_name = get_rooms)]
     pub fn js_get_rooms(&self) -> Vec<u16> {
-        self.maps.keys().map(|k| k.packed_repr()).collect()
+        self.rooms().iter().map(|r| r.packed_repr()).collect()
     }
 
     /// Gets the DistanceMap for a given room

@@ -3,6 +3,8 @@ import {
   bfsFlowField,
   bfsMonoFlowField,
   bfsMultiroomDistanceMap,
+  bfsMultiroomFlowField,
+  bfsMultiroomMonoFlowField,
   ClockworkCostMatrix
 } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
@@ -189,8 +191,8 @@ export default [
   },
   {
     name: 'BFS Multiroom Distance Map',
-    color1: COLOR_RED,
-    color2: COLOR_BROWN,
+    color1: COLOR_PURPLE,
+    color2: COLOR_RED,
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
@@ -210,9 +212,77 @@ export default [
     }
   },
   {
+    name: 'BFS Multiroom Flow Field',
+    color1: COLOR_PURPLE,
+    color2: COLOR_PURPLE,
+    run(rooms) {
+      for (const room in rooms) {
+        const start = rooms[room].map(flag => flag.pos);
+        const flowField = bfsMultiroomFlowField(start, {
+          costMatrixCallback: room => {
+            // TODO: Need to free these cost matrices when we're done with them
+            const cm = getTerrainCostMatrix(room);
+            return cm;
+          },
+          maxRoomDistance: 2
+        });
+        for (const room of flowField.getRooms()) {
+          visualizeFlowField(room, flowField.getRoom(room)!);
+        }
+        flowField.free();
+      }
+    }
+  },
+  {
+    name: 'BFS Multiroom Mono Flow Field',
+    color1: COLOR_PURPLE,
+    color2: COLOR_BLUE,
+    run(rooms) {
+      for (const room in rooms) {
+        const start = rooms[room].map(flag => flag.pos);
+        const flowField = bfsMultiroomMonoFlowField(start, {
+          costMatrixCallback: room => {
+            // TODO: Need to free these cost matrices when we're done with them
+            const cm = getTerrainCostMatrix(room);
+            return cm;
+          },
+          maxRoomDistance: 2
+        });
+        for (const room of flowField.getRooms()) {
+          visualizeMonoFlowField(room, flowField.getRoom(room)!);
+        }
+        flowField.free();
+      }
+    }
+  },
+  {
+    name: 'BFS Multiroom Flow Field Path',
+    color1: COLOR_PURPLE,
+    color2: COLOR_GREEN,
+    /**
+     * Visualization of a BFS multiroom flow field-based path.
+     */
+    run(rooms) {
+      const [originFlag, ...targetFlags] = Object.values(rooms).reduce((acc, flags) => [...acc, ...flags], []);
+      if (!originFlag || targetFlags.length === 0) {
+        return;
+      }
+      const flowField = bfsMultiroomFlowField(
+        targetFlags.map(flag => flag.pos),
+        {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxRoomDistance: 2
+        }
+      );
+      const path = flowField.pathToOrigin(originFlag.pos);
+      visualizePath(path);
+      path.free();
+    }
+  },
+  {
     name: 'BFS Multiroom Distance Map Path',
-    color1: COLOR_RED,
-    color2: COLOR_GREY,
+    color1: COLOR_PURPLE,
+    color2: COLOR_YELLOW,
     /**
      * Visualization of a BFS multiroom distance map-based path.
      */
@@ -232,6 +302,30 @@ export default [
         }
       );
       const path = distanceMap.pathToOrigin(originFlag.pos);
+      visualizePath(path);
+      path.free();
+    }
+  },
+  {
+    name: 'BFS Multiroom Mono Flow Field Path',
+    color1: COLOR_PURPLE,
+    color2: COLOR_ORANGE,
+    /**
+     * Visualization of a BFS mono flow field-based path.
+     */
+    run(rooms) {
+      const [originFlag, ...targetFlags] = Object.values(rooms).reduce((acc, flags) => [...acc, ...flags], []);
+      if (!originFlag || targetFlags.length === 0) {
+        return;
+      }
+      const flowField = bfsMultiroomMonoFlowField(
+        targetFlags.map(flag => flag.pos),
+        {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxRoomDistance: 2
+        }
+      );
+      const path = flowField.pathToOrigin(originFlag.pos);
       visualizePath(path);
       path.free();
     }

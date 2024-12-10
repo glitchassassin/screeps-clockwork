@@ -6,6 +6,7 @@ use wasm_bindgen::prelude::*;
 /// equally valid directions, so we represent this as a bitfield (where each bit in an
 /// 8-bit unsigned integer represents a direction that is either viable or not).
 #[wasm_bindgen]
+#[derive(Debug, Clone)]
 pub struct FlowField {
     data: [u8; 2500],
 }

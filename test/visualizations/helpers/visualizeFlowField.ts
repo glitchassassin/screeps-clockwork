@@ -17,7 +17,7 @@ const DIRECTION_OFFSET = {
  * @param flowField - The flow field to visualize.
  */
 export function visualizeFlowField(room: string, flowField: FlowField) {
-  const visual = Game.rooms[room].visual;
+  const visual = new RoomVisual(room);
   for (let x = 0; x < 50; x++) {
     for (let y = 0; y < 50; y++) {
       const directions = flowField.getDirections(x, y) as DirectionConstant[];
