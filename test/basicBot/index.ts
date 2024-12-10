@@ -16,7 +16,7 @@ export const runTestScenarios = () => {
     if (!creep.spawning && creep.memory.role) roles[creep.memory.role](creep);
   }
 
-  visualizeIntel();
+  // visualizeIntel();
   // profileReport();
 };
 

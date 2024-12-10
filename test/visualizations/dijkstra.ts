@@ -1,12 +1,4 @@
-import {
-  ClockworkCostMatrix,
-  dijkstraDistanceMap,
-  dijkstraFlowField,
-  dijkstraMonoFlowField,
-  pathToDistanceMapOrigin,
-  pathToFlowFieldOrigin,
-  pathToMonoFlowFieldOrigin
-} from '../../src/index';
+import { ClockworkCostMatrix, dijkstraDistanceMap, dijkstraFlowField, dijkstraMonoFlowField } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
 import { visualizePath } from './helpers/visualizePath';
@@ -187,7 +179,7 @@ export default [
           targetFlags.map(flag => flag.pos),
           costMatrix
         );
-        const path = pathToFlowFieldOrigin(originFlag.pos, flowField);
+        const path = flowField.pathToOrigin(originFlag.pos);
         visualizePath(path);
         path.free();
       }
@@ -211,7 +203,7 @@ export default [
           targetFlags.map(flag => flag.pos),
           costMatrix
         );
-        const path = pathToDistanceMapOrigin(originFlag.pos, distanceMap);
+        const path = distanceMap.pathToOrigin(originFlag.pos);
         visualizePath(path);
         path.free();
       }
@@ -235,7 +227,7 @@ export default [
           targetFlags.map(flag => flag.pos),
           costMatrix
         );
-        const path = pathToMonoFlowFieldOrigin(originFlag.pos, flowField);
+        const path = flowField.pathToOrigin(originFlag.pos);
         visualizePath(path);
         path.free();
       }

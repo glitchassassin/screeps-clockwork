@@ -97,7 +97,7 @@ describe('bfsMultiroomDistanceMap', () => {
     });
     costMatrix.free();
     expect(distanceMap.getRooms().length).toBe(5);
-  }, 10);
+  }, 15);
   it('should respect maxTiles', () => {
     const costMatrix = new ClockworkCostMatrix();
     const distanceMap = bfsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {

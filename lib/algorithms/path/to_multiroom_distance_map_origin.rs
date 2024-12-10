@@ -1,15 +1,16 @@
+use crate::algorithms::map::corresponding_room_edge;
 use crate::algorithms::map::neighbors;
+use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::Path;
-use crate::DistanceMap;
+use crate::log;
 use screeps::Position;
-use screeps::RoomXY;
 use std::collections::HashSet;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_str;
 
-pub fn path_to_distance_map_origin(
+pub fn path_to_multiroom_distance_map_origin(
     start: Position,
-    distance_map: &DistanceMap,
+    distance_map: &MultiroomDistanceMap,
 ) -> Result<Path, &'static str> {
     let mut path = Path::new();
     let mut visited = HashSet::new();
@@ -21,7 +22,7 @@ pub fn path_to_distance_map_origin(
     let mut steps = 0;
 
     while steps < MAX_STEPS {
-        let current_distance = distance_map[RoomXY::from(current)];
+        let current_distance = distance_map.get(current);
 
         // If we've reached the origin
         if current_distance == 0 {
@@ -32,12 +33,13 @@ pub fn path_to_distance_map_origin(
         let mut next_pos = None;
         let mut min_distance = usize::MAX;
 
-        for neighbor in neighbors(current) {
-            if neighbor.room_name() != current.room_name() {
-                continue; // skip neighbors in different rooms
-            }
-
-            let neighbor_distance = distance_map[RoomXY::from(neighbor)];
+        for neighbor in current
+            .xy()
+            .neighbors()
+            .into_iter()
+            .map(|xy| Position::new(xy.x, xy.y, current.room_name()))
+        {
+            let neighbor_distance = distance_map.get(neighbor);
             if neighbor_distance < min_distance {
                 min_distance = neighbor_distance;
                 next_pos = Some(neighbor);
@@ -47,10 +49,13 @@ pub fn path_to_distance_map_origin(
         // If no valid next position is found, return an error
         if let Some(next) = next_pos {
             if visited.contains(&next) {
+                log(&format!("Cycle detected in distance map at {:?}", next));
+                log(&format!("Visited: {:?}", visited));
                 return Err("Cycle detected in distance map");
             }
 
-            current = next;
+            // if next is a room edge, jump to the corresponding room edge
+            current = corresponding_room_edge(next);
             path.add(current);
             visited.insert(current);
         } else {
@@ -64,14 +69,15 @@ pub fn path_to_distance_map_origin(
 }
 
 #[wasm_bindgen]
-pub fn js_path_to_distance_map_origin(start: u32, distance_map: &DistanceMap) -> Path {
-    match path_to_distance_map_origin(Position::from_packed(start), distance_map) {
+pub fn js_path_to_multiroom_distance_map_origin(
+    start: u32,
+    distance_map: &MultiroomDistanceMap,
+) -> Path {
+    match path_to_multiroom_distance_map_origin(Position::from_packed(start), distance_map) {
         Ok(path) => path,
-        Err(e) => {
-            throw_str(&format!(
-                "Error calculating path to distance map origin: {}",
-                e
-            ));
-        }
+        Err(e) => throw_str(&format!(
+            "Error calculating path to multiroom distance map origin: {}",
+            e
+        )),
     }
 }

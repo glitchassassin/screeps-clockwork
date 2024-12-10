@@ -1,4 +1,6 @@
 import { ClockworkCostMatrix, js_bfs_flow_field, js_bfs_mono_flow_field } from '../wasm/screeps_clockwork';
+import { ClockworkFlowField } from './flowField';
+import { ClockworkMonoFlowField } from './monoFlowField';
 
 /**
  * Generate a [flow field](https://glitchassassin.github.io/screeps-clockwork/primitives/flowfield.html) for a set of positions
@@ -18,7 +20,7 @@ import { ClockworkCostMatrix, js_bfs_flow_field, js_bfs_mono_flow_field } from '
 export function bfsFlowField(start: RoomPosition[], costMatrix: ClockworkCostMatrix) {
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
   const result = js_bfs_flow_field(startPacked, costMatrix);
-  return result;
+  return new ClockworkFlowField(result);
 }
 
 /**
@@ -42,5 +44,5 @@ export function bfsFlowField(start: RoomPosition[], costMatrix: ClockworkCostMat
 export function bfsMonoFlowField(start: RoomPosition[], costMatrix: ClockworkCostMatrix) {
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
   const result = js_bfs_mono_flow_field(startPacked, costMatrix);
-  return result;
+  return new ClockworkMonoFlowField(result);
 }

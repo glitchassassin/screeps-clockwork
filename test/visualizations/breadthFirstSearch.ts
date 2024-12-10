@@ -3,10 +3,7 @@ import {
   bfsFlowField,
   bfsMonoFlowField,
   bfsMultiroomDistanceMap,
-  ClockworkCostMatrix,
-  pathToDistanceMapOrigin,
-  pathToFlowFieldOrigin,
-  pathToMonoFlowFieldOrigin
+  ClockworkCostMatrix
 } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
@@ -136,7 +133,7 @@ export default [
           targetFlags.map(flag => flag.pos),
           costMatrix
         );
-        const path = pathToFlowFieldOrigin(originFlag.pos, flowField);
+        const path = flowField.pathToOrigin(originFlag.pos);
         visualizePath(path);
         path.free();
       }
@@ -160,7 +157,7 @@ export default [
           targetFlags.map(flag => flag.pos),
           costMatrix
         );
-        const path = pathToDistanceMapOrigin(originFlag.pos, distanceMap);
+        const path = distanceMap.pathToOrigin(originFlag.pos);
         visualizePath(path);
         path.free();
       }
@@ -184,7 +181,7 @@ export default [
           targetFlags.map(flag => flag.pos),
           costMatrix
         );
-        const path = pathToMonoFlowFieldOrigin(originFlag.pos, flowField);
+        const path = flowField.pathToOrigin(originFlag.pos);
         visualizePath(path);
         path.free();
       }
@@ -203,14 +200,40 @@ export default [
             const cm = getTerrainCostMatrix(room);
             return cm;
           },
-          maxRoomDistance: 1,
-          maxTileDistance: 10
+          maxRoomDistance: 2
         });
         for (const room of distanceMap.getRooms()) {
           visualizeDistanceMap(room, distanceMap.getRoom(room)!);
         }
         distanceMap.free();
       }
+    }
+  },
+  {
+    name: 'BFS Multiroom Distance Map Path',
+    color1: COLOR_RED,
+    color2: COLOR_GREY,
+    /**
+     * Visualization of a BFS multiroom distance map-based path.
+     */
+    run(rooms) {
+      const [originFlag, ...targetFlags] = Object.values(rooms).reduce((acc, flags) => [...acc, ...flags], []);
+      if (!originFlag || targetFlags.length === 0) {
+        return;
+      }
+      const distanceMap = bfsMultiroomDistanceMap(
+        targetFlags.map(flag => flag.pos),
+        {
+          costMatrixCallback: room => {
+            const cm = getTerrainCostMatrix(room);
+            return cm;
+          },
+          maxRoomDistance: 2
+        }
+      );
+      const path = distanceMap.pathToOrigin(originFlag.pos);
+      visualizePath(path);
+      path.free();
     }
   }
 ] satisfies FlagVisualizer[];

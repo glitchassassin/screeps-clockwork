@@ -16,3 +16,4 @@ import './cases/distanceMapPath';
 import './cases/flowFieldPath';
 import './cases/getRange';
 import './cases/monoFlowFieldPath';
+import './cases/multiroomDistanceMapPath';

@@ -1,4 +1,4 @@
-import { bfsFlowField, ClockworkCostMatrix, pathToFlowFieldOrigin } from '../../../../src/index';
+import { bfsFlowField, ClockworkCostMatrix } from '../../../../src/index';
 import { describe, expect, it } from '../../helpers';
 
 describe('flowFieldPath', () => {
@@ -10,7 +10,7 @@ describe('flowFieldPath', () => {
      */
     const costMatrix = new ClockworkCostMatrix();
     const flowField = bfsFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix);
-    const clockworkPath = pathToFlowFieldOrigin(new RoomPosition(0, 0, 'W1N1'), flowField);
+    const clockworkPath = flowField.pathToOrigin(new RoomPosition(0, 0, 'W1N1'));
     const path = clockworkPath.toArray();
     clockworkPath.free();
     flowField.free();

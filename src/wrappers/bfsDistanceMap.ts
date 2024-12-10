@@ -1,4 +1,5 @@
 import { ClockworkCostMatrix, js_bfs_distance_map } from '../wasm/screeps_clockwork';
+import { ClockworkDistanceMap } from './distanceMap';
 
 /**
  * Generate a [distance map](https://glitchassassin.github.io/screeps-clockwork/primitives/flowfield.html) for a set of positions
@@ -21,5 +22,5 @@ import { ClockworkCostMatrix, js_bfs_distance_map } from '../wasm/screeps_clockw
 export function bfsDistanceMap(start: RoomPosition[], costMatrix: ClockworkCostMatrix) {
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
   const result = js_bfs_distance_map(startPacked, costMatrix);
-  return result;
+  return new ClockworkDistanceMap(result);
 }

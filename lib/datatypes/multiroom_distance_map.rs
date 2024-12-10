@@ -19,6 +19,21 @@ impl MultiroomDistanceMap {
         }
     }
 
+    /// Gets the distance value at a given position
+    pub fn get(&self, pos: Position) -> usize {
+        self.maps
+            .get(&pos.room_name())
+            .map(|map| map[pos.xy()])
+            .unwrap_or(usize::MAX)
+    }
+
+    /// Sets the distance value at a given position
+    pub fn set(&mut self, pos: Position, value: usize) {
+        let room_name = pos.room_name();
+        let map = self.maps.entry(room_name).or_insert_with(DistanceMap::new);
+        map[pos.xy()] = value;
+    }
+
     /// Returns whether the map contains data for a given room
     pub fn contains_room(&self, room_name: RoomName) -> bool {
         self.maps.contains_key(&room_name)
@@ -47,19 +62,14 @@ impl MultiroomDistanceMap {
     #[wasm_bindgen(js_name = get)]
     pub fn js_get(&self, packed_pos: u32) -> usize {
         let pos = Position::from_packed(packed_pos);
-        self.maps
-            .get(&pos.room_name())
-            .map(|map| map[pos.xy()])
-            .unwrap_or(usize::MAX)
+        self.get(pos)
     }
 
     /// Sets the distance value at a given position
     #[wasm_bindgen(js_name = set)]
     pub fn js_set(&mut self, packed_pos: u32, value: usize) {
         let pos = Position::from_packed(packed_pos);
-        let room_name = pos.room_name();
-        let map = self.maps.entry(room_name).or_insert_with(DistanceMap::new);
-        map[pos.xy()] = value;
+        self.set(pos, value);
     }
 
     /// Gets the list of rooms in the map

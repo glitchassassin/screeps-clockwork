@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::datatypes::{FlowField, Path};
 use screeps::Position;
-use wasm_bindgen::{prelude::*, UnwrapThrowExt};
+use wasm_bindgen::{prelude::*, throw_str, UnwrapThrowExt};
 
 // Maximum iterations to prevent infinite loops
 const MAX_STEPS: usize = 2500;
@@ -47,5 +47,11 @@ pub fn path_to_flow_field_origin(
 
 #[wasm_bindgen]
 pub fn js_path_to_flow_field_origin(start: u32, flow_field: &FlowField) -> Path {
-    path_to_flow_field_origin(Position::from_packed(start), flow_field).unwrap_throw()
+    match path_to_flow_field_origin(Position::from_packed(start), flow_field) {
+        Ok(path) => path,
+        Err(e) => throw_str(&format!(
+            "Error calculating path to flow field origin: {}",
+            e
+        )),
+    }
 }
