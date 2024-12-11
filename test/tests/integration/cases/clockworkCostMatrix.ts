@@ -1,16 +1,15 @@
-import { ClockworkCostMatrix } from '../../../../src/index';
+import { ClockworkCostMatrix, ephemeral } from '../../../../src/index';
 import { cpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
 
 describe('clockworkCostMatrix', () => {
   it('should work', () => {
-    const matrix = new ClockworkCostMatrix();
+    const matrix = ephemeral(new ClockworkCostMatrix());
     matrix.set(0, 0, 1);
     expect(matrix.get(0, 0)).toBe(1);
-    matrix.free();
   });
   it('should not be significantly slower than screeps', () => {
-    const clockwork_matrix = new ClockworkCostMatrix();
+    const clockwork_matrix = ephemeral(new ClockworkCostMatrix());
     const screeps_matrix = new PathFinder.CostMatrix();
     const clockworkSetTime = cpuTime(() => {
       for (let x = 0; x < 50; x++) {
@@ -26,8 +25,6 @@ describe('clockworkCostMatrix', () => {
         }
       }
     });
-
-    clockwork_matrix.free();
 
     const screepsSetTime = cpuTime(() => {
       for (let x = 0; x < 50; x++) {

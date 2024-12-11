@@ -5,7 +5,8 @@ import {
   bfsMultiroomDistanceMap,
   bfsMultiroomFlowField,
   bfsMultiroomMonoFlowField,
-  ClockworkCostMatrix
+  ClockworkCostMatrix,
+  ephemeral
 } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
@@ -21,7 +22,7 @@ function getTerrainCostMatrix(room: string) {
       costMatrix.set(x, y, terrain.get(x, y) === TERRAIN_MASK_WALL ? 255 : 0);
     }
   }
-  return costMatrix;
+  return ephemeral(costMatrix);
 }
 
 export default [
@@ -37,12 +38,13 @@ export default [
       for (const room in rooms) {
         const flags = rooms[room];
         const costMatrix = getTerrainCostMatrix(room);
-        const distanceMap = bfsDistanceMap(
-          flags.map(flag => flag.pos),
-          costMatrix
+        const distanceMap = ephemeral(
+          bfsDistanceMap(
+            flags.map(flag => flag.pos),
+            costMatrix
+          )
         );
         visualizeDistanceMap(room, distanceMap);
-        distanceMap.free();
       }
     }
   },
@@ -58,12 +60,13 @@ export default [
       for (const room in rooms) {
         const flags = rooms[room];
         const costMatrix = getTerrainCostMatrix(room);
-        const flowField = bfsFlowField(
-          flags.map(flag => flag.pos),
-          costMatrix
+        const flowField = ephemeral(
+          bfsFlowField(
+            flags.map(flag => flag.pos),
+            costMatrix
+          )
         );
         visualizeFlowField(room, flowField);
-        flowField.free();
       }
     }
   },
@@ -79,12 +82,13 @@ export default [
       for (const room in rooms) {
         const flags = rooms[room];
         const costMatrix = getTerrainCostMatrix(room);
-        const flowField = bfsMonoFlowField(
-          flags.map(flag => flag.pos),
-          costMatrix
+        const flowField = ephemeral(
+          bfsMonoFlowField(
+            flags.map(flag => flag.pos),
+            costMatrix
+          )
         );
         visualizeMonoFlowField(room, flowField);
-        flowField.free();
       }
     }
   },
@@ -102,13 +106,14 @@ export default [
           continue;
         }
         const costMatrix = getTerrainCostMatrix(room);
-        const flowField = bfsFlowField(
-          targetFlags.map(flag => flag.pos),
-          costMatrix
+        const flowField = ephemeral(
+          bfsFlowField(
+            targetFlags.map(flag => flag.pos),
+            costMatrix
+          )
         );
-        const path = flowField.pathToOrigin(originFlag.pos);
+        const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
         visualizePath(path);
-        path.free();
       }
     }
   },
@@ -126,13 +131,14 @@ export default [
           continue;
         }
         const costMatrix = getTerrainCostMatrix(room);
-        const distanceMap = bfsDistanceMap(
-          targetFlags.map(flag => flag.pos),
-          costMatrix
+        const distanceMap = ephemeral(
+          bfsDistanceMap(
+            targetFlags.map(flag => flag.pos),
+            costMatrix
+          )
         );
-        const path = distanceMap.pathToOrigin(originFlag.pos);
+        const path = ephemeral(distanceMap.pathToOrigin(originFlag.pos));
         visualizePath(path);
-        path.free();
       }
     }
   },
@@ -150,13 +156,14 @@ export default [
           continue;
         }
         const costMatrix = getTerrainCostMatrix(room);
-        const flowField = bfsMonoFlowField(
-          targetFlags.map(flag => flag.pos),
-          costMatrix
+        const flowField = ephemeral(
+          bfsMonoFlowField(
+            targetFlags.map(flag => flag.pos),
+            costMatrix
+          )
         );
-        const path = flowField.pathToOrigin(originFlag.pos);
+        const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
         visualizePath(path);
-        path.free();
       }
     }
   },
@@ -167,18 +174,15 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const distanceMap = bfsMultiroomDistanceMap(start, {
-          costMatrixCallback: room => {
-            // TODO: Need to free these cost matrices when we're done with them
-            const cm = getTerrainCostMatrix(room);
-            return cm;
-          },
-          maxRoomDistance: 2
-        });
+        const distanceMap = ephemeral(
+          bfsMultiroomDistanceMap(start, {
+            costMatrixCallback: getTerrainCostMatrix,
+            maxRoomDistance: 2
+          })
+        );
         for (const room of distanceMap.getRooms()) {
           visualizeDistanceMap(room, distanceMap.getRoom(room)!);
         }
-        distanceMap.free();
       }
     }
   },
@@ -189,18 +193,15 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const flowField = bfsMultiroomFlowField(start, {
-          costMatrixCallback: room => {
-            // TODO: Need to free these cost matrices when we're done with them
-            const cm = getTerrainCostMatrix(room);
-            return cm;
-          },
-          maxRoomDistance: 2
-        });
+        const flowField = ephemeral(
+          bfsMultiroomFlowField(start, {
+            costMatrixCallback: getTerrainCostMatrix,
+            maxRoomDistance: 2
+          })
+        );
         for (const room of flowField.getRooms()) {
           visualizeFlowField(room, flowField.getRoom(room)!);
         }
-        flowField.free();
       }
     }
   },
@@ -211,18 +212,15 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const flowField = bfsMultiroomMonoFlowField(start, {
-          costMatrixCallback: room => {
-            // TODO: Need to free these cost matrices when we're done with them
-            const cm = getTerrainCostMatrix(room);
-            return cm;
-          },
-          maxRoomDistance: 2
-        });
+        const flowField = ephemeral(
+          bfsMultiroomMonoFlowField(start, {
+            costMatrixCallback: getTerrainCostMatrix,
+            maxRoomDistance: 2
+          })
+        );
         for (const room of flowField.getRooms()) {
           visualizeMonoFlowField(room, flowField.getRoom(room)!);
         }
-        flowField.free();
       }
     }
   },
@@ -238,16 +236,17 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const flowField = bfsMultiroomFlowField(
-        targetFlags.map(flag => flag.pos),
-        {
-          costMatrixCallback: getTerrainCostMatrix,
-          maxRoomDistance: 2
-        }
+      const flowField = ephemeral(
+        bfsMultiroomFlowField(
+          targetFlags.map(flag => flag.pos),
+          {
+            costMatrixCallback: getTerrainCostMatrix,
+            maxRoomDistance: 2
+          }
+        )
       );
-      const path = flowField.pathToOrigin(originFlag.pos);
+      const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
       visualizePath(path);
-      path.free();
     }
   },
   {
@@ -262,19 +261,17 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const distanceMap = bfsMultiroomDistanceMap(
-        targetFlags.map(flag => flag.pos),
-        {
-          costMatrixCallback: room => {
-            const cm = getTerrainCostMatrix(room);
-            return cm;
-          },
-          maxRoomDistance: 2
-        }
+      const distanceMap = ephemeral(
+        bfsMultiroomDistanceMap(
+          targetFlags.map(flag => flag.pos),
+          {
+            costMatrixCallback: getTerrainCostMatrix,
+            maxRoomDistance: 2
+          }
+        )
       );
-      const path = distanceMap.pathToOrigin(originFlag.pos);
+      const path = ephemeral(distanceMap.pathToOrigin(originFlag.pos));
       visualizePath(path);
-      path.free();
     }
   },
   {
@@ -289,16 +286,17 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const flowField = bfsMultiroomMonoFlowField(
-        targetFlags.map(flag => flag.pos),
-        {
-          costMatrixCallback: getTerrainCostMatrix,
-          maxRoomDistance: 2
-        }
+      const flowField = ephemeral(
+        bfsMultiroomMonoFlowField(
+          targetFlags.map(flag => flag.pos),
+          {
+            costMatrixCallback: getTerrainCostMatrix,
+            maxRoomDistance: 2
+          }
+        )
       );
-      const path = flowField.pathToOrigin(originFlag.pos);
+      const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
       visualizePath(path);
-      path.free();
     }
   }
 ] satisfies FlagVisualizer[];

@@ -1,7 +1,7 @@
 *.js
 !rollup.config.js
 *.d.ts
-wasm/
+src/wasm/
 node_modules/
 dist/
 dist_docs/

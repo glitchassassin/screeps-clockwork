@@ -1,4 +1,4 @@
-import { ClockworkCostMatrix, dijkstraFlowField, FlowField } from '../../../../src/index';
+import { ClockworkCostMatrix, dijkstraFlowField, ephemeral, FlowField } from '../../../../src/index';
 import { cpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
 import { referenceDijkstraFlowField, ReferenceFlowField } from '../../referenceAlgorithms/dijkstraFlowField';
@@ -10,8 +10,8 @@ describe('dijkstraFlowField', () => {
      * ........................^.........................
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix(1);
-    const flowField = dijkstraFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix);
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const flowField = ephemeral(dijkstraFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix));
     expect(flowField.getDirections(25, 25)).toEqual([]);
     expect(flowField.getDirections(26, 25)).toEqual([LEFT]);
     expect(flowField.getDirections(0, 0)).toEqual([BOTTOM_RIGHT]);
@@ -22,11 +22,11 @@ describe('dijkstraFlowField', () => {
      * .........\##############################/.........
      * ..........>>>>>>>>>>>>>>*<<<<<<<<<<<<<<<..........
      */
-    const costMatrix = new ClockworkCostMatrix(1);
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     for (let x = 11; x < 40; x++) {
       costMatrix.set(x, 25, 255);
     }
-    const flowField = dijkstraFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const flowField = ephemeral(dijkstraFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(flowField.getDirections(25, 26)).toEqual([]);
     expect(flowField.getDirections(24, 26)).toEqual([RIGHT]);
     expect(flowField.getDirections(25, 25)).toEqual([]);
@@ -38,11 +38,11 @@ describe('dijkstraFlowField', () => {
      * ..........#############/^\##############..........
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix(1);
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 5);
     }
-    const flowField = dijkstraFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const flowField = ephemeral(dijkstraFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(flowField.getDirections(25, 26)).toEqual([]);
     expect(flowField.getDirections(25, 25)).toEqual([BOTTOM]);
     expect(flowField.getDirections(25, 24)).toEqual([BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT]);
@@ -53,12 +53,12 @@ describe('dijkstraFlowField', () => {
      * ..........############/###\#############..........
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix(1);
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     for (let x = 10; x < 40; x++) {
       if (x === 23 || x === 27) continue;
       costMatrix.set(x, 25, 5);
     }
-    const flowField = dijkstraFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const flowField = ephemeral(dijkstraFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(flowField.getDirections(25, 26)).toEqual([]);
     expect(flowField.getDirections(25, 25)).toEqual([BOTTOM]);
     expect(flowField.getDirections(25, 24)).toEqual([RIGHT, LEFT]);
@@ -76,7 +76,9 @@ describe('dijkstraFlowField', () => {
     });
     let clockworkFlowField: FlowField | undefined;
     const clockworkTime = cpuTime(() => {
-      clockworkFlowField = dijkstraFlowField([new RoomPosition(25, 26, 'W1N1')], new ClockworkCostMatrix(1));
+      clockworkFlowField = ephemeral(
+        dijkstraFlowField([new RoomPosition(25, 26, 'W1N1')], ephemeral(new ClockworkCostMatrix(1)))
+      );
     });
 
     expect(clockworkFlowField?.getDirections(25, 26).sort()).toEqual(referenceFlowField?.getDirections(25, 26).sort());

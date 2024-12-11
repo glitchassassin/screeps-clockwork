@@ -1,4 +1,4 @@
-import { bfsMultiroomMonoFlowField, ClockworkCostMatrix } from '../../../../src/index';
+import { bfsMultiroomMonoFlowField, ClockworkCostMatrix, ephemeral } from '../../../../src/index';
 import { describe, expect, it } from '../../helpers';
 
 describe('bfsMultiroomMonoFlowField', () => {
@@ -8,46 +8,50 @@ describe('bfsMultiroomMonoFlowField', () => {
      * ........................^.........................
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
-      costMatrixCallback: () => costMatrix,
-      maxRooms: 1
-    });
-    costMatrix.free();
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(
+      bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        maxRooms: 1
+      })
+    );
     expect(flowField.get(new RoomPosition(25, 25, 'W1N1'))).toBeNull();
     expect(flowField.get(new RoomPosition(26, 25, 'W1N1'))).toBe(LEFT);
     expect(flowField.get(new RoomPosition(0, 0, 'W1N1'))).toBeNull();
   });
 
   it('should skip rooms if cost matrix is undefined', () => {
-    const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
-      costMatrixCallback: roomName => (roomName === 'W1N1' ? costMatrix : undefined),
-      maxRooms: 4
-    });
-    costMatrix.free();
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(
+      bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: roomName => (roomName === 'W1N1' ? costMatrix : undefined),
+        maxRooms: 4
+      })
+    );
     expect(flowField.get(new RoomPosition(25, 25, 'W1N1'))).toBeNull();
     expect(flowField.get(new RoomPosition(25, 25, 'W1N2'))).toBeNull();
     expect(flowField.get(new RoomPosition(25, 25, 'W2N1'))).toBeNull();
   });
 
   it('should respect maxRooms', () => {
-    const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
-      costMatrixCallback: () => costMatrix,
-      maxRooms: 2
-    });
-    costMatrix.free();
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(
+      bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        maxRooms: 2
+      })
+    );
     expect(flowField.getRooms().length).toBe(2);
   }, 10);
 
   it('should respect maxRoomDistance', () => {
-    const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
-      costMatrixCallback: () => costMatrix,
-      maxRoomDistance: 1
-    });
-    costMatrix.free();
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(
+      bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        maxRoomDistance: 1
+      })
+    );
     expect(flowField.getRooms().length).toBe(5);
   }, 15);
 
@@ -99,13 +103,14 @@ describe('bfsMultiroomMonoFlowField', () => {
   });
 
   it('should respect maxTiles', () => {
-    const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
-      costMatrixCallback: () => costMatrix,
-      maxRooms: 1,
-      maxTiles: 100
-    });
-    costMatrix.free();
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(
+      bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        maxRooms: 1,
+        maxTiles: 100
+      })
+    );
     let explored = 0;
     for (let y = 0; y < 50; y++) {
       for (let x = 0; x < 50; x++) {
@@ -118,12 +123,13 @@ describe('bfsMultiroomMonoFlowField', () => {
   });
 
   it('should respect maxTileDistance', () => {
-    const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
-      costMatrixCallback: () => costMatrix,
-      maxTileDistance: 10
-    });
-    costMatrix.free();
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(
+      bfsMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        maxTileDistance: 10
+      })
+    );
     let explored = 0;
     for (let y = 0; y < 50; y++) {
       for (let x = 0; x < 50; x++) {

@@ -1,4 +1,4 @@
-import { bfsMonoFlowField, ClockworkCostMatrix, MonoFlowField } from '../../../../src/index';
+import { bfsMonoFlowField, ClockworkCostMatrix, ephemeral, MonoFlowField } from '../../../../src/index';
 import { cpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
 import { referenceBfsMonoFlowField, ReferenceMonoFlowField } from '../../referenceAlgorithms/bfsMonoFlowField';
@@ -10,8 +10,8 @@ describe('bfsMonoFlowField', () => {
      * ........................^.........................
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsMonoFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix);
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(bfsMonoFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix));
     expect(flowField.get(25, 25)).toBeUndefined();
     expect(flowField.get(26, 25)).toEqual(LEFT);
     expect(flowField.get(0, 0)).toEqual(BOTTOM_RIGHT);
@@ -22,11 +22,11 @@ describe('bfsMonoFlowField', () => {
      * .........\##############################/.........
      * ..........>>>>>>>>>>>>>>*<<<<<<<<<<<<<<<..........
      */
-    const costMatrix = new ClockworkCostMatrix();
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
     for (let x = 11; x < 40; x++) {
       costMatrix.set(x, 25, 255);
     }
-    const flowField = bfsMonoFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const flowField = ephemeral(bfsMonoFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(flowField.get(25, 26)).toBeUndefined();
     expect(flowField.get(24, 26)).toEqual(RIGHT);
     expect(flowField.get(25, 25)).toBeUndefined();
@@ -38,11 +38,11 @@ describe('bfsMonoFlowField', () => {
      * ..........#############/^\##############..........
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix();
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 254);
     }
-    const flowField = bfsMonoFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const flowField = ephemeral(bfsMonoFlowField([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(flowField.get(25, 26)).toBeUndefined();
     expect(flowField.get(25, 25)).toEqual(BOTTOM);
     expect(flowField.get(25, 24)).toEqual(BOTTOM);
@@ -54,7 +54,7 @@ describe('bfsMonoFlowField', () => {
     });
     let clockworkFlowField: MonoFlowField | undefined;
     const clockworkTime = cpuTime(() => {
-      clockworkFlowField = bfsMonoFlowField([new RoomPosition(25, 26, 'W1N1')], new ClockworkCostMatrix());
+      clockworkFlowField = ephemeral(bfsMonoFlowField([new RoomPosition(25, 26, 'W1N1')], new ClockworkCostMatrix()));
     });
 
     expect(clockworkFlowField?.get(25, 26)).toEqual(referenceFlowField?.get(25, 26));

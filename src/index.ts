@@ -11,6 +11,7 @@ import {
 } from './wasm/screeps_clockwork';
 export { ClockworkCostMatrix, DistanceMap, FlowField, MonoFlowField };
 
+export * from './utils/cleanup';
 export * from './wrappers/bfsDistanceMap';
 export * from './wrappers/bfsFlowField';
 export * from './wrappers/dijkstraDistanceMap';

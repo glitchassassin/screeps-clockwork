@@ -1,4 +1,4 @@
-import { ClockworkCostMatrix, dijkstraDistanceMap, DistanceMap } from '../../../../src/index';
+import { ClockworkCostMatrix, dijkstraDistanceMap, DistanceMap, ephemeral } from '../../../../src/index';
 import { cpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
 import { referenceDijkstraDistanceMap, ReferenceDistanceMap } from '../../referenceAlgorithms/dijkstraDistanceMap';
@@ -10,8 +10,8 @@ describe('dijkstraDistanceMap', () => {
      * ........................|.........................
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix(1);
-    const distanceMap = dijkstraDistanceMap([new RoomPosition(25, 25, 'W1N1')], costMatrix);
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const distanceMap = ephemeral(dijkstraDistanceMap([new RoomPosition(25, 25, 'W1N1')], costMatrix));
     expect(distanceMap.get(25, 25)).toBe(0);
     expect(distanceMap.get(26, 25)).toBe(1);
     expect(distanceMap.get(0, 0)).toBe(25);
@@ -22,11 +22,11 @@ describe('dijkstraDistanceMap', () => {
      * .........|##############################..........
      * ..........--------------1.........................
      */
-    const costMatrix = new ClockworkCostMatrix(1);
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 255);
     }
-    const distanceMap = dijkstraDistanceMap([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const distanceMap = ephemeral(dijkstraDistanceMap([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(distanceMap.get(25, 26)).toBe(0);
     expect(distanceMap.get(26, 26)).toBe(1);
     expect(distanceMap.get(25, 25)).toBe(0xffffffff);
@@ -38,11 +38,11 @@ describe('dijkstraDistanceMap', () => {
      * ..........##############|###############..........
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix(1);
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 5);
     }
-    const distanceMap = dijkstraDistanceMap([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const distanceMap = ephemeral(dijkstraDistanceMap([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(distanceMap.get(25, 26)).toBe(0);
     expect(distanceMap.get(26, 26)).toBe(1);
     expect(distanceMap.get(25, 25)).toBe(5);
@@ -54,13 +54,12 @@ describe('dijkstraDistanceMap', () => {
      * .........|##############################|.........
      * ..........-----1...................2----..........
      */
-    const costMatrix = new ClockworkCostMatrix(1);
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 255);
     }
-    const distanceMap = dijkstraDistanceMap(
-      [new RoomPosition(15, 26, 'W1N1'), new RoomPosition(35, 26, 'W1N1')],
-      costMatrix
+    const distanceMap = ephemeral(
+      dijkstraDistanceMap([new RoomPosition(15, 26, 'W1N1'), new RoomPosition(35, 26, 'W1N1')], costMatrix)
     );
     expect(distanceMap.get(15, 26)).toBe(0);
     expect(distanceMap.get(15, 24)).toBe(12);
@@ -81,7 +80,9 @@ describe('dijkstraDistanceMap', () => {
     });
     let clockworkDistanceMap: DistanceMap | undefined;
     const clockworkTime = cpuTime(() => {
-      clockworkDistanceMap = dijkstraDistanceMap([new RoomPosition(25, 26, 'W1N1')], new ClockworkCostMatrix(1));
+      clockworkDistanceMap = ephemeral(
+        dijkstraDistanceMap([new RoomPosition(25, 26, 'W1N1')], ephemeral(new ClockworkCostMatrix(1)))
+      );
     });
     expect(clockworkDistanceMap?.get(0, 0)).toEqual(referenceDistanceMap?.get(0, 0));
     expect(clockworkDistanceMap?.get(25, 26)).toEqual(referenceDistanceMap?.get(25, 26));

@@ -1,4 +1,4 @@
-import { bfsFlowField, ClockworkCostMatrix } from '../../../../src/index';
+import { bfsFlowField, ClockworkCostMatrix, ephemeral } from '../../../../src/index';
 import { describe, expect, it } from '../../helpers';
 
 describe('flowFieldPath', () => {
@@ -8,12 +8,10 @@ describe('flowFieldPath', () => {
      * ........................^.........................
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix();
-    const flowField = bfsFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix);
-    const clockworkPath = flowField.pathToOrigin(new RoomPosition(0, 0, 'W1N1'));
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const flowField = ephemeral(bfsFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix));
+    const clockworkPath = ephemeral(flowField.pathToOrigin(new RoomPosition(0, 0, 'W1N1')));
     const path = clockworkPath.toArray();
-    clockworkPath.free();
-    flowField.free();
 
     expect(path[0].isEqualTo(new RoomPosition(0, 0, 'W1N1'))).toBeTruthy();
     expect(path[path.length - 1].isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();

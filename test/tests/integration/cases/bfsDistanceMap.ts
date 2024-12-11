@@ -1,4 +1,4 @@
-import { bfsDistanceMap, ClockworkCostMatrix, DistanceMap } from '../../../../src/index';
+import { bfsDistanceMap, ClockworkCostMatrix, DistanceMap, ephemeral } from '../../../../src/index';
 import { cpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
 import { referenceBfsDistanceMap, ReferenceDistanceMap } from '../../referenceAlgorithms/bfsDistanceMap';
@@ -10,8 +10,8 @@ describe('bfsDistanceMap', () => {
      * ........................|.........................
      * ........................1.........................
      */
-    const costMatrix = new ClockworkCostMatrix();
-    const distanceMap = bfsDistanceMap([new RoomPosition(25, 25, 'W1N1')], costMatrix);
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const distanceMap = ephemeral(bfsDistanceMap([new RoomPosition(25, 25, 'W1N1')], costMatrix));
     expect(distanceMap.get(25, 25)).toBe(0);
     expect(distanceMap.get(26, 25)).toBe(1);
     expect(distanceMap.get(0, 0)).toBe(25);
@@ -26,7 +26,7 @@ describe('bfsDistanceMap', () => {
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 255);
     }
-    const distanceMap = bfsDistanceMap([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const distanceMap = ephemeral(bfsDistanceMap([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(distanceMap.get(25, 26)).toBe(0);
     expect(distanceMap.get(26, 26)).toBe(1);
     expect(distanceMap.get(25, 25)).toBe(0xffffffff);
@@ -42,7 +42,7 @@ describe('bfsDistanceMap', () => {
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 254);
     }
-    const distanceMap = bfsDistanceMap([new RoomPosition(25, 26, 'W1N1')], costMatrix);
+    const distanceMap = ephemeral(bfsDistanceMap([new RoomPosition(25, 26, 'W1N1')], costMatrix));
     expect(distanceMap.get(25, 26)).toBe(0);
     expect(distanceMap.get(26, 26)).toBe(1);
     expect(distanceMap.get(25, 25)).toBe(1);
@@ -58,9 +58,8 @@ describe('bfsDistanceMap', () => {
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 255);
     }
-    const distanceMap = bfsDistanceMap(
-      [new RoomPosition(15, 26, 'W1N1'), new RoomPosition(35, 26, 'W1N1')],
-      costMatrix
+    const distanceMap = ephemeral(
+      bfsDistanceMap([new RoomPosition(15, 26, 'W1N1'), new RoomPosition(35, 26, 'W1N1')], costMatrix)
     );
     expect(distanceMap.get(15, 26)).toBe(0);
     expect(distanceMap.get(15, 24)).toBe(12);
@@ -74,7 +73,7 @@ describe('bfsDistanceMap', () => {
     });
     let clockworkDistanceMap: DistanceMap | undefined;
     const clockworkTime = cpuTime(() => {
-      clockworkDistanceMap = bfsDistanceMap([new RoomPosition(25, 26, 'W1N1')], new ClockworkCostMatrix());
+      clockworkDistanceMap = ephemeral(bfsDistanceMap([new RoomPosition(25, 26, 'W1N1')], new ClockworkCostMatrix()));
     });
     expect(clockworkDistanceMap?.get(0, 0)).toEqual(referenceDistanceMap?.get(0, 0));
     expect(clockworkDistanceMap?.get(25, 26)).toEqual(referenceDistanceMap?.get(25, 26));
