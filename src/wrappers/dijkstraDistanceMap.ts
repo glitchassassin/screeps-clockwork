@@ -1,5 +1,12 @@
-import { ClockworkCostMatrix, js_dijkstra_distance_map } from '../wasm/screeps_clockwork';
+import { MAX_USIZE } from '../utils/constants';
+import { fromPackedRoomName } from '../utils/fromPacked';
+import {
+  ClockworkCostMatrix,
+  js_dijkstra_distance_map,
+  js_dijkstra_multiroom_distance_map
+} from '../wasm/screeps_clockwork';
 import { ClockworkDistanceMap } from './distanceMap';
+import { ClockworkMultiroomDistanceMap } from './multiroomDistanceMap';
 
 /**
  * Generate a [distance map](https://glitchassassin.github.io/screeps-clockwork/primitives/flowfield.html) for a set of positions
@@ -21,4 +28,52 @@ export function dijkstraDistanceMap(start: RoomPosition[], costMatrix: Clockwork
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
   const result = js_dijkstra_distance_map(startPacked, costMatrix);
   return new ClockworkDistanceMap(result);
+}
+
+/**
+ * Create a distance map for the given start positions, using Dijkstra's algorithm to
+ * factor in terrain costs (0-255, where 255 is impassable).
+ *
+ * This calculates a distance map across multiple rooms, with a few configurable limits:
+ * - `maxTiles`: The maximum number of tiles to explore.
+ * - `maxRooms`: The maximum number of rooms to explore.
+ * - `maxRoomDistance`: Don't explore rooms further (in Manhattan distance) than this.
+ * - `maxTileDistance`: Don't explore tiles further (in accumulated cost) than this.
+ *
+ * At least one of these limits must be set.
+ *
+ * @param start - The starting positions.
+ * @param options - The options for the distance map.
+ * @returns A multi-room distance map.
+ */
+export function dijkstraMultiroomDistanceMap(
+  start: RoomPosition[],
+  {
+    costMatrixCallback,
+    maxTiles = MAX_USIZE,
+    maxRooms = MAX_USIZE,
+    maxRoomDistance = MAX_USIZE,
+    maxTileDistance = MAX_USIZE
+  }: {
+    costMatrixCallback: (room: string) => ClockworkCostMatrix | undefined;
+    maxTiles?: number;
+    maxRooms?: number;
+    maxRoomDistance?: number;
+    maxTileDistance?: number;
+  }
+) {
+  if ([maxTiles, maxRooms, maxRoomDistance, maxTileDistance].every(n => n === MAX_USIZE)) {
+    throw new Error('At least one of maxTiles, maxRooms, maxRoomDistance, or maxTileDistance must be set');
+  }
+
+  const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
+  const result = js_dijkstra_multiroom_distance_map(
+    startPacked,
+    (room: number) => costMatrixCallback(fromPackedRoomName(room)),
+    maxTiles,
+    maxRooms,
+    maxRoomDistance,
+    maxTileDistance
+  );
+  return new ClockworkMultiroomDistanceMap(result);
 }

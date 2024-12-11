@@ -89,38 +89,9 @@ export default [
     }
   },
   {
-    name: 'BFS Distance Map Basin',
-    color1: COLOR_RED,
-    color2: COLOR_CYAN,
-    /**
-     * Visualization of "basins," areas that are furthest from terrain walls.
-     */
-    run(rooms) {
-      for (const room in rooms) {
-        const costMatrix = new ClockworkCostMatrix();
-        const walls: RoomPosition[] = [];
-        const terrain = Game.map.getRoomTerrain(room);
-        for (let x = 0; x < 50; x++) {
-          for (let y = 0; y < 50; y++) {
-            if (terrain.get(x, y) === TERRAIN_MASK_WALL) {
-              walls.push(new RoomPosition(x, y, room));
-              costMatrix.set(x, y, 255);
-            } else {
-              costMatrix.set(x, y, 0);
-            }
-          }
-        }
-
-        const distanceMap = bfsDistanceMap(walls, costMatrix);
-        visualizeDistanceMap(room, distanceMap);
-        distanceMap.free();
-      }
-    }
-  },
-  {
     name: 'BFS Flow Field Path',
     color1: COLOR_RED,
-    color2: COLOR_GREEN,
+    color2: COLOR_CYAN,
     /**
      * Visualization of a BFS path.
      */
@@ -144,7 +115,7 @@ export default [
   {
     name: 'BFS Distance Map Path',
     color1: COLOR_RED,
-    color2: COLOR_YELLOW,
+    color2: COLOR_GREEN,
     /**
      * Visualization of a BFS distance map-based path.
      */
@@ -168,7 +139,7 @@ export default [
   {
     name: 'BFS Mono Flow Field Path',
     color1: COLOR_RED,
-    color2: COLOR_ORANGE,
+    color2: COLOR_YELLOW,
     /**
      * Visualization of a BFS mono flow field-based path.
      */
@@ -258,7 +229,7 @@ export default [
   {
     name: 'BFS Multiroom Flow Field Path',
     color1: COLOR_PURPLE,
-    color2: COLOR_GREEN,
+    color2: COLOR_CYAN,
     /**
      * Visualization of a BFS multiroom flow field-based path.
      */
@@ -282,7 +253,7 @@ export default [
   {
     name: 'BFS Multiroom Distance Map Path',
     color1: COLOR_PURPLE,
-    color2: COLOR_YELLOW,
+    color2: COLOR_GREEN,
     /**
      * Visualization of a BFS multiroom distance map-based path.
      */
@@ -309,7 +280,7 @@ export default [
   {
     name: 'BFS Multiroom Mono Flow Field Path',
     color1: COLOR_PURPLE,
-    color2: COLOR_ORANGE,
+    color2: COLOR_YELLOW,
     /**
      * Visualization of a BFS mono flow field-based path.
      */

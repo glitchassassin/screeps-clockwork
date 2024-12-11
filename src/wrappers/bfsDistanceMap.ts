@@ -1,3 +1,4 @@
+import { MAX_USIZE } from '../utils/constants';
 import { fromPackedRoomName } from '../utils/fromPacked';
 import { ClockworkCostMatrix, js_bfs_distance_map, js_bfs_multiroom_distance_map } from '../wasm/screeps_clockwork';
 import { ClockworkDistanceMap } from './distanceMap';
@@ -26,8 +27,6 @@ export function bfsDistanceMap(start: RoomPosition[], costMatrix: ClockworkCostM
   const result = js_bfs_distance_map(startPacked, costMatrix);
   return new ClockworkDistanceMap(result);
 }
-
-const MAX_USIZE = 0xffffffff;
 
 /**
  * Create a distance map for the given start positions, using a breadth-first search.

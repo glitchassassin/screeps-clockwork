@@ -1,3 +1,4 @@
+import { MAX_USIZE } from '../utils/constants';
 import { fromPackedRoomName } from '../utils/fromPacked';
 import {
   ClockworkCostMatrix,
@@ -10,8 +11,6 @@ import { ClockworkFlowField } from './flowField';
 import { ClockworkMonoFlowField } from './monoFlowField';
 import { ClockworkMultiroomFlowField } from './multiroomFlowField';
 import { ClockworkMultiroomMonoFlowField } from './multiroomMonoFlowField';
-
-const MAX_USIZE = 0xffffffff;
 
 /**
  * Generate a [flow field](https://glitchassassin.github.io/screeps-clockwork/primitives/flowfield.html) for a set of positions
