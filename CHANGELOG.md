@@ -1,3 +1,12 @@
+## 0.5.0 (2024-12-11)
+
+### Feat
+
+- add dijkstra generators
+- implement multi-room flow fields
+- implement multi-room distance map paths
+- implement multi-room distance maps
+
 ## 0.4.0 (2024-12-05)
 
 ### Feat
