@@ -73,17 +73,27 @@ export function dijkstraMultiroomFlowField(
     maxTiles = MAX_USIZE,
     maxRooms = MAX_USIZE,
     maxRoomDistance = MAX_USIZE,
-    maxTileDistance = MAX_USIZE
+    maxTileDistance = MAX_USIZE,
+    anyOfDestinations,
+    allOfDestinations
   }: {
     costMatrixCallback: (roomName: string) => ClockworkCostMatrix | undefined;
     maxTiles?: number;
     maxRooms?: number;
     maxRoomDistance?: number;
     maxTileDistance?: number;
+    anyOfDestinations?: RoomPosition[];
+    allOfDestinations?: RoomPosition[];
   }
 ) {
-  if ([maxTiles, maxRooms, maxRoomDistance, maxTileDistance].every(n => n === MAX_USIZE)) {
-    throw new Error('At least one of maxTiles, maxRooms, maxRoomDistance, or maxTileDistance must be set');
+  if (
+    [maxTiles, maxRooms, maxRoomDistance, maxTileDistance].every(n => n === MAX_USIZE) &&
+    !anyOfDestinations &&
+    !allOfDestinations
+  ) {
+    throw new Error(
+      'At least one of maxTiles, maxRooms, maxRoomDistance, maxTileDistance, anyOfDestinations, or allOfDestinations must be set'
+    );
   }
 
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
@@ -96,7 +106,9 @@ export function dijkstraMultiroomFlowField(
     maxTiles,
     maxRooms,
     maxRoomDistance,
-    maxTileDistance
+    maxTileDistance,
+    anyOfDestinations ? new Uint32Array(anyOfDestinations.map(pos => pos.__packedPos)) : undefined,
+    allOfDestinations ? new Uint32Array(allOfDestinations.map(pos => pos.__packedPos)) : undefined
   );
   return new ClockworkMultiroomFlowField(result);
 }
@@ -121,17 +133,27 @@ export function dijkstraMultiroomMonoFlowField(
     maxTiles = MAX_USIZE,
     maxRooms = MAX_USIZE,
     maxRoomDistance = MAX_USIZE,
-    maxTileDistance = MAX_USIZE
+    maxTileDistance = MAX_USIZE,
+    anyOfDestinations,
+    allOfDestinations
   }: {
     costMatrixCallback: (roomName: string) => ClockworkCostMatrix | undefined;
     maxTiles?: number;
     maxRooms?: number;
     maxRoomDistance?: number;
     maxTileDistance?: number;
+    anyOfDestinations?: RoomPosition[];
+    allOfDestinations?: RoomPosition[];
   }
 ) {
-  if ([maxTiles, maxRooms, maxRoomDistance, maxTileDistance].every(n => n === MAX_USIZE)) {
-    throw new Error('At least one of maxTiles, maxRooms, maxRoomDistance, or maxTileDistance must be set');
+  if (
+    [maxTiles, maxRooms, maxRoomDistance, maxTileDistance].every(n => n === MAX_USIZE) &&
+    !anyOfDestinations &&
+    !allOfDestinations
+  ) {
+    throw new Error(
+      'At least one of maxTiles, maxRooms, maxRoomDistance, maxTileDistance, anyOfDestinations, or allOfDestinations must be set'
+    );
   }
 
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
@@ -144,7 +166,9 @@ export function dijkstraMultiroomMonoFlowField(
     maxTiles,
     maxRooms,
     maxRoomDistance,
-    maxTileDistance
+    maxTileDistance,
+    anyOfDestinations ? new Uint32Array(anyOfDestinations.map(pos => pos.__packedPos)) : undefined,
+    allOfDestinations ? new Uint32Array(allOfDestinations.map(pos => pos.__packedPos)) : undefined
   );
   return new ClockworkMultiroomMonoFlowField(result);
 }

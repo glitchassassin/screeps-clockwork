@@ -36,11 +36,17 @@ pub fn dijkstra_multiroom_distance_map(
     max_rooms: usize,
     max_room_distance: usize,
     max_tile_distance: usize,
+    any_of_destinations: Option<Vec<Position>>,
+    all_of_destinations: Option<Vec<Position>>,
 ) -> MultiroomDistanceMap {
     set_panic_hook();
     let origin_rooms = start.iter().map(|p| p.room_name()).collect::<HashSet<_>>();
     let mut frontier = BinaryHeap::new();
     let mut visited = HashSet::new();
+    let any_of_destinations =
+        any_of_destinations.and_then(|d| Some(d.iter().cloned().collect::<HashSet<_>>()));
+    let mut all_of_destinations =
+        all_of_destinations.and_then(|d| Some(d.iter().cloned().collect::<HashSet<_>>()));
     let mut multiroom_distance_map = MultiroomDistanceMap::new();
     let mut cost_matrices = HashMap::new();
 
@@ -91,11 +97,22 @@ pub fn dijkstra_multiroom_distance_map(
                 multiroom_distance_map.get_or_create_room_map(neighbor.room_name())
                     [neighbor.xy()] = next_cost;
                 visited.insert(neighbor);
+                if let Some(ref mut all_of) = all_of_destinations {
+                    all_of.remove(&neighbor);
+                    if all_of.is_empty() {
+                        return multiroom_distance_map;
+                    }
+                }
+                if let Some(ref destinations) = any_of_destinations {
+                    if destinations.contains(&neighbor) {
+                        return multiroom_distance_map;
+                    }
+                }
             }
-        }
 
-        if visited.len() >= max_tiles {
-            break;
+            if visited.len() >= max_tiles {
+                return multiroom_distance_map;
+            }
         }
     }
 
@@ -110,6 +127,8 @@ pub fn js_dijkstra_multiroom_distance_map(
     max_rooms: usize,
     max_room_distance: usize,
     max_tile_distance: usize,
+    any_of_destinations: Option<Vec<u32>>,
+    all_of_destinations: Option<Vec<u32>>,
 ) -> MultiroomDistanceMap {
     let start_positions = start_packed
         .iter()
@@ -142,5 +161,9 @@ pub fn js_dijkstra_multiroom_distance_map(
         max_rooms,
         max_room_distance,
         max_tile_distance,
+        any_of_destinations
+            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
+        all_of_destinations
+            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
     )
 }

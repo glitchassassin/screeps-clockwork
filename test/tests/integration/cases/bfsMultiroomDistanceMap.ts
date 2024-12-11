@@ -139,4 +139,30 @@ describe('bfsMultiroomDistanceMap', () => {
     }
     expect(explored).toBe(21 * 21);
   });
+  it('should respect anyOfDestinations', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const distanceMap = ephemeral(
+      bfsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        anyOfDestinations: [new RoomPosition(25, 27, 'W1N1'), new RoomPosition(25, 21, 'W1N1')]
+      })
+    );
+    expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
+    expect(distanceMap.get(new RoomPosition(25, 27, 'W1N1'))).toBe(2);
+    expect(distanceMap.get(new RoomPosition(25, 21, 'W1N1'))).toBe(UNREACHABLE);
+    expect(distanceMap.get(new RoomPosition(25, 1, 'W1N1'))).toBe(UNREACHABLE);
+  });
+  it('should respect allOfDestinations', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const distanceMap = ephemeral(
+      bfsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        allOfDestinations: [new RoomPosition(25, 27, 'W1N1'), new RoomPosition(25, 21, 'W1N1')]
+      })
+    );
+    expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
+    expect(distanceMap.get(new RoomPosition(25, 27, 'W1N1'))).toBe(2);
+    expect(distanceMap.get(new RoomPosition(25, 21, 'W1N1'))).toBe(4);
+    expect(distanceMap.get(new RoomPosition(25, 1, 'W1N1'))).toBe(UNREACHABLE);
+  });
 });

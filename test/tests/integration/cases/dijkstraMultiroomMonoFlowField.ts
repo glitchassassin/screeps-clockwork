@@ -140,4 +140,29 @@ describe('dijkstraMultiroomMonoFlowField', () => {
     }
     expect(explored).toBe(21 * 21 - 1); // -1 because the origin is not included
   });
+  it('should respect anyOfDestinations', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const flowField = ephemeral(
+      dijkstraMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        anyOfDestinations: [new RoomPosition(25, 27, 'W1N1')]
+      })
+    );
+    expect(flowField.get(new RoomPosition(25, 25, 'W1N1'))).toBeNull();
+    expect(flowField.get(new RoomPosition(25, 27, 'W1N1'))).toEqual(TOP);
+    expect(flowField.get(new RoomPosition(25, 1, 'W1N1'))).toBeNull();
+  });
+  it('should respect allOfDestinations', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const flowField = ephemeral(
+      dijkstraMultiroomMonoFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        allOfDestinations: [new RoomPosition(25, 27, 'W1N1'), new RoomPosition(25, 21, 'W1N1')]
+      })
+    );
+    expect(flowField.get(new RoomPosition(25, 25, 'W1N1'))).toBeNull();
+    expect(flowField.get(new RoomPosition(25, 27, 'W1N1'))).toEqual(TOP);
+    expect(flowField.get(new RoomPosition(25, 21, 'W1N1'))).toEqual(BOTTOM_RIGHT);
+    expect(flowField.get(new RoomPosition(25, 1, 'W1N1'))).toBeNull();
+  });
 });

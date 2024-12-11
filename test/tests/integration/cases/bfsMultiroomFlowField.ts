@@ -140,4 +140,29 @@ describe('bfsMultiroomFlowField', () => {
     }
     expect(explored).toBe(21 * 21 - 1); // -1 because the origin is not included
   });
+  it('should respect anyOfDestinations', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(
+      bfsMultiroomFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        anyOfDestinations: [new RoomPosition(25, 27, 'W1N1')]
+      })
+    );
+    expect(flowField.getDirections(new RoomPosition(25, 25, 'W1N1'))).toEqual([]);
+    expect(flowField.getDirections(new RoomPosition(25, 27, 'W1N1'))).toEqual([TOP, TOP_RIGHT, TOP_LEFT]);
+    expect(flowField.getDirections(new RoomPosition(25, 1, 'W1N1'))).toEqual([]);
+  });
+  it('should respect allOfDestinations', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix());
+    const flowField = ephemeral(
+      bfsMultiroomFlowField([new RoomPosition(25, 25, 'W1N1')], {
+        costMatrixCallback: () => costMatrix,
+        allOfDestinations: [new RoomPosition(25, 27, 'W1N1'), new RoomPosition(25, 21, 'W1N1')]
+      })
+    );
+    expect(flowField.getDirections(new RoomPosition(25, 25, 'W1N1'))).toEqual([]);
+    expect(flowField.getDirections(new RoomPosition(25, 27, 'W1N1'))).toEqual([TOP, TOP_RIGHT, TOP_LEFT]);
+    expect(flowField.getDirections(new RoomPosition(25, 21, 'W1N1'))).toEqual([BOTTOM_RIGHT, BOTTOM, BOTTOM_LEFT]);
+    expect(flowField.getDirections(new RoomPosition(25, 1, 'W1N1'))).toEqual([]);
+  });
 });

@@ -18,6 +18,19 @@ use wasm_bindgen::throw_val;
 ///
 /// This calculates a distance map across multiple rooms, up to a maximum number of
 /// tiles or rooms (in Manhattan distance).
+///
+/// # Arguments
+/// * `start` - The starting position(s)
+/// * `get_cost_matrix` - Function that returns the cost matrix for a given room
+/// * `max_tiles` - Maximum number of tiles to explore
+/// * `max_rooms` - Maximum number of rooms to explore
+/// * `max_room_distance` - Maximum Manhattan distance in rooms to explore
+/// * `max_tile_distance` - Maximum distance in tiles to explore
+/// * `any_of_destinations` - Search exits early if any of these positions are reached
+/// * `all_of_destinations` - Search exits early when all of these positions are reached
+///
+/// # Returns
+/// A `MultiroomDistanceMap` containing the distances from the start positions
 pub fn bfs_multiroom_distance_map(
     start: Vec<Position>,
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
@@ -25,12 +38,18 @@ pub fn bfs_multiroom_distance_map(
     max_rooms: usize,
     max_room_distance: usize,
     max_tile_distance: usize,
+    any_of_destinations: Option<Vec<Position>>,
+    all_of_destinations: Option<Vec<Position>>,
 ) -> MultiroomDistanceMap {
     set_panic_hook();
     // Initialize the frontier with the passable positions surrounding the start positions
     let origin_rooms = start.iter().map(|p| p.room_name()).collect::<HashSet<_>>();
     let mut frontier = VecDeque::from(start.clone());
     let mut visited = start.iter().cloned().collect::<HashSet<_>>();
+    let any_of_destinations =
+        any_of_destinations.and_then(|d| Some(d.iter().cloned().collect::<HashSet<_>>()));
+    let mut all_of_destinations =
+        all_of_destinations.and_then(|d| Some(d.iter().cloned().collect::<HashSet<_>>()));
     let mut multiroom_distance_map = MultiroomDistanceMap::new();
     let mut cost_matrices = HashMap::new();
 
@@ -73,12 +92,22 @@ pub fn bfs_multiroom_distance_map(
                     [neighbor.xy()] = current_distance + 1;
                 frontier.push_back(neighbor);
                 visited.insert(neighbor);
-            } else {
-                visited.insert(neighbor);
+                if let Some(ref mut all_of_destinations) = all_of_destinations {
+                    all_of_destinations.remove(&neighbor);
+                    if all_of_destinations.is_empty() {
+                        return multiroom_distance_map; // early exit if all of the destinations are reached
+                    }
+                }
+                if let Some(ref any_of_destinations) = any_of_destinations {
+                    if any_of_destinations.contains(&neighbor) {
+                        return multiroom_distance_map; // early exit if any of the destinations are reached
+                    }
+                }
             }
-        }
-        if visited.len() >= max_tiles {
-            break;
+
+            if visited.len() >= max_tiles {
+                return multiroom_distance_map;
+            }
         }
     }
 
@@ -86,6 +115,19 @@ pub fn bfs_multiroom_distance_map(
 }
 
 /// WASM wrapper for the BFS multiroom distance map function.
+///
+/// # Arguments
+/// * `start_packed` - Array of packed position integers representing start positions
+/// * `get_cost_matrix` - JavaScript function that returns cost matrices for rooms
+/// * `max_tiles` - Maximum number of tiles to explore
+/// * `max_rooms` - Maximum number of rooms to explore
+/// * `max_room_distance` - Maximum Manhattan distance in rooms to explore
+/// * `max_tile_distance` - Maximum distance in tiles to explore
+/// * `any_of_destinations` - Array of packed positions to trigger early exit when any are reached
+/// * `all_of_destinations` - Array of packed positions to trigger early exit when all are reached
+///
+/// # Returns
+/// A `MultiroomDistanceMap` containing the distances from the start positions
 #[wasm_bindgen]
 pub fn js_bfs_multiroom_distance_map(
     start_packed: Vec<u32>,
@@ -94,6 +136,8 @@ pub fn js_bfs_multiroom_distance_map(
     max_rooms: usize,
     max_room_distance: usize,
     max_tile_distance: usize,
+    any_of_destinations: Option<Vec<u32>>,
+    all_of_destinations: Option<Vec<u32>>,
 ) -> MultiroomDistanceMap {
     let start_positions = start_packed
         .iter()
@@ -126,5 +170,9 @@ pub fn js_bfs_multiroom_distance_map(
         max_rooms,
         max_room_distance,
         max_tile_distance,
+        any_of_destinations
+            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
+        all_of_destinations
+            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
     )
 }

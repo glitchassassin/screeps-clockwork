@@ -15,6 +15,8 @@ pub fn dijkstra_multiroom_mono_flow_field(
     max_rooms: usize,
     max_room_distance: usize,
     max_tile_distance: usize,
+    any_of_destinations: Option<Vec<Position>>,
+    all_of_destinations: Option<Vec<Position>>,
 ) -> MultiroomMonoFlowField {
     set_panic_hook();
     let mut flow_field = MultiroomMonoFlowField::new();
@@ -25,6 +27,8 @@ pub fn dijkstra_multiroom_mono_flow_field(
         max_rooms,
         max_room_distance,
         max_tile_distance,
+        any_of_destinations,
+        all_of_destinations,
     );
 
     for room in distance_map.rooms() {
@@ -63,6 +67,8 @@ pub fn js_dijkstra_multiroom_mono_flow_field(
     max_rooms: usize,
     max_room_distance: usize,
     max_tile_distance: usize,
+    any_of_destinations: Option<Vec<u32>>,
+    all_of_destinations: Option<Vec<u32>>,
 ) -> MultiroomMonoFlowField {
     let start_positions = start_packed
         .iter()
@@ -96,5 +102,9 @@ pub fn js_dijkstra_multiroom_mono_flow_field(
         max_rooms,
         max_room_distance,
         max_tile_distance,
+        any_of_destinations
+            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
+        all_of_destinations
+            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
     )
 }
