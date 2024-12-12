@@ -1,5 +1,3 @@
-import { FlowField } from '../../../src';
-
 const DIRECTION_OFFSET = {
   [TOP]: { x: 0, y: -0.5 },
   [TOP_RIGHT]: { x: 0.5, y: -0.5 },
@@ -16,7 +14,12 @@ const DIRECTION_OFFSET = {
  * @param room - The room to visualize.
  * @param flowField - The flow field to visualize.
  */
-export function visualizeFlowField(room: string, flowField: FlowField) {
+export function visualizeFlowField(
+  room: string,
+  flowField: {
+    getDirections: (x: number, y: number) => DirectionConstant[];
+  }
+) {
   const visual = new RoomVisual(room);
   for (let x = 0; x < 50; x++) {
     for (let y = 0; y < 50; y++) {

@@ -1,5 +1,5 @@
 export class ReferenceDistanceMap {
-  internal: number[] = new Array(50 * 50).fill(Infinity);
+  internal: number[] = new Array(50 * 50).fill(0xffffffff);
 
   get(x: number, y: number) {
     return this.internal[x * 50 + y];
@@ -7,6 +7,10 @@ export class ReferenceDistanceMap {
 
   set(x: number, y: number, value: number) {
     this.internal[x * 50 + y] = value;
+  }
+
+  toArray() {
+    return this.internal;
   }
 }
 
@@ -33,7 +37,6 @@ export function referenceBfsDistanceMap(startPositions: RoomPosition[], costMatr
   const frontier: Coord[] = [...startPositions.map(pos => ({ x: pos.x, y: pos.y }))];
   const visited = new Set<number>();
   const distanceMap = new ReferenceDistanceMap();
-
   // Set initial distances for start positions
   for (const pos of startPositions) {
     const packedPos = pos.x * 50 + pos.y;
@@ -55,8 +58,12 @@ export function referenceBfsDistanceMap(startPositions: RoomPosition[], costMatr
         const newX = currentPos.x + dx;
         const newY = currentPos.y + dy;
 
+        const newPositionIsEdge = isEdge({ x: newX, y: newY });
+
         // Cannot move from one edge tile to another
-        if (positionIsEdge && isEdge({ x: newX, y: newY })) continue;
+        if (newPositionIsEdge && positionIsEdge) {
+          continue;
+        }
 
         // Skip if out of bounds
         if (newX < 0 || newX > 49 || newY < 0 || newY > 49) continue;

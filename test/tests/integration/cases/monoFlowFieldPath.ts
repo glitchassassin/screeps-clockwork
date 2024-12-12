@@ -1,4 +1,4 @@
-import { bfsMonoFlowField, ClockworkCostMatrix, ephemeral } from '../../../../src/index';
+import { bfsDistanceMap, ClockworkCostMatrix, ephemeral } from '../../../../src/index';
 import { describe, expect, it } from '../../helpers';
 
 describe('monoFlowFieldPath', () => {
@@ -9,7 +9,8 @@ describe('monoFlowFieldPath', () => {
      * ........................1.........................
      */
     const costMatrix = ephemeral(new ClockworkCostMatrix(1));
-    const flowField = ephemeral(bfsMonoFlowField([new RoomPosition(25, 25, 'W1N1')], costMatrix));
+    const distanceMap = ephemeral(bfsDistanceMap([new RoomPosition(25, 25, 'W1N1')], costMatrix));
+    const flowField = ephemeral(distanceMap.toMonoFlowField());
     const clockworkPath = ephemeral(flowField.pathToOrigin(new RoomPosition(0, 0, 'W1N1')));
     const path = clockworkPath.toArray();
 

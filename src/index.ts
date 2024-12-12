@@ -13,9 +13,7 @@ export { ClockworkCostMatrix, DistanceMap, FlowField, MonoFlowField };
 
 export * from './utils/cleanup';
 export * from './wrappers/bfsDistanceMap';
-export * from './wrappers/bfsFlowField';
 export * from './wrappers/dijkstraDistanceMap';
-export * from './wrappers/dijkstraFlowField';
 export * from './wrappers/flowField';
 export * from './wrappers/getRange';
 export * from './wrappers/monoFlowField';
@@ -44,6 +42,7 @@ let initialized = false;
 export function initialize(verbose = false) {
   // need to freshly override the fake console object each tick
   console.error = console_error;
+  const start = Game.cpu.getUsed();
   if (!wasm_bytes) wasm_bytes = require('screeps_clockwork.wasm');
   if (verbose && !initialized) console.log('[clockwork] wasm_bytes loaded');
   if (!wasm_module) wasm_module = new WebAssembly.Module(wasm_bytes);
@@ -51,7 +50,7 @@ export function initialize(verbose = false) {
   if (!wasm_instance) wasm_instance = initSync({ module: wasm_module });
   if (verbose && !initialized) {
     console.log('[clockwork] wasm_instance loaded');
-    console.log(`[clockwork] version ${version()} initialized`);
+    console.log(`[clockwork] version ${version()} initialized with ${(Game.cpu.getUsed() - start).toFixed(2)} CPU`);
   }
   initialized = true;
 }

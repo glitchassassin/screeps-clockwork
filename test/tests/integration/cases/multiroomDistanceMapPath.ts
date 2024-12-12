@@ -26,5 +26,5 @@ describe('multiroomDistanceMapPath', () => {
     expect(path[0].isEqualTo(new RoomPosition(25, 25, 'W1N2'))).toBeTruthy();
     expect(path[path.length - 1].isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();
     expect(path.length).toBe(50);
-  });
+  }, 15);
 });

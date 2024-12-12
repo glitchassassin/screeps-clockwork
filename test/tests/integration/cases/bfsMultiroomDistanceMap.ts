@@ -91,7 +91,7 @@ describe('bfsMultiroomDistanceMap', () => {
       })
     );
     expect(distanceMap.getRooms().length).toBe(2);
-  });
+  }, 10);
   it('should respect maxRoomDistance', () => {
     const costMatrix = ephemeral(new ClockworkCostMatrix());
     const distanceMap = ephemeral(

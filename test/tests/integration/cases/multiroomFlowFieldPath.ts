@@ -1,11 +1,11 @@
-import { bfsMultiroomFlowField, ClockworkCostMatrix, ephemeral } from '../../../../src/index';
+import { bfsMultiroomDistanceMap, ClockworkCostMatrix, ephemeral } from '../../../../src/index';
 import { describe, expect, it } from '../../helpers';
 
 describe('multiroomFlowFieldPath', () => {
   it('should calculate a path from a multiroom flow field', () => {
     const costMatrix = ephemeral(new ClockworkCostMatrix(1));
-    const flowField = ephemeral(
-      bfsMultiroomFlowField([new RoomPosition(25, 25, 'W1N1')], {
+    const distanceMap = ephemeral(
+      bfsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback(room) {
           if (['W1N1', 'W1N2', 'W2N2'].includes(room)) {
             return costMatrix;
@@ -15,6 +15,7 @@ describe('multiroomFlowFieldPath', () => {
         maxRooms: 3
       })
     );
+    const flowField = ephemeral(distanceMap.toFlowField());
     const clockworkPath = ephemeral(flowField.pathToOrigin(new RoomPosition(25, 25, 'W2N2')));
     const path = clockworkPath.toArray();
 

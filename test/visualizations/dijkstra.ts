@@ -1,13 +1,4 @@
-import {
-  ClockworkCostMatrix,
-  dijkstraDistanceMap,
-  dijkstraFlowField,
-  dijkstraMonoFlowField,
-  dijkstraMultiroomDistanceMap,
-  dijkstraMultiroomFlowField,
-  dijkstraMultiroomMonoFlowField,
-  ephemeral
-} from '../../src/index';
+import { ClockworkCostMatrix, dijkstraDistanceMap, dijkstraMultiroomDistanceMap, ephemeral } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
 import { visualizeFlowField } from './helpers/visualizeFlowField';
@@ -91,12 +82,13 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const flags = rooms[room];
-        const flowField = ephemeral(
-          dijkstraFlowField(
+        const distanceMap = ephemeral(
+          dijkstraDistanceMap(
             flags.map(flag => flag.pos),
             getTerrainCostMatrix(room)
           )
         );
+        const flowField = ephemeral(distanceMap.toFlowField());
         visualizeFlowField(room, flowField);
       }
     }
@@ -112,12 +104,13 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const flags = rooms[room];
-        const flowField = ephemeral(
-          dijkstraMonoFlowField(
+        const distanceMap = ephemeral(
+          dijkstraDistanceMap(
             flags.map(flag => flag.pos),
             getTerrainCostMatrix(room)
           )
         );
+        const flowField = ephemeral(distanceMap.toMonoFlowField());
         visualizeMonoFlowField(room, flowField);
       }
     }
@@ -135,12 +128,13 @@ export default [
         if (!originFlag || targetFlags.length === 0) {
           continue;
         }
-        const flowField = ephemeral(
-          dijkstraFlowField(
+        const distanceMap = ephemeral(
+          dijkstraDistanceMap(
             targetFlags.map(flag => flag.pos),
             getTerrainCostMatrix(room)
           )
         );
+        const flowField = ephemeral(distanceMap.toFlowField());
         const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
         visualizePath(path);
       }
@@ -183,12 +177,13 @@ export default [
         if (!originFlag || targetFlags.length === 0) {
           continue;
         }
-        const flowField = ephemeral(
-          dijkstraMonoFlowField(
+        const distanceMap = ephemeral(
+          dijkstraDistanceMap(
             targetFlags.map(flag => flag.pos),
             getTerrainCostMatrix(room)
           )
         );
+        const flowField = ephemeral(distanceMap.toMonoFlowField());
         const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
         visualizePath(path);
       }
@@ -220,12 +215,13 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const flowField = ephemeral(
-          dijkstraMultiroomFlowField(start, {
+        const distanceMap = ephemeral(
+          dijkstraMultiroomDistanceMap(start, {
             costMatrixCallback: getTerrainCostMatrix,
             maxRoomDistance: 2
           })
         );
+        const flowField = ephemeral(distanceMap.toFlowField());
         for (const room of flowField.getRooms()) {
           visualizeFlowField(room, flowField.getRoom(room)!);
         }
@@ -239,12 +235,13 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const flowField = ephemeral(
-          dijkstraMultiroomMonoFlowField(start, {
+        const distanceMap = ephemeral(
+          dijkstraMultiroomDistanceMap(start, {
             costMatrixCallback: getTerrainCostMatrix,
             maxRoomDistance: 2
           })
         );
+        const flowField = ephemeral(distanceMap.toMonoFlowField());
         for (const room of flowField.getRooms()) {
           visualizeMonoFlowField(room, flowField.getRoom(room)!);
         }
@@ -263,8 +260,8 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const flowField = ephemeral(
-        dijkstraMultiroomFlowField(
+      const distanceMap = ephemeral(
+        dijkstraMultiroomDistanceMap(
           targetFlags.map(flag => flag.pos),
           {
             costMatrixCallback: getTerrainCostMatrix,
@@ -272,6 +269,7 @@ export default [
           }
         )
       );
+      const flowField = ephemeral(distanceMap.toFlowField());
       const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
       visualizePath(path);
     }
@@ -313,8 +311,8 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const flowField = ephemeral(
-        dijkstraMultiroomMonoFlowField(
+      const distanceMap = ephemeral(
+        dijkstraMultiroomDistanceMap(
           targetFlags.map(flag => flag.pos),
           {
             costMatrixCallback: getTerrainCostMatrix,
@@ -322,6 +320,7 @@ export default [
           }
         )
       );
+      const flowField = ephemeral(distanceMap.toMonoFlowField());
       const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
       visualizePath(path);
     }

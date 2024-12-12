@@ -3,9 +3,6 @@ mod datatypes;
 mod helpers;
 mod utils;
 
-pub use algorithms::breadth_first_search::distance_map;
-pub use algorithms::breadth_first_search::flow_field;
-pub use algorithms::breadth_first_search::mono_flow_field;
 pub use datatypes::DistanceMap;
 pub use datatypes::Fatigue;
 pub use datatypes::FlowField;

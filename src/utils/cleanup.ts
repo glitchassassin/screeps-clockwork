@@ -14,7 +14,11 @@ let cacheTick = 0;
 export function ephemeral<T extends { free: () => void }>(item: T) {
   if (cacheTick !== Game.time) {
     for (const item of cache) {
-      item.free();
+      try {
+        item.free();
+      } catch {
+        // may have already been cleaned up
+      }
     }
     cache.clear();
     cacheTick = Game.time;

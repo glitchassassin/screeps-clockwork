@@ -1,5 +1,3 @@
-import { DistanceMap } from '../../../src';
-
 const UNREACHABLE = 0xffffffff;
 
 /**
@@ -7,7 +5,12 @@ const UNREACHABLE = 0xffffffff;
  * @param room - The room to visualize.
  * @param distanceMap - The distance map to visualize.
  */
-export function visualizeDistanceMap(room: string, distanceMap: DistanceMap) {
+export function visualizeDistanceMap(
+  room: string,
+  distanceMap: {
+    toArray: () => number[] | Uint32Array;
+  }
+) {
   const distanceMapArray = distanceMap.toArray();
 
   const viz = new RoomVisual(room);

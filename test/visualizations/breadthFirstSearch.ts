@@ -1,13 +1,4 @@
-import {
-  bfsDistanceMap,
-  bfsFlowField,
-  bfsMonoFlowField,
-  bfsMultiroomDistanceMap,
-  bfsMultiroomFlowField,
-  bfsMultiroomMonoFlowField,
-  ClockworkCostMatrix,
-  ephemeral
-} from '../../src/index';
+import { bfsDistanceMap, bfsMultiroomDistanceMap, ClockworkCostMatrix, ephemeral } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
 import { visualizeFlowField } from './helpers/visualizeFlowField';
@@ -60,12 +51,13 @@ export default [
       for (const room in rooms) {
         const flags = rooms[room];
         const costMatrix = getTerrainCostMatrix(room);
-        const flowField = ephemeral(
-          bfsFlowField(
+        const distanceMap = ephemeral(
+          bfsDistanceMap(
             flags.map(flag => flag.pos),
             costMatrix
           )
         );
+        const flowField = ephemeral(distanceMap.toFlowField());
         visualizeFlowField(room, flowField);
       }
     }
@@ -82,12 +74,13 @@ export default [
       for (const room in rooms) {
         const flags = rooms[room];
         const costMatrix = getTerrainCostMatrix(room);
-        const flowField = ephemeral(
-          bfsMonoFlowField(
+        const distanceMap = ephemeral(
+          bfsDistanceMap(
             flags.map(flag => flag.pos),
             costMatrix
           )
         );
+        const flowField = ephemeral(distanceMap.toMonoFlowField());
         visualizeMonoFlowField(room, flowField);
       }
     }
@@ -106,12 +99,13 @@ export default [
           continue;
         }
         const costMatrix = getTerrainCostMatrix(room);
-        const flowField = ephemeral(
-          bfsFlowField(
+        const distanceMap = ephemeral(
+          bfsDistanceMap(
             targetFlags.map(flag => flag.pos),
             costMatrix
           )
         );
+        const flowField = ephemeral(distanceMap.toFlowField());
         const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
         visualizePath(path);
       }
@@ -156,12 +150,13 @@ export default [
           continue;
         }
         const costMatrix = getTerrainCostMatrix(room);
-        const flowField = ephemeral(
-          bfsMonoFlowField(
+        const distanceMap = ephemeral(
+          bfsDistanceMap(
             targetFlags.map(flag => flag.pos),
             costMatrix
           )
         );
+        const flowField = ephemeral(distanceMap.toMonoFlowField());
         const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
         visualizePath(path);
       }
@@ -193,12 +188,13 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const flowField = ephemeral(
-          bfsMultiroomFlowField(start, {
+        const distanceMap = ephemeral(
+          bfsMultiroomDistanceMap(start, {
             costMatrixCallback: getTerrainCostMatrix,
             maxRoomDistance: 2
           })
         );
+        const flowField = ephemeral(distanceMap.toFlowField());
         for (const room of flowField.getRooms()) {
           visualizeFlowField(room, flowField.getRoom(room)!);
         }
@@ -212,12 +208,13 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const flowField = ephemeral(
-          bfsMultiroomMonoFlowField(start, {
+        const distanceMap = ephemeral(
+          bfsMultiroomDistanceMap(start, {
             costMatrixCallback: getTerrainCostMatrix,
             maxRoomDistance: 2
           })
         );
+        const flowField = ephemeral(distanceMap.toMonoFlowField());
         for (const room of flowField.getRooms()) {
           visualizeMonoFlowField(room, flowField.getRoom(room)!);
         }
@@ -236,8 +233,8 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const flowField = ephemeral(
-        bfsMultiroomFlowField(
+      const distanceMap = ephemeral(
+        bfsMultiroomDistanceMap(
           targetFlags.map(flag => flag.pos),
           {
             costMatrixCallback: getTerrainCostMatrix,
@@ -245,6 +242,7 @@ export default [
           }
         )
       );
+      const flowField = ephemeral(distanceMap.toFlowField());
       const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
       visualizePath(path);
     }
@@ -286,8 +284,8 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const flowField = ephemeral(
-        bfsMultiroomMonoFlowField(
+      const distanceMap = ephemeral(
+        bfsMultiroomDistanceMap(
           targetFlags.map(flag => flag.pos),
           {
             costMatrixCallback: getTerrainCostMatrix,
@@ -295,6 +293,7 @@ export default [
           }
         )
       );
+      const flowField = ephemeral(distanceMap.toMonoFlowField());
       const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
       visualizePath(path);
     }
