@@ -1,53 +1,18 @@
-import { ClockworkCostMatrix, dijkstraDistanceMap, dijkstraMultiroomDistanceMap, ephemeral } from '../../src/index';
+import {
+  getTerrainCostMatrix as clockworkGetTerrainCostMatrix,
+  dijkstraDistanceMap,
+  dijkstraMultiroomDistanceMap,
+  ephemeral
+} from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
 import { visualizeFlowField } from './helpers/visualizeFlowField';
 import { visualizeMonoFlowField } from './helpers/visualizeMonoFlowField';
 import { visualizePath } from './helpers/visualizePath';
 
-const UNREACHABLE = 0xffffffff;
-
 function getTerrainCostMatrix(room: string) {
-  const costMatrix = new ClockworkCostMatrix();
-  const terrain = Game.map.getRoomTerrain(room);
-  for (let x = 0; x < 50; x++) {
-    for (let y = 0; y < 50; y++) {
-      switch (terrain.get(x, y)) {
-        case TERRAIN_MASK_WALL:
-          costMatrix.set(x, y, 255);
-          break;
-        case TERRAIN_MASK_SWAMP:
-          costMatrix.set(x, y, 5);
-          break;
-        default:
-          costMatrix.set(x, y, 1);
-      }
-    }
-  }
-  return ephemeral(costMatrix);
+  return ephemeral(clockworkGetTerrainCostMatrix(room));
 }
-
-const DIRECTION_OFFSET = {
-  [TOP]: { x: 0, y: -0.5 },
-  [TOP_RIGHT]: { x: 0.5, y: -0.5 },
-  [RIGHT]: { x: 0.5, y: 0 },
-  [BOTTOM_RIGHT]: { x: 0.5, y: 0.5 },
-  [BOTTOM]: { x: 0, y: 0.5 },
-  [BOTTOM_LEFT]: { x: -0.5, y: 0.5 },
-  [LEFT]: { x: -0.5, y: 0 },
-  [TOP_LEFT]: { x: -0.5, y: -0.5 }
-};
-
-const DIRECTION_ARROWS = {
-  [TOP]: '↑',
-  [TOP_RIGHT]: '↗',
-  [RIGHT]: '→',
-  [BOTTOM_RIGHT]: '↘',
-  [BOTTOM]: '↓',
-  [BOTTOM_LEFT]: '↙',
-  [LEFT]: '←',
-  [TOP_LEFT]: '↖'
-};
 
 export default [
   {

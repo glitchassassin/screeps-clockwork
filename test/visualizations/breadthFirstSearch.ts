@@ -1,4 +1,9 @@
-import { bfsDistanceMap, bfsMultiroomDistanceMap, ClockworkCostMatrix, ephemeral } from '../../src/index';
+import {
+  bfsDistanceMap,
+  bfsMultiroomDistanceMap,
+  getTerrainCostMatrix as clockworkGetTerrainCostMatrix,
+  ephemeral
+} from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
 import { visualizeFlowField } from './helpers/visualizeFlowField';
@@ -6,14 +11,7 @@ import { visualizeMonoFlowField } from './helpers/visualizeMonoFlowField';
 import { visualizePath } from './helpers/visualizePath';
 
 function getTerrainCostMatrix(room: string) {
-  const costMatrix = new ClockworkCostMatrix();
-  const terrain = Game.map.getRoomTerrain(room);
-  for (let x = 0; x < 50; x++) {
-    for (let y = 0; y < 50; y++) {
-      costMatrix.set(x, y, terrain.get(x, y) === TERRAIN_MASK_WALL ? 255 : 0);
-    }
-  }
-  return ephemeral(costMatrix);
+  return ephemeral(clockworkGetTerrainCostMatrix(room));
 }
 
 export default [

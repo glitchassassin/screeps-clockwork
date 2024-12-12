@@ -1,8 +1,11 @@
 use std::convert::TryFrom;
 
-use screeps::{LocalCostMatrix, RoomCoordinate, RoomXY};
+use screeps::{
+    LocalCostMatrix, LocalRoomTerrain, RoomCoordinate, RoomName, RoomTerrain, RoomXY, Terrain,
+};
+use screeps_utils::room_xy::{GridIter, Order};
 use wasm_bindgen::__rt::WasmRefCell;
-use wasm_bindgen::prelude::*;
+use wasm_bindgen::{prelude::*, throw_str};
 
 /// A wrapper around the `LocalCostMatrix` type from the Screeps API.
 /// Instances can be passed between WASM and JS as a pointer, using the
@@ -30,8 +33,8 @@ impl ClockworkCostMatrix {
     }
 
     /// Gets the cost of a given position in the cost matrix.
-    #[wasm_bindgen]
-    pub fn get(&self, x: u8, y: u8) -> u8 {
+    #[wasm_bindgen(js_name = "get")]
+    pub fn js_get(&self, x: u8, y: u8) -> u8 {
         let x = RoomCoordinate::new(x)
             .unwrap_or_else(|_| wasm_bindgen::throw_str(&format!("Invalid x coordinate: {}", x)));
         let y = RoomCoordinate::new(y)
@@ -40,13 +43,25 @@ impl ClockworkCostMatrix {
     }
 
     /// Sets the cost of a given position in the cost matrix.
-    #[wasm_bindgen]
-    pub fn set(&mut self, x: u8, y: u8, value: u8) {
+    #[wasm_bindgen(js_name = "set")]
+    pub fn js_set(&mut self, x: u8, y: u8, value: u8) {
         let x = RoomCoordinate::new(x)
             .unwrap_or_else(|_| wasm_bindgen::throw_str(&format!("Invalid x coordinate: {}", x)));
         let y = RoomCoordinate::new(y)
             .unwrap_or_else(|_| wasm_bindgen::throw_str(&format!("Invalid y coordinate: {}", y)));
         self.internal.set(RoomXY::new(x, y), value);
+    }
+}
+
+impl ClockworkCostMatrix {
+    /// Gets the cost of a given position in the cost matrix.
+    pub fn get(&self, xy: RoomXY) -> u8 {
+        self.internal.get(xy)
+    }
+
+    /// Sets the cost of a given position in the cost matrix.
+    pub fn set(&mut self, xy: RoomXY, value: u8) {
+        self.internal.set(xy, value);
     }
 }
 
@@ -85,4 +100,44 @@ impl TryFrom<JsValue> for ClockworkCostMatrix {
         let me = unsafe { &*me };
         Ok(me.borrow().clone())
     }
+}
+
+#[wasm_bindgen]
+pub fn get_terrain_cost_matrix(
+    room_name: u16,
+    plain_cost: Option<u8>,
+    swamp_cost: Option<u8>,
+    wall_cost: Option<u8>,
+) -> ClockworkCostMatrix {
+    let plain_cost = plain_cost.unwrap_or(1);
+    let swamp_cost = swamp_cost.unwrap_or(5);
+    let wall_cost = wall_cost.unwrap_or(255);
+    let room_name = RoomName::from_packed(room_name);
+    let terrain = RoomTerrain::new(room_name);
+    if terrain.is_none() {
+        throw_str(&format!("Invalid room name: {}", room_name));
+    }
+    let terrain = LocalRoomTerrain::from(terrain.unwrap());
+    let mut cost_matrix = ClockworkCostMatrix::new(None);
+    for xy in GridIter::new(
+        RoomXY {
+            x: RoomCoordinate::new(0).unwrap(),
+            y: RoomCoordinate::new(0).unwrap(),
+        },
+        RoomXY {
+            x: RoomCoordinate::new(49).unwrap(),
+            y: RoomCoordinate::new(49).unwrap(),
+        },
+        Order::XMajor,
+    ) {
+        cost_matrix.set(
+            xy,
+            match terrain.get_xy(xy) {
+                Terrain::Plain => plain_cost,
+                Terrain::Wall => wall_cost,
+                Terrain::Swamp => swamp_cost,
+            },
+        );
+    }
+    cost_matrix
 }

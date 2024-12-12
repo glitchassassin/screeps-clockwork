@@ -1,6 +1,7 @@
-import { ClockworkCostMatrix, ephemeral } from '../../../../src/index';
+import { ClockworkCostMatrix, ephemeral, getTerrainCostMatrix } from '../../../../src/index';
 import { cpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
+import { referenceGetTerrainCostMatrix } from '../../referenceAlgorithms/getTerrainCostMatrix';
 
 describe('clockworkCostMatrix', () => {
   it('should work', () => {
@@ -46,4 +47,15 @@ describe('clockworkCostMatrix', () => {
     console.log('screepsGetTime', screepsGetTime);
     expect(clockworkSetTime + clockworkGetTime).toBeLessThan((screepsSetTime + screepsGetTime) * 2);
   });
+  it('should fill terrain data faster than screeps', () => {
+    const clockworkTime = cpuTime(() => {
+      ephemeral(getTerrainCostMatrix('W1N1', { plainCost: 1, swampCost: 5, wallCost: 255 }));
+    }, 10);
+    const screepsTime = cpuTime(() => {
+      referenceGetTerrainCostMatrix('W1N1', { plainCost: 1, swampCost: 5, wallCost: 255 });
+    }, 10);
+    console.log('clockworkTime', clockworkTime);
+    console.log('screepsTime', screepsTime);
+    expect(clockworkTime).toBeLessThan(screepsTime);
+  }, 20);
 });

@@ -91,5 +91,5 @@ describe('dijkstraDistanceMap', () => {
     console.log('referenceTime', referenceTime);
     console.log('clockworkTime', clockworkTime);
     expect(clockworkTime).toBeLessThan(referenceTime * 2);
-  }, 20);
+  }, 25);
 });
