@@ -1,4 +1,5 @@
 use crate::algorithms::map::corresponding_room_edge;
+use crate::algorithms::map::neighbors_without_edges;
 use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::Path;
 use crate::log;
@@ -14,7 +15,6 @@ pub fn path_to_multiroom_distance_map_origin(
     let mut path = Path::new();
     let mut visited = HashSet::new();
     let mut current = start;
-    path.add(current);
 
     // Maximum iterations to prevent infinite loops (50x50 room size)
     const MAX_STEPS: usize = 2500;
@@ -32,13 +32,9 @@ pub fn path_to_multiroom_distance_map_origin(
         let mut next_pos = None;
         let mut min_distance = usize::MAX;
 
-        for neighbor in current
-            .xy()
-            .neighbors()
-            .into_iter()
-            .map(|xy| Position::new(xy.x, xy.y, current.room_name()))
-        {
+        for neighbor in neighbors_without_edges(current) {
             let neighbor_distance = distance_map.get(neighbor);
+
             if neighbor_distance < min_distance {
                 min_distance = neighbor_distance;
                 next_pos = Some(neighbor);

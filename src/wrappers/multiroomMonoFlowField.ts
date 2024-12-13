@@ -1,7 +1,7 @@
 import { fromPackedRoomName, packRoomName } from '../utils/fromPacked';
 import { MultiroomMonoFlowField, js_path_to_multiroom_mono_flow_field_origin } from '../wasm/screeps_clockwork';
 import { ClockworkMonoFlowField } from './monoFlowField';
-import { Path } from './path';
+import { ClockworkPath } from './path';
 
 /**
  * A flow field that spans multiple rooms, storing a single direction per tile.
@@ -45,8 +45,8 @@ export class ClockworkMultiroomMonoFlowField {
   /**
    * Find a path from a given position to the origin of the flow field.
    */
-  pathToOrigin(start: RoomPosition): Path {
-    return new Path(js_path_to_multiroom_mono_flow_field_origin(start.__packedPos, this._flowField));
+  pathToOrigin(start: RoomPosition): ClockworkPath {
+    return new ClockworkPath(js_path_to_multiroom_mono_flow_field_origin(start.__packedPos, this._flowField));
   }
 
   /**

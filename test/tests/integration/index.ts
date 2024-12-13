@@ -4,6 +4,7 @@
  * require creeps or other additional setup.
  */
 
+import './cases/astarMultiroomDistanceMap';
 import './cases/bfsDistanceMap';
 import './cases/bfsMultiroomDistanceMap';
 import './cases/clockworkCostMatrix';

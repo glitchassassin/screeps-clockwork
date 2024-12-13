@@ -101,7 +101,7 @@ export default [
         );
         const flowField = ephemeral(distanceMap.toFlowField());
         const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
-        visualizePath(path);
+        visualizePath(path.toArray());
       }
     }
   },
@@ -125,7 +125,7 @@ export default [
           )
         );
         const path = ephemeral(distanceMap.pathToOrigin(originFlag.pos));
-        visualizePath(path);
+        visualizePath(path.toArray());
       }
     }
   },
@@ -150,7 +150,7 @@ export default [
         );
         const flowField = ephemeral(distanceMap.toMonoFlowField());
         const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
-        visualizePath(path);
+        visualizePath(path.toArray());
       }
     }
   },
@@ -236,7 +236,7 @@ export default [
       );
       const flowField = ephemeral(distanceMap.toFlowField());
       const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
-      visualizePath(path);
+      visualizePath(path.toArray());
     }
   },
   {
@@ -261,7 +261,7 @@ export default [
         )
       );
       const path = ephemeral(distanceMap.pathToOrigin(originFlag.pos));
-      visualizePath(path);
+      visualizePath(path.toArray());
     }
   },
   {
@@ -287,7 +287,7 @@ export default [
       );
       const flowField = ephemeral(distanceMap.toMonoFlowField());
       const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
-      visualizePath(path);
+      visualizePath(path.toArray());
     }
   }
 ] satisfies FlagVisualizer[];

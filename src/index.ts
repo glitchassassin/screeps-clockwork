@@ -12,6 +12,7 @@ import {
 export { ClockworkCostMatrix, DistanceMap, FlowField, MonoFlowField };
 
 export * from './utils/cleanup';
+export * from './wrappers/astarDistanceMap';
 export * from './wrappers/bfsDistanceMap';
 export * from './wrappers/dijkstraDistanceMap';
 export * from './wrappers/flowField';
@@ -21,6 +22,7 @@ export * from './wrappers/monoFlowField';
 export * from './wrappers/multiroomFlowField';
 export * from './wrappers/multiroomMonoFlowField';
 export * from './wrappers/path';
+
 declare namespace WebAssembly {
   class Module {
     constructor(bytes: Uint8Array);

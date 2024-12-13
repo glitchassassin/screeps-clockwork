@@ -14,7 +14,6 @@ pub fn path_to_distance_map_origin(
     let mut path = Path::new();
     let mut visited = HashSet::new();
     let mut current = start;
-    path.add(current);
 
     // Maximum iterations to prevent infinite loops (50x50 room size)
     const MAX_STEPS: usize = 2500;
