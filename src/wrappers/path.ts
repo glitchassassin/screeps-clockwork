@@ -1,12 +1,12 @@
 import { fromPacked } from '../utils/fromPacked';
-import { Path as ClockworkPath } from '../wasm/screeps_clockwork';
+import { Path } from '../wasm/screeps_clockwork';
 
 /**
  * A path from a start position to an end position. Typically returned by a
  * function like `pathToFlowFieldOrigin` rather than created directly.
  */
-export class Path {
-  constructor(private readonly path: ClockworkPath) {}
+export class ClockworkPath {
+  constructor(private readonly path: Path) {}
 
   /**
    * Iterate over the path.

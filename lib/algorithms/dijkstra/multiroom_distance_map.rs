@@ -1,6 +1,6 @@
 use crate::algorithms::map::manhattan_distance;
 use crate::algorithms::map::neighbors;
-use crate::cost_matrix::ClockworkCostMatrix;
+use crate::datatypes::ClockworkCostMatrix;
 use crate::datatypes::MultiroomDistanceMap;
 use crate::utils::set_panic_hook;
 use screeps::Position;

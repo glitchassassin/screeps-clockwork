@@ -1,6 +1,6 @@
 export function referenceGetTerrainCostMatrix(
   room: string,
-  { plainCost = 1, swampCost = 5, wallCost = 255 }: { plainCost?: number; swampCost?: number; wallCost?: number }
+  { plainCost = 1, swampCost = 5, wallCost = 255 }: { plainCost?: number; swampCost?: number; wallCost?: number } = {}
 ) {
   const costMatrix = new PathFinder.CostMatrix();
   const terrain = Game.map.getRoomTerrain(room);

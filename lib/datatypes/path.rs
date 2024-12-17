@@ -165,3 +165,9 @@ impl PathFatigue {
             .sum()
     }
 }
+
+impl From<Vec<Position>> for Path {
+    fn from(positions: Vec<Position>) -> Self {
+        Path(positions)
+    }
+}

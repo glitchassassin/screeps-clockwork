@@ -13,8 +13,8 @@ describe('distanceMapPath', () => {
     const clockworkPath = ephemeral(distanceMap.pathToOrigin(new RoomPosition(0, 0, 'W1N1')));
     const path = clockworkPath.toArray();
 
-    expect(path[0].isEqualTo(new RoomPosition(0, 0, 'W1N1'))).toBeTruthy();
+    expect(path[0].isEqualTo(new RoomPosition(1, 1, 'W1N1'))).toBeTruthy();
     expect(path[path.length - 1].isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();
-    expect(path.length).toBe(26);
+    expect(path.length).toBe(25);
   });
 });

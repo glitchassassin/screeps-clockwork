@@ -1,4 +1,4 @@
-use crate::cost_matrix::ClockworkCostMatrix;
+use crate::datatypes::ClockworkCostMatrix;
 use crate::DistanceMap;
 use screeps::LocalCostMatrix;
 use screeps::Position;

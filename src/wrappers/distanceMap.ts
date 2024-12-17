@@ -1,7 +1,7 @@
 import { DistanceMap, flowField, js_path_to_distance_map_origin, monoFlowField } from '../wasm/screeps_clockwork';
 import { ClockworkFlowField } from './flowField';
 import { ClockworkMonoFlowField } from './monoFlowField';
-import { Path } from './path';
+import { ClockworkPath } from './path';
 
 /**
  * A distance map for a single room.
@@ -40,8 +40,8 @@ export class ClockworkDistanceMap {
   /**
    * Path to the origin from a given position.
    */
-  pathToOrigin(start: RoomPosition): Path {
-    return new Path(js_path_to_distance_map_origin(start.__packedPos, this._map));
+  pathToOrigin(start: RoomPosition): ClockworkPath {
+    return new ClockworkPath(js_path_to_distance_map_origin(start.__packedPos, this._map));
   }
 
   /**
