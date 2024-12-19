@@ -18,6 +18,7 @@ export * from './wrappers/dijkstraDistanceMap';
 export * from './wrappers/flowField';
 export * from './wrappers/getRange';
 export * from './wrappers/getTerrainCostMatrix';
+export * from './wrappers/jpsDistanceMap';
 export * from './wrappers/monoFlowField';
 export * from './wrappers/multiroomFlowField';
 export * from './wrappers/multiroomMonoFlowField';

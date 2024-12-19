@@ -3,25 +3,20 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use std::rc::Rc;
 
-#[derive(Debug, Clone)]
-pub struct OptionalCache<K, V, F>
-where
-    F: Fn(K) -> Option<V>,
-{
+pub struct OptionalCache<'a, K, V> {
     cache: Rc<RefCell<HashMap<K, Option<V>>>>,
-    creator: F,
+    creator: Box<dyn Fn(K) -> Option<V> + 'a>,
 }
 
-impl<K, V, F> OptionalCache<K, V, F>
+impl<'a, K, V> OptionalCache<'a, K, V>
 where
     K: Hash + Eq + Clone,
     V: Clone,
-    F: Fn(K) -> Option<V>,
 {
-    pub fn new(creator: F) -> Self {
+    pub fn new(creator: impl Fn(K) -> Option<V> + 'a) -> Self {
         Self {
             cache: Rc::new(RefCell::new(HashMap::new())),
-            creator,
+            creator: Box::new(creator),
         }
     }
 

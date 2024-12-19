@@ -1,9 +1,9 @@
 use crate::algorithms::astar::metrics::PathfindingMetrics;
-use crate::algorithms::map::neighbors_with_open_direction;
+use crate::algorithms::jps::jump;
+use crate::algorithms::map::corresponding_room_edge;
 use crate::datatypes::ClockworkCostMatrix;
 use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::OptionalCache;
-use crate::log;
 use crate::utils::set_panic_hook;
 use lazy_static::lazy_static;
 use screeps::Direction;
@@ -112,9 +112,9 @@ fn next_directions(open_direction: Option<Direction>) -> &'static [Direction] {
     &DIRECTION_LOOKUP[open_direction.map(|d| d as usize).unwrap_or(0)]
 }
 
-/// Creates a distance map for the given start positions, using A* to optimize the search and
-/// find the shortest path to the given destinations.
-pub fn astar_multiroom_distance_map(
+/// Creates a distance map for the given start positions, using A* with jump-point search
+/// to optimize the search and find the shortest path to the given destinations.
+pub fn jps_multiroom_distance_map(
     start: Vec<Position>,
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
     max_tiles: usize,
@@ -147,7 +147,6 @@ pub fn astar_multiroom_distance_map(
         if let Some(cost_matrix) = cost_matrices.get_or_create(current_room) {
             cost_matrix
         } else {
-            log(&format!("A*: {:?}", metrics));
             return multiroom_distance_map; // cannot plan distance map with no cost matrix
         };
     let mut current_room_distance_map = multiroom_distance_map.get_or_create_room_map(current_room);
@@ -165,61 +164,90 @@ pub fn astar_multiroom_distance_map(
             continue;
         }
 
-        for neighbor in neighbors_with_open_direction(position, next_directions(open_direction)) {
-            metrics.neighbor_checks += 1;
-            if neighbor.room_name() != current_room {
-                let next_matrix = cost_matrices.get_or_create(neighbor.room_name());
+        if goals.contains(&position) || visited >= max_tiles {
+            return multiroom_distance_map;
+        }
 
-                if let Some(cost_matrix) = next_matrix {
-                    current_room_cost_matrix = cost_matrix;
-                    current_room = neighbor.room_name();
-                    current_room_distance_map =
-                        multiroom_distance_map.get_or_create_room_map(current_room);
-                } else {
+        let h_score = heuristic(position, &goals);
+
+        for direction in next_directions(open_direction) {
+            metrics.neighbor_checks += 1;
+            if let Some(neighbor) = jump(position, *direction, &goals, &cost_matrices, h_score) {
+                metrics.jump_attempts += 1;
+                // Interpolate between position and neighbor to fill in the distance map
+                let mut step = position;
+                let mut step_cost = g_score;
+                while let Ok(next_step) = step
+                    .checked_add_direction(*direction)
+                    .map(corresponding_room_edge)
+                {
+                    if next_step == neighbor {
+                        break;
+                    }
+                    if next_step.room_name() != current_room {
+                        let next_matrix = cost_matrices.get_or_create(next_step.room_name());
+
+                        if let Some(cost_matrix) = next_matrix {
+                            current_room_cost_matrix = cost_matrix;
+                            current_room = neighbor.room_name();
+                            current_room_distance_map =
+                                multiroom_distance_map.get_or_create_room_map(current_room);
+                        } else {
+                            continue;
+                        }
+                    }
+                    step_cost = step_cost
+                        .saturating_add(current_room_cost_matrix.get(next_step.xy()) as usize);
+                    current_room_distance_map[next_step.xy()] =
+                        step_cost.min(current_room_distance_map[next_step.xy()]);
+                    step = next_step;
+                }
+                if neighbor.room_name() != current_room {
+                    let next_matrix = cost_matrices.get_or_create(neighbor.room_name());
+
+                    if let Some(cost_matrix) = next_matrix {
+                        current_room_cost_matrix = cost_matrix;
+                        current_room = neighbor.room_name();
+                        current_room_distance_map =
+                            multiroom_distance_map.get_or_create_room_map(current_room);
+                    } else {
+                        continue;
+                    }
+                }
+
+                let jump_range = position.get_range_to(neighbor);
+                metrics.max_jump_distance = metrics.max_jump_distance.max(jump_range as usize);
+                let terrain_cost = current_room_cost_matrix.get(neighbor.xy());
+                if terrain_cost >= 255 {
+                    // impassable terrain
                     continue;
                 }
-            }
 
-            // Per room, we need...
-            // - A cost matrix
-            // - The distance map
-            let terrain_cost = current_room_cost_matrix.get(neighbor.xy());
-            if terrain_cost >= 255 {
-                // impassable terrain
-                continue;
-            }
+                let next_cost = step_cost.saturating_add(terrain_cost as usize);
 
-            let next_cost = g_score.saturating_add(terrain_cost as usize);
+                if current_room_distance_map[neighbor.xy()] <= next_cost {
+                    // already visited and better path found
+                    continue;
+                }
 
-            if current_room_distance_map[neighbor.xy()] <= next_cost {
-                // already visited and better path found
-                continue;
-            }
-
-            let h_score = heuristic(neighbor, &goals);
-            let f_score = next_cost.saturating_add(h_score);
-            frontier.push(State {
-                f_score,
-                g_score: next_cost,
-                position: neighbor,
-                open_direction: position.get_direction_to(neighbor),
-            });
-            current_room_distance_map[neighbor.xy()] = next_cost;
-            visited += 1;
-
-            if goals.contains(&neighbor) || visited >= max_tiles {
-                log(&format!("A*: {:?}", metrics));
-                return multiroom_distance_map;
+                let h_score = heuristic(neighbor, &goals);
+                let f_score = next_cost.saturating_add(h_score);
+                frontier.push(State {
+                    f_score,
+                    g_score: next_cost,
+                    position: neighbor,
+                    open_direction: position.get_direction_to(neighbor),
+                });
+                current_room_distance_map[neighbor.xy()] = next_cost;
+                visited += 1;
             }
         }
     }
-
-    log(&format!("A*: {:?}", metrics));
     multiroom_distance_map
 }
 
 #[wasm_bindgen]
-pub fn js_astar_multiroom_distance_map(
+pub fn js_jps_multiroom_distance_map(
     start_packed: Vec<u32>,
     get_cost_matrix: &js_sys::Function,
     max_tiles: usize,
@@ -230,7 +258,7 @@ pub fn js_astar_multiroom_distance_map(
         .iter()
         .map(|pos| Position::from_packed(*pos))
         .collect();
-    astar_multiroom_distance_map(
+    jps_multiroom_distance_map(
         start_positions,
         |room| {
             let result = get_cost_matrix.call1(
