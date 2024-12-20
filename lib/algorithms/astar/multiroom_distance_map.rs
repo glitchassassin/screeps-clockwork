@@ -13,6 +13,8 @@ use std::convert::TryFrom;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_val;
 
+use super::heuristics::range_heuristic;
+
 #[derive(Copy, Clone, Eq, PartialEq)]
 struct State {
     f_score: usize,
@@ -31,13 +33,6 @@ impl PartialOrd for State {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
-}
-
-fn heuristic(position: Position, goal: &[Position]) -> usize {
-    goal.iter()
-        .map(|g| position.get_range_to(*g))
-        .min()
-        .unwrap_or(0) as usize
 }
 
 lazy_static! {
@@ -117,7 +112,8 @@ pub fn astar_multiroom_distance_map(
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
     max_tiles: usize,
     max_tile_distance: usize,
-    goals: Vec<Position>,
+    goal_fn: impl Fn(Position) -> bool,
+    heuristic_fn: impl Fn(Position) -> usize,
 ) -> MultiroomDistanceMap {
     set_panic_hook();
     let mut frontier = BinaryHeap::new();
@@ -189,7 +185,7 @@ pub fn astar_multiroom_distance_map(
                 continue;
             }
 
-            let h_score = heuristic(neighbor, &goals);
+            let h_score = heuristic_fn(neighbor);
             let f_score = next_cost.saturating_add(h_score);
             frontier.push(State {
                 f_score,
@@ -200,7 +196,7 @@ pub fn astar_multiroom_distance_map(
             current_room_distance_map[neighbor.xy()] = next_cost;
             visited += 1;
 
-            if goals.contains(&neighbor) || visited >= max_tiles {
+            if goal_fn(neighbor) || visited >= max_tiles {
                 return multiroom_distance_map;
             }
         }
@@ -221,6 +217,14 @@ pub fn js_astar_multiroom_distance_map(
         .iter()
         .map(|pos| Position::from_packed(*pos))
         .collect();
+
+    let destinations: Vec<Position> = destinations
+        .iter()
+        .map(|pos| Position::from_packed(*pos))
+        .collect();
+
+    let heuristic_fn = range_heuristic(&destinations);
+
     astar_multiroom_distance_map(
         start_positions,
         |room| {
@@ -248,9 +252,7 @@ pub fn js_astar_multiroom_distance_map(
         },
         max_tiles,
         max_tile_distance,
-        destinations
-            .iter()
-            .map(|pos| Position::from_packed(*pos))
-            .collect(),
+        |pos| destinations.contains(&pos),
+        heuristic_fn,
     )
 }
