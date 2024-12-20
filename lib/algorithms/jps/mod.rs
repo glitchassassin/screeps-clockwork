@@ -1,6 +1,6 @@
-use screeps::{Direction, Position, RoomCoordinate, RoomName};
+use screeps::{Direction, Position, RoomCoordinate};
 
-use crate::datatypes::{ClockworkCostMatrix, OptionalCache};
+use crate::datatypes::ClockworkCostMatrix;
 
 use super::map::corresponding_room_edge;
 
@@ -8,12 +8,8 @@ pub fn jump(
     position: Position,
     direction: Direction,
     goals: &[Position],
-    cost_matrices: &OptionalCache<'_, RoomName, ClockworkCostMatrix>,
-    max_tiles: usize,
+    cost_matrix: &ClockworkCostMatrix,
 ) -> Option<Position> {
-    if max_tiles == 0 {
-        return Some(position);
-    }
     if position.x() == RoomCoordinate::new(0).unwrap()
         && [Direction::Left, Direction::TopLeft, Direction::BottomLeft].contains(&direction)
     {
@@ -51,7 +47,9 @@ pub fn jump(
 
     let next_pos = corresponding_room_edge(position.checked_add_direction(direction).ok()?);
 
-    let cost_matrix = cost_matrices.get_or_create(next_pos.room_name())?;
+    if next_pos.room_name() != position.room_name() {
+        return Some(next_pos); // jumped to a different room
+    }
 
     let next_cost = cost_matrix.get(next_pos.xy());
 
@@ -60,11 +58,7 @@ pub fn jump(
         return None;
     }
 
-    if cost_matrices
-        .get_or_create(position.room_name())?
-        .get(position.xy())
-        != next_cost
-    {
+    if cost_matrix.get(position.xy()) != next_cost {
         // Region has different cost; stop jumping and re-evaluate
         return Some(next_pos);
     }
@@ -85,36 +79,18 @@ pub fn jump(
             .ok()?;
 
         // Check for forced neighbors
-        if cost_matrices
-            .get_or_create(left.room_name())?
-            .get(left.xy())
-            != next_cost
-            || cost_matrices
-                .get_or_create(right.room_name())?
-                .get(right.xy())
-                != next_cost
+        if left.room_name() != position.room_name()
+            || cost_matrix.get(left.xy()) != next_cost
+            || right.room_name() != position.room_name()
+            || cost_matrix.get(right.xy()) != next_cost
         {
             // Found a forced neighbor - stop jumping
             return Some(next_pos);
         }
 
         // Recursively look in both cardinal and diagonal directions
-        if jump(
-            next_pos,
-            direction.multi_rot(1),
-            goals,
-            cost_matrices,
-            max_tiles - 1,
-        )
-        .is_some()
-            || jump(
-                next_pos,
-                direction.multi_rot(-1),
-                goals,
-                cost_matrices,
-                max_tiles - 1,
-            )
-            .is_some()
+        if jump(next_pos, direction.multi_rot(1), goals, &cost_matrix).is_some()
+            || jump(next_pos, direction.multi_rot(-1), goals, &cost_matrix).is_some()
         {
             return Some(next_pos);
         }
@@ -129,19 +105,15 @@ pub fn jump(
             .map(corresponding_room_edge)
             .ok()?;
 
-        if cost_matrices
-            .get_or_create(left.room_name())?
-            .get(left.xy())
-            != next_cost
-            || cost_matrices
-                .get_or_create(right.room_name())?
-                .get(right.xy())
-                != next_cost
+        if left.room_name() != position.room_name()
+            || cost_matrix.get(left.xy()) != next_cost
+            || right.room_name() != position.room_name()
+            || cost_matrix.get(right.xy()) != next_cost
         {
             // Found a forced neighbor - stop jumping
             return Some(next_pos);
         }
     }
 
-    jump(next_pos, direction, goals, cost_matrices, max_tiles - 1)
+    jump(next_pos, direction, goals, cost_matrix)
 }
