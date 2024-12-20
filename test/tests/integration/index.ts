@@ -14,7 +14,7 @@
 // import './cases/flowField';
 // import './cases/flowFieldPath';
 // import './cases/getRange';
-import './cases/jpsMultiroomDistanceMap';
+import './cases/jpsPath';
 // import './cases/monoFlowField';
 // import './cases/monoFlowFieldPath';
 // import './cases/multiroomDistanceMapPath';

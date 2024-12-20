@@ -1,7 +1,7 @@
 import { MAX_USIZE } from '../utils/constants';
 import { fromPackedRoomName } from '../utils/fromPacked';
-import { ClockworkCostMatrix, js_jps_multiroom_distance_map } from '../wasm/screeps_clockwork';
-import { ClockworkMultiroomDistanceMap } from './multiroomDistanceMap';
+import { ClockworkCostMatrix, js_jps_path } from '../wasm/screeps_clockwork';
+import { ClockworkPath } from './path';
 
 /**
  * Create a distance map for the given start positions, using JPS.
@@ -16,17 +16,15 @@ import { ClockworkMultiroomDistanceMap } from './multiroomDistanceMap';
  * @param options - The options for the distance map.
  * @returns A multi-room distance map.
  */
-export function jpsMultiroomDistanceMap(
+export function jpsPath(
   start: RoomPosition[],
   destinations: RoomPosition[],
   {
     costMatrixCallback,
-    maxTiles = MAX_USIZE,
-    maxTileDistance = MAX_USIZE
+    maxOps = MAX_USIZE
   }: {
     costMatrixCallback: (room: string) => ClockworkCostMatrix | undefined;
-    maxTiles?: number;
-    maxTileDistance?: number;
+    maxOps?: number;
   }
 ) {
   if (!destinations?.length) {
@@ -34,12 +32,11 @@ export function jpsMultiroomDistanceMap(
   }
 
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
-  const result = js_jps_multiroom_distance_map(
+  const result = js_jps_path(
     startPacked,
     (room: number) => costMatrixCallback(fromPackedRoomName(room)),
-    maxTiles,
-    maxTileDistance,
+    maxOps,
     new Uint32Array(destinations.map(pos => pos.__packedPos))
   );
-  return new ClockworkMultiroomDistanceMap(result);
+  return new ClockworkPath(result);
 }

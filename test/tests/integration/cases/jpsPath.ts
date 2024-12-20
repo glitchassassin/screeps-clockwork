@@ -1,28 +1,19 @@
-import {
-  ClockworkCostMatrix,
-  ClockworkPath,
-  ephemeral,
-  getTerrainCostMatrix,
-  jpsMultiroomDistanceMap
-} from '../../../../src/index';
-import { ClockworkMultiroomDistanceMap } from '../../../../src/wrappers/multiroomDistanceMap';
+import { ClockworkCostMatrix, ClockworkPath, ephemeral, getTerrainCostMatrix, jpsPath } from '../../../../src/index';
 import { cpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
 const UNREACHABLE = 0xffffffff;
 
-describe('jpsMultiroomDistanceMap', () => {
-  it('should calculate the distance map for an empty room', () => {
+describe('jpsPath', () => {
+  it('should calculate the path for an empty room', () => {
     const costMatrix = ephemeral(new ClockworkCostMatrix(1));
-    const distanceMap = ephemeral(
-      jpsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(30, 25, 'W1N1')], {
+    const path = ephemeral(
+      jpsPath([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(30, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        maxTiles: 2500
+        maxOps: 10000
       })
     );
-    expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
-    expect(distanceMap.get(new RoomPosition(26, 25, 'W1N1'))).toBe(1);
-    // should not explore further than it needs to
-    expect(distanceMap.get(new RoomPosition(1, 1, 'W1N1'))).toBe(UNREACHABLE);
+    expect(path.get(0).isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();
+    expect(path.get(path.length - 1).isEqualTo(new RoomPosition(30, 25, 'W1N1'))).toBeTruthy();
   });
 
   it('should factor in terrain costs', () => {
@@ -31,30 +22,28 @@ describe('jpsMultiroomDistanceMap', () => {
     for (let x = 10; x < 40; x++) {
       costMatrix.set(x, 25, 10);
     }
-    const distanceMap = ephemeral(
-      jpsMultiroomDistanceMap([new RoomPosition(25, 26, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
+    const path = ephemeral(
+      jpsPath([new RoomPosition(25, 26, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        maxTiles: 2500
+        maxOps: 10000
       })
     );
-    expect(distanceMap.get(new RoomPosition(25, 26, 'W1N1'))).toBe(0);
-    expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(10);
-    expect(distanceMap.get(new RoomPosition(25, 24, 'W1N1'))).toBe(11);
-    // should not explore further than it needs to
-    expect(distanceMap.get(new RoomPosition(1, 1, 'W1N1'))).toBe(UNREACHABLE);
+    expect(path.get(0).isEqualTo(new RoomPosition(25, 26, 'W1N1'))).toBeTruthy();
+    expect(path.get(path.length - 1).isEqualTo(new RoomPosition(25, 23, 'W1N1'))).toBeTruthy();
+    expect(path.length).toBeGreaterThan(3);
   });
 
   it('should throw for invalid cost matrixes', () => {
     // cost matrix is a Screeps CostMatrix
     expect(() =>
-      jpsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
+      jpsPath([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
         costMatrixCallback: () => new PathFinder.CostMatrix() as any
       })
     ).toThrow('Invalid ClockworkCostMatrix');
 
     // cost matrix is an invalid value
     expect(() =>
-      jpsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
+      jpsPath([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
         costMatrixCallback: () => 'foo' as any
       })
     ).toThrow('Invalid ClockworkCostMatrix');
@@ -63,27 +52,14 @@ describe('jpsMultiroomDistanceMap', () => {
     expect(() => {
       const costMatrix = new ClockworkCostMatrix();
       costMatrix.free();
-      jpsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
+      jpsPath([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
         costMatrixCallback: () => costMatrix
       });
     }).toThrow('Invalid ClockworkCostMatrix');
   });
-
-  it('should skip rooms if cost matrix is undefined', () => {
-    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
-    const distanceMap = ephemeral(
-      jpsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], [new RoomPosition(25, 23, 'W1N1')], {
-        costMatrixCallback: roomName => (roomName === 'W1N1' ? costMatrix : undefined),
-        maxTiles: 2500
-      })
-    );
-    expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
-    expect(distanceMap.get(new RoomPosition(25, 25, 'W1N2'))).toBe(UNREACHABLE);
-    expect(distanceMap.get(new RoomPosition(25, 25, 'W2N1'))).toBe(UNREACHABLE);
-  });
   it('should be faster than PathFinder.search', () => {
     const from = new RoomPosition(5, 5, 'W1N1');
-    const to = new RoomPosition(45, 45, 'W1N1');
+    const to = new RoomPosition(45, 45, 'W3N3');
     const iterations = 1;
 
     let pathFinderPath: PathFinderPath;
@@ -100,11 +76,10 @@ describe('jpsMultiroomDistanceMap', () => {
       });
     }, iterations);
 
-    let clockworkDistanceMap: ClockworkMultiroomDistanceMap;
     let clockworkPath: ClockworkPath;
     const cache = new Map<string, ClockworkCostMatrix>();
     ephemeral(
-      jpsMultiroomDistanceMap([from], [to], {
+      jpsPath([from], [to], {
         costMatrixCallback: roomName => {
           if (cache.has(roomName)) {
             return cache.get(roomName);
@@ -117,8 +92,8 @@ describe('jpsMultiroomDistanceMap', () => {
     );
 
     const clockworkTime = cpuTime(() => {
-      clockworkDistanceMap = ephemeral(
-        jpsMultiroomDistanceMap([from], [to], {
+      clockworkPath = ephemeral(
+        jpsPath([from], [to], {
           costMatrixCallback: roomName => {
             if (cache.has(roomName)) {
               return cache.get(roomName);
@@ -129,7 +104,6 @@ describe('jpsMultiroomDistanceMap', () => {
           }
         })
       );
-      clockworkPath = clockworkDistanceMap.pathToOrigin(to);
     }, iterations);
 
     console.log('Clockwork Time', clockworkTime);
