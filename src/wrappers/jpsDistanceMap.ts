@@ -1,12 +1,7 @@
-import { ephemeral } from '../utils/cleanup';
 import { MAX_USIZE } from '../utils/constants';
 import { fromPackedRoomName } from '../utils/fromPacked';
-import {
-  ClockworkCostMatrix,
-  js_jps_multiroom_distance_map,
-  js_path_to_multiroom_distance_map_origin
-} from '../wasm/screeps_clockwork';
-import { ClockworkPath } from './path';
+import { ClockworkCostMatrix, js_jps_multiroom_distance_map } from '../wasm/screeps_clockwork';
+import { ClockworkMultiroomDistanceMap } from './multiroomDistanceMap';
 
 /**
  * Create a distance map for the given start positions, using JPS.
@@ -21,7 +16,7 @@ import { ClockworkPath } from './path';
  * @param options - The options for the distance map.
  * @returns A multi-room distance map.
  */
-export function jpsPath(
+export function jpsDistanceMap(
   start: RoomPosition[],
   destinations: RoomPosition[],
   {
@@ -37,15 +32,12 @@ export function jpsPath(
   }
 
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
-  const destinationsPacked = new Uint32Array(destinations.map(pos => pos.__packedPos));
-  const distanceMap = ephemeral(
-    js_jps_multiroom_distance_map(
-      startPacked,
-      (room: number) => costMatrixCallback(fromPackedRoomName(room)),
-      maxOps,
-      destinationsPacked
-    )
+  const distanceMap = js_jps_multiroom_distance_map(
+    startPacked,
+    (room: number) => costMatrixCallback(fromPackedRoomName(room)),
+    maxOps,
+    new Uint32Array(destinations.map(pos => pos.__packedPos))
   );
 
-  return new ClockworkPath(js_path_to_multiroom_distance_map_origin(destinationsPacked[0], distanceMap));
+  return new ClockworkMultiroomDistanceMap(distanceMap);
 }

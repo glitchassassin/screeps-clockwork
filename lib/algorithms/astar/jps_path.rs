@@ -2,20 +2,17 @@ use crate::algorithms::astar::metrics::PathfindingMetrics;
 use crate::algorithms::jps::jump;
 use crate::algorithms::map::corresponding_room_edge;
 use crate::datatypes::ClockworkCostMatrix;
+use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::OptionalCache;
 use crate::utils::set_panic_hook;
-use crate::Path;
 use lazy_static::lazy_static;
-use rustc_hash::FxHashMap;
 use screeps::Direction;
 use screeps::Position;
 use screeps::RoomName;
 use std::cmp::Ordering;
 use std::collections::BinaryHeap;
-use std::collections::HashMap;
 use std::convert::TryFrom;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::throw_str;
 use wasm_bindgen::throw_val;
 
 #[derive(Copy, Clone, Eq, PartialEq)]
@@ -117,15 +114,15 @@ fn next_directions(open_direction: Option<Direction>) -> &'static [Direction] {
 
 /// Creates a distance map for the given start positions, using A* with jump-point search
 /// to optimize the search and find the shortest path to the given destinations.
-pub fn jps_path(
+pub fn jps_multiroom_distance_map(
     start: Vec<Position>,
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
     max_ops: usize,
     goals: Vec<Position>,
-) -> Result<Path, String> {
+) -> MultiroomDistanceMap {
     set_panic_hook();
     let mut frontier = BinaryHeap::new();
-    let mut came_from: FxHashMap<Position, (Position, usize)> = FxHashMap::default();
+    let mut multiroom_distance_map = MultiroomDistanceMap::new();
     let cost_matrices = OptionalCache::new(|room: RoomName| get_cost_matrix(room));
     let mut metrics = PathfindingMetrics::new();
 
@@ -139,6 +136,7 @@ pub fn jps_path(
             position,
             open_direction: None,
         });
+        multiroom_distance_map.set(position, 0);
     }
 
     let mut current_room = start_room;
@@ -146,8 +144,9 @@ pub fn jps_path(
         if let Some(cost_matrix) = cost_matrices.get_or_create(current_room) {
             cost_matrix
         } else {
-            return Err("Cannot plan path with no cost matrix".to_string());
+            return multiroom_distance_map; // cannot plan distance map with no cost matrix
         };
+    let mut current_room_distance_map = multiroom_distance_map.get_or_create_room_map(current_room);
 
     while let Some(State {
         f_score: _,
@@ -159,22 +158,11 @@ pub fn jps_path(
         metrics.nodes_visited += 1;
 
         if metrics.nodes_visited >= max_ops {
-            return Err("Max operations reached".to_string());
+            return multiroom_distance_map;
         }
 
         if goals.contains(&position) {
-            let mut path = Path::new();
-            let mut current = position;
-            while let Some((previous, _)) = came_from.get(&current) {
-                while current != *previous {
-                    path.add(current);
-                    let dir = current.get_direction_to(*previous).unwrap();
-                    current = current.checked_add_direction(dir).unwrap_or_else(|_| {
-                        throw_str("Failed to reconstruct path");
-                    });
-                }
-            }
-            return Ok(path);
+            return multiroom_distance_map;
         }
 
         let position_cost_matrix = cost_matrices.get_or_create(position.room_name()).unwrap();
@@ -196,6 +184,8 @@ pub fn jps_path(
                         if let Some(cost_matrix) = next_matrix {
                             current_room_cost_matrix = cost_matrix;
                             current_room = neighbor.room_name();
+                            current_room_distance_map =
+                                multiroom_distance_map.get_or_create_room_map(current_room);
                         } else {
                             continue;
                         }
@@ -205,23 +195,8 @@ pub fn jps_path(
                     }
                     step_cost = step_cost
                         .saturating_add(current_room_cost_matrix.get(next_step.xy()) as usize);
-                    match came_from.get(&next_step) {
-                        Some((_, cost)) => {
-                            if step_cost < *cost {
-                                // better path found
-                                came_from.insert(
-                                    corresponding_room_edge(next_step),
-                                    (corresponding_room_edge(step), step_cost),
-                                );
-                            }
-                        }
-                        None => {
-                            came_from.insert(
-                                corresponding_room_edge(next_step),
-                                (corresponding_room_edge(step), step_cost),
-                            );
-                        }
-                    }
+                    current_room_distance_map[next_step.xy()] =
+                        step_cost.min(current_room_distance_map[next_step.xy()]);
                     step = next_step;
                 }
 
@@ -235,11 +210,9 @@ pub fn jps_path(
 
                 let next_cost = step_cost.saturating_add(terrain_cost as usize);
 
-                if let Some((_, cost)) = came_from.get(&neighbor) {
-                    if *cost <= next_cost {
-                        // already visited and better path found
-                        continue;
-                    }
+                if current_room_distance_map[neighbor.xy()] <= next_cost {
+                    // already visited and better path found
+                    continue;
                 }
 
                 let h_score = heuristic(neighbor, &goals);
@@ -250,29 +223,25 @@ pub fn jps_path(
                     position: neighbor,
                     open_direction: position.get_direction_to(neighbor),
                 });
-                came_from.insert(
-                    corresponding_room_edge(neighbor),
-                    (corresponding_room_edge(position), next_cost),
-                );
+                current_room_distance_map[neighbor.xy()] = next_cost;
             }
         }
     }
-
-    Err("No path found".to_string())
+    multiroom_distance_map
 }
 
 #[wasm_bindgen]
-pub fn js_jps_path(
+pub fn js_jps_multiroom_distance_map(
     start_packed: Vec<u32>,
     get_cost_matrix: &js_sys::Function,
     max_ops: usize,
     destinations: Vec<u32>,
-) -> Path {
+) -> MultiroomDistanceMap {
     let start_positions = start_packed
         .iter()
         .map(|pos| Position::from_packed(*pos))
         .collect();
-    let path = jps_path(
+    jps_multiroom_distance_map(
         start_positions,
         |room| {
             let result = get_cost_matrix.call1(
@@ -302,10 +271,5 @@ pub fn js_jps_path(
             .iter()
             .map(|pos| Position::from_packed(*pos))
             .collect(),
-    );
-
-    match path {
-        Ok(path) => path,
-        Err(e) => throw_str(&e),
-    }
+    )
 }
