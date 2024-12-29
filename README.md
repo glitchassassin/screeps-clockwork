@@ -68,6 +68,9 @@ curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 # Add rust-src component
 rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
 
+# Set nightly as the default
+rustup default nightly
+
 # Install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
@@ -75,6 +78,9 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 nvm install --lts
 nvm use --lts
 nvm alias default --lts # optional
+
+# install project dependencies
+npm install
 ```
 
 To build the project:
