@@ -2,7 +2,6 @@ import {
   astarMultiroomDistanceMap,
   getTerrainCostMatrix as clockworkGetTerrainCostMatrix,
   ephemeral,
-  jpsDistanceMap,
   jpsPath
 } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
@@ -68,30 +67,6 @@ export default [
     }
   },
   {
-    name: 'JPS Distance Map',
-    color1: COLOR_YELLOW,
-    color2: COLOR_RED,
-    /**
-     * Visualization of a JPS path.
-     */
-    run(rooms) {
-      const [originFlag, targetFlag, ...rest] = Object.values(rooms).reduce((acc, flags) => [...acc, ...flags], []);
-      if (!originFlag || !targetFlag) {
-        return;
-      }
-
-      const distanceMap = ephemeral(
-        jpsDistanceMap([originFlag.pos], [targetFlag.pos], {
-          costMatrixCallback: getTerrainCostMatrix,
-          maxOps: 10000
-        })
-      );
-      for (const room of distanceMap.getRooms()) {
-        visualizeDistanceMap(room, distanceMap.getRoom(room)!);
-      }
-    }
-  },
-  {
     name: 'JPS Path',
     color1: COLOR_YELLOW,
     color2: COLOR_GREEN,
@@ -104,14 +79,8 @@ export default [
         return;
       }
 
-      const path = ephemeral(
-        jpsPath([originFlag.pos], [targetFlag.pos], {
-          costMatrixCallback: getTerrainCostMatrix,
-          maxOps: 10000
-        })
-      );
-      const pathArray = path.toArray();
-      visualizePath(pathArray);
+      const path = jpsPath(originFlag.pos, [targetFlag.pos]);
+      visualizePath(path);
     }
   }
 ] satisfies FlagVisualizer[];

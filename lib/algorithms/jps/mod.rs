@@ -1,119 +1,59 @@
-use screeps::{Direction, Position, RoomCoordinate};
+mod collections;
+mod goal;
+mod pathfinder;
+mod room;
+mod types;
 
-use crate::datatypes::ClockworkCostMatrix;
+pub use goal::{Goal, PathfindingOptions};
+pub use pathfinder::PathFinder;
+use screeps::{game, Position};
+pub use types::*;
+use wasm_bindgen::{prelude::wasm_bindgen, throw_str};
 
-use super::map::corresponding_room_edge;
+use crate::log;
 
-pub fn jump(
-    position: Position,
-    direction: Direction,
-    goals: &[Position],
-    cost_matrix: &ClockworkCostMatrix,
-) -> Option<Position> {
-    if position.x() == RoomCoordinate::new(0).unwrap()
-        && [Direction::Left, Direction::TopLeft, Direction::BottomLeft].contains(&direction)
-    {
-        // cannot move left on a left-edge tile
-        return None;
-    }
-    if position.x() == RoomCoordinate::new(49).unwrap()
-        && [
-            Direction::Right,
-            Direction::TopRight,
-            Direction::BottomRight,
-        ]
-        .contains(&direction)
-    {
-        // cannot move right on a right-edge tile
-        return None;
-    }
-    if position.y() == RoomCoordinate::new(0).unwrap()
-        && [Direction::Top, Direction::TopLeft, Direction::TopRight].contains(&direction)
-    {
-        // cannot move top on a top-edge tile
-        return None;
-    }
-    if position.y() == RoomCoordinate::new(49).unwrap()
-        && [
-            Direction::Bottom,
-            Direction::BottomLeft,
-            Direction::BottomRight,
-        ]
-        .contains(&direction)
-    {
-        // cannot move down on a bottom-edge tile
-        return None;
-    }
+thread_local! {
+    static PATHFINDER: std::cell::RefCell<PathFinder> = std::cell::RefCell::new(PathFinder::new());
+}
 
-    let next_pos = corresponding_room_edge(position.checked_add_direction(direction).ok()?);
-
-    if next_pos.room_name() != position.room_name() {
-        return Some(next_pos); // jumped to a different room
-    }
-
-    let next_cost = cost_matrix.get(next_pos.xy());
-
-    if next_cost >= 255 {
-        // Impassable terrain
-        return None;
-    }
-
-    if cost_matrix.get(position.xy()) != next_cost {
-        // Region has different cost; stop jumping and re-evaluate
-        return Some(next_pos);
-    }
-
-    if goals.contains(&next_pos) {
-        return Some(next_pos);
-    }
-
-    // Diagonal movement
-    if direction.is_diagonal() {
-        let right = position
-            .checked_add_direction(direction.multi_rot(3))
-            .map(corresponding_room_edge)
-            .ok()?;
-        let left = position
-            .checked_add_direction(direction.multi_rot(-3))
-            .map(corresponding_room_edge)
-            .ok()?;
-
-        // Check for forced neighbors
-        if left.room_name() != position.room_name()
-            || cost_matrix.get(left.xy()) != next_cost
-            || right.room_name() != position.room_name()
-            || cost_matrix.get(right.xy()) != next_cost
-        {
-            // Found a forced neighbor - stop jumping
-            return Some(next_pos);
+#[wasm_bindgen]
+pub fn js_pathfinder(origin: u32, goals: Vec<u32>) -> Vec<u32> {
+    let start = game::cpu::get_used();
+    PATHFINDER.with(|pf| {
+        let mut pf = pf.borrow_mut();
+        let origin = Position::from_packed(origin);
+        let goals = goals
+            .into_iter()
+            .map(|g| {
+                let pos = Position::from_packed(g);
+                Goal::new(WorldPosition::from(pos), 0)
+            })
+            .collect();
+        log(&format!("Pathfinder setup: {}", game::cpu::get_used() - start).to_string());
+        let start = game::cpu::get_used();
+        let options = PathfindingOptions {
+            plain_cost: 1,
+            swamp_cost: 5,
+            max_rooms: 100,
+            flee: false,
+            max_cost: 1500,
+            max_ops: 10000,
+            heuristic_weight: 1.0,
+        };
+        let result = pf.search(WorldPosition::from(origin), goals, options);
+        log(&format!("Pathfinder search: {}", game::cpu::get_used() - start).to_string());
+        if let Ok(result) = result {
+            log(&format!("Pathfinder ops: {}", result.ops).to_string());
+            log(&format!("Pathfinder cost: {}", result.cost).to_string());
+            log(&format!("Pathfinder incomplete: {}", result.incomplete).to_string());
+            return result
+                .path
+                .into_iter()
+                .map(|p| Position::from(p).packed_repr())
+                .collect();
+        } else if let Err(e) = result {
+            throw_str(e);
         }
-
-        // Recursively look in both cardinal and diagonal directions
-        if jump(next_pos, direction.multi_rot(1), goals, &cost_matrix).is_some()
-            || jump(next_pos, direction.multi_rot(-1), goals, &cost_matrix).is_some()
-        {
-            return Some(next_pos);
-        }
-    } else {
-        // Cardinal movement - check for forced neighbors
-        let left = position
-            .checked_add_direction(direction.multi_rot(-2))
-            .map(corresponding_room_edge)
-            .ok()?;
-        let right = position
-            .checked_add_direction(direction.multi_rot(2))
-            .map(corresponding_room_edge)
-            .ok()?;
-
-        if left.room_name() != position.room_name()
-            || cost_matrix.get(left.xy()) != next_cost
-            || right.room_name() != position.room_name()
-            || cost_matrix.get(right.xy()) != next_cost
-        {
-            // Found a forced neighbor - stop jumping
-            return Some(next_pos);
-        }
-    }
-
-    jump(next_pos, direction, goals, cost_matrix)
+        vec![]
+    })
 }
