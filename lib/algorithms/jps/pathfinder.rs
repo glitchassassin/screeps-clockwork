@@ -1,15 +1,16 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
-use screeps::{game, CircleStyle, Position, RoomCoordinate, RoomName, RoomTerrain, RoomVisual, TextStyle, Visual};
-use crate::log;
 use super::{
     collections::{Heap, OpenClosed},
     goal::{Goal, PathfindingOptions, PathfindingResult},
     room::RoomInfo,
     types::{Cost, MapPosition, PosIndex, RoomIndex, WorldPosition, MAX_ROOMS, OBSTACLE},
 };
+use crate::log;
+use screeps::{RoomName, RoomTerrain};
 
 pub struct PathFinder {
+    terrain_cache: HashMap<RoomName, Vec<u8>>,
     room_table: Vec<RoomInfo>,
     reverse_room_table: Vec<RoomIndex>,
     blocked_rooms: HashSet<MapPosition>,
@@ -28,6 +29,7 @@ impl PathFinder {
     pub fn new() -> Self {
         let capacity = 2500 * MAX_ROOMS;
         Self {
+            terrain_cache: HashMap::new(),
             room_table: Vec::with_capacity(MAX_ROOMS),
             reverse_room_table: vec![0; 1 << 16], // 2^16 possible room positions
             blocked_rooms: HashSet::new(),
@@ -43,8 +45,11 @@ impl PathFinder {
         }
     }
 
-    pub fn get_terrain(&self, pos: MapPosition) -> Option<Vec<u8>> {
+    pub fn get_terrain(&mut self, pos: MapPosition) -> Option<Vec<u8>> {
         let room_name = RoomName::from_packed(pos.id());
+        if let Some(terrain) = self.terrain_cache.get(&room_name) {
+            return Some(terrain.clone());
+        }
         let terrain = RoomTerrain::new(room_name)?;
         let buffer = terrain.get_raw_buffer().to_vec();
 
@@ -62,7 +67,8 @@ impl PathFinder {
             .map(|chunk| chunk[0] | chunk[1] << 2 | chunk[2] << 4 | chunk[3] << 6)
             .collect::<Vec<_>>();
 
-        Some(compacted)
+        self.terrain_cache.insert(room_name, compacted);
+        Some(self.terrain_cache.get(&room_name).unwrap().clone())
     }
 
     /// Convert a world position to an index in our pathfinding grid
@@ -102,7 +108,7 @@ impl PathFinder {
         let terrain_data = self.get_terrain(map_pos)?;
 
         // Create new room info
-        let room = RoomInfo::new(terrain_data.to_vec(), None, map_pos);
+        let room = RoomInfo::new(terrain_data, None, map_pos);
 
         self.room_table.push(room);
         let new_index = self.room_table.len() as RoomIndex;
@@ -113,13 +119,10 @@ impl PathFinder {
 
     /// Calculate the cost of moving to a position
     fn look(&mut self, pos: WorldPosition) -> Cost {
-        let map_pos = pos.map_position();
-        let room_index = match self.reverse_room_table[map_pos.id() as usize] {
-            0 => self.room_index_from_pos(map_pos).unwrap(),
-            // 0 => OBSTACLE,
-            i => i,
+        let room_index = match self.room_index_from_pos(pos.map_position()) {
+            Some(i) => i,
+            None => return OBSTACLE,
         };
-        // let room_index = self.room_index_from_pos(map_pos).unwrap();
 
         let terrain = &self.room_table[(room_index - 1) as usize];
         let cost_matrix_value = terrain.cost_matrix[pos.xx as usize % 50][pos.yy as usize % 50];
@@ -445,7 +448,7 @@ impl PathFinder {
         // Special case for searching to same node
         if self.heuristic(origin) == 0 {
             return Ok(PathfindingResult::same_tile());
-        } 
+        }
 
         self.in_use = true;
 
@@ -474,7 +477,6 @@ impl PathFinder {
             let pos = self.pos_from_index(current_index);
             let h_cost = self.heuristic(pos);
             let g_cost = current_cost - (h_cost as f64 * self.heuristic_weight) as Cost;
-
 
             // let room_pos = Position::from(pos);
             // let viz = RoomVisual::new(Some(room_pos.room_name()));
@@ -543,6 +545,11 @@ impl PathFinder {
         path.reverse();
 
         self.in_use = false;
+
+        log(&format!(
+            "Rust Pathfinder visited rooms: {:?}",
+            self.room_table.len()
+        ));
 
         Ok(PathfindingResult::new(
             path,

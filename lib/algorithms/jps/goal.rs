@@ -1,5 +1,3 @@
-use js_sys::Uint32Array;
-use screeps::Position;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use super::types::{Cost, WorldPosition};
