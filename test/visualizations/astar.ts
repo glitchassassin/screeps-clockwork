@@ -12,6 +12,10 @@ function getTerrainCostMatrix(room: string) {
   return ephemeral(clockworkGetTerrainCostMatrix(room));
 }
 
+
+let avg_pf_cpu = 0;
+let avg_rust_pf_cpu = 0;
+
 export default [
   {
     name: 'A* Multiroom Distance Map',
@@ -79,8 +83,33 @@ export default [
         return;
       }
 
+      let start_cpu = Game.cpu.getUsed();
+      let pathFinderPath: PathFinderPath;
+      const visitedRooms = new Set<string>();
+      pathFinderPath = PathFinder.search(targetFlag.pos, {pos: originFlag.pos, range: 0}, {
+        maxCost: 1500,
+        maxOps: 50000,
+        maxRooms: 100,
+        roomCallback: roomName => {
+          visitedRooms.add(roomName);
+          return new PathFinder.CostMatrix();
+        },
+        heuristicWeight: 1
+      });
+      let end_cpu = Game.cpu.getUsed();
+      let pf_cpu = end_cpu - start_cpu;
+      let weight = 0.1;
+      avg_pf_cpu = (avg_pf_cpu * (1 - weight)) + (pf_cpu * weight);
+      console.log(`PathFinder CPU: ${pf_cpu}, \nAvg PathFinder CPU: ${avg_pf_cpu}, \nPathFinder Ops: ${pathFinderPath.ops}, \nlength: ${pathFinderPath.path.length}, \nCost: ${pathFinderPath.cost}, \nVisited Rooms: ${visitedRooms.size}, \nIncomplete: ${pathFinderPath.incomplete}`);
+
+      visualizePath(pathFinderPath!.path, "red");
+      start_cpu = Game.cpu.getUsed();
       const path = jpsPath(originFlag.pos, [targetFlag.pos]);
-      visualizePath(path);
+      end_cpu = Game.cpu.getUsed();
+      let rust_pf_cpu = end_cpu - start_cpu;
+      avg_rust_pf_cpu = (avg_rust_pf_cpu * (1 - weight)) + (rust_pf_cpu * weight);
+      console.log(`JS JPS CPU: ${rust_pf_cpu}, Avg JS JPS CPU: ${avg_rust_pf_cpu}`);
+      visualizePath(path, "green");
     }
   }
 ] satisfies FlagVisualizer[];

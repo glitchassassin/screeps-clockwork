@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use screeps::{game, Position, RoomCoordinate, RoomName, RoomTerrain};
-
+use screeps::{game, CircleStyle, Position, RoomCoordinate, RoomName, RoomTerrain, RoomVisual, TextStyle, Visual};
+use crate::log;
 use super::{
     collections::{Heap, OpenClosed},
     goal::{Goal, PathfindingOptions, PathfindingResult},
@@ -112,17 +112,20 @@ impl PathFinder {
     }
 
     /// Calculate the cost of moving to a position
-    fn look(&self, pos: WorldPosition) -> Cost {
+    fn look(&mut self, pos: WorldPosition) -> Cost {
         let map_pos = pos.map_position();
         let room_index = match self.reverse_room_table[map_pos.id() as usize] {
-            0 => return OBSTACLE,
+            0 => self.room_index_from_pos(map_pos).unwrap(),
+            // 0 => OBSTACLE,
             i => i,
         };
+        // let room_index = self.room_index_from_pos(map_pos).unwrap();
 
         let terrain = &self.room_table[(room_index - 1) as usize];
         let cost_matrix_value = terrain.cost_matrix[pos.xx as usize % 50][pos.yy as usize % 50];
 
         if cost_matrix_value != 0 {
+            // log(&format!("Cost matrix value: {:?}", cost_matrix_value));
             if cost_matrix_value == 0xff {
                 return OBSTACLE;
             }
@@ -130,6 +133,7 @@ impl PathFinder {
         }
 
         let terrain_type = terrain.look((pos.xx % 50) as u8, (pos.yy % 50) as u8) as usize;
+        // log(&format!("Terrain type: {:?}, cost: {:?}", terrain_type, self.look_table[terrain_type]));
         self.look_table[terrain_type]
     }
 
@@ -218,7 +222,7 @@ impl PathFinder {
                 self.push_node(
                     index,
                     jumped_pos,
-                    g_cost + n_cost * (pos.range_to(neighbor) - 1) as Cost + jump_cost,
+                    g_cost + n_cost * (pos.range_to(jumped_pos) - 1) as Cost + jump_cost,
                 )
             } else {
                 Ok(())
@@ -233,6 +237,7 @@ impl PathFinder {
         pos: WorldPosition,
         g_cost: Cost,
     ) -> Result<(), &'static str> {
+        // log(&format!("JPS: {:?}", Position::from(pos)));
         let parent = self.pos_from_index(self.parents[index as usize]);
         let dx = if pos.xx > parent.xx {
             1
@@ -292,14 +297,16 @@ impl PathFinder {
                 ]);
             }
         }
-
         // Process special border nodes if any
         if !neighbors.is_empty() {
             for neighbor in neighbors {
+                // let room_index = self.room_index_from_pos(neighbor.map_position());
                 let n_cost = self.look(neighbor);
+                // log(&format!("Pos: {:?}, Neighbor: {:?}, Cost: {:?}", Position::from(pos), Position::from(neighbor), n_cost));
                 if n_cost == OBSTACLE {
                     continue;
                 }
+                // log(&format!("Pushing node: {:?}", neighbor));
                 self.push_node(index, neighbor, g_cost + n_cost)?;
             }
             return Ok(());
@@ -363,41 +370,47 @@ impl PathFinder {
                         (pos.xx as i32 - dx) as u32,
                         (pos.yy as i32 + dy) as u32,
                     );
-                    self.jump_neighbor(pos, index, forced, g_cost, cost, self.look(forced))?;
+                    let n_cost = self.look(forced);
+                    self.jump_neighbor(pos, index, forced, g_cost, cost, n_cost)?;
                 }
                 if self.look(WorldPosition::new(pos.xx, (pos.yy as i32 - dy) as u32)) != cost {
                     let forced = WorldPosition::new(
                         (pos.xx as i32 + dx) as u32,
                         (pos.yy as i32 - dy) as u32,
                     );
-                    self.jump_neighbor(pos, index, forced, g_cost, cost, self.look(forced))?;
+                    let n_cost = self.look(forced);
+                    self.jump_neighbor(pos, index, forced, g_cost, cost, n_cost)?;
                 }
             } else {
                 // Jumping horizontally
                 if border_dy == 1 || self.look(WorldPosition::new(pos.xx, pos.yy + 1)) != cost {
                     let neighbor = WorldPosition::new((pos.xx as i32 + dx) as u32, pos.yy + 1);
-                    self.jump_neighbor(pos, index, neighbor, g_cost, cost, self.look(neighbor))?;
+                    let n_cost = self.look(neighbor);
+                    self.jump_neighbor(pos, index, neighbor, g_cost, cost, n_cost)?;
                 }
                 if border_dy == -1
                     || self.look(WorldPosition::new(pos.xx, pos.yy.saturating_sub(1))) != cost
                 {
                     let neighbor =
                         WorldPosition::new((pos.xx as i32 + dx) as u32, pos.yy.saturating_sub(1));
-                    self.jump_neighbor(pos, index, neighbor, g_cost, cost, self.look(neighbor))?;
+                    let n_cost = self.look(neighbor);
+                    self.jump_neighbor(pos, index, neighbor, g_cost, cost, n_cost)?;
                 }
             }
         } else {
             // Jumping vertically
             if border_dx == 1 || self.look(WorldPosition::new(pos.xx + 1, pos.yy)) != cost {
                 let neighbor = WorldPosition::new(pos.xx + 1, (pos.yy as i32 + dy) as u32);
-                self.jump_neighbor(pos, index, neighbor, g_cost, cost, self.look(neighbor))?;
+                let n_cost = self.look(neighbor);
+                self.jump_neighbor(pos, index, neighbor, g_cost, cost, n_cost)?;
             }
             if border_dx == -1
                 || self.look(WorldPosition::new(pos.xx.saturating_sub(1), pos.yy)) != cost
             {
                 let neighbor =
                     WorldPosition::new(pos.xx.saturating_sub(1), (pos.yy as i32 + dy) as u32);
-                self.jump_neighbor(pos, index, neighbor, g_cost, cost, self.look(neighbor))?;
+                let n_cost = self.look(neighbor);
+                self.jump_neighbor(pos, index, neighbor, g_cost, cost, n_cost)?;
             }
         }
 
@@ -432,7 +445,7 @@ impl PathFinder {
         // Special case for searching to same node
         if self.heuristic(origin) == 0 {
             return Ok(PathfindingResult::same_tile());
-        }
+        } 
 
         self.in_use = true;
 
@@ -462,6 +475,28 @@ impl PathFinder {
             let h_cost = self.heuristic(pos);
             let g_cost = current_cost - (h_cost as f64 * self.heuristic_weight) as Cost;
 
+
+            // let room_pos = Position::from(pos);
+            // let viz = RoomVisual::new(Some(room_pos.room_name()));
+            // // viz.circle(
+            // //     room_pos.x().u8() as f32,
+            // //     room_pos.y().u8() as f32,
+            // //     Some(
+            // //         CircleStyle::default()
+            // //             .radius(0.5)
+            // //             .stroke("green")
+            // //             .fill("transparent"),
+            // //     ),
+            // // );
+            // viz.text(
+            //     room_pos.x().u8() as f32,
+            //     room_pos.y().u8() as f32,
+            //     format!("{}", g_cost),
+            //     {
+            //         Some(TextStyle::default().font(0.7).color("white"))
+            //     },
+            // );
+            // log(&format!("index: {:?}, pos: {:?}, Room: {:?}, blah: {:?}", current_index, pos, room_pos, WorldPosition::from(room_pos)));
             // Check if we've reached a destination
             if h_cost == 0 {
                 min_node = current_index;
@@ -480,6 +515,7 @@ impl PathFinder {
 
             // Add next neighbors to heap
             self.jps(current_index, pos, g_cost)?;
+            // self.astar(current_index, pos, g_cost)?;
             ops_remaining -= 1;
         }
 
@@ -527,7 +563,7 @@ impl PathFinder {
     }
 
     /// Jump in X direction
-    fn jump_x(&self, cost: Cost, mut pos: WorldPosition, dx: i32) -> Option<WorldPosition> {
+    fn jump_x(&mut self, cost: Cost, mut pos: WorldPosition, dx: i32) -> Option<WorldPosition> {
         let mut prev_cost_u = self.look(WorldPosition::new(pos.xx, pos.yy.saturating_sub(1)));
         let mut prev_cost_d = self.look(WorldPosition::new(pos.xx, pos.yy + 1));
 
@@ -564,7 +600,7 @@ impl PathFinder {
     }
 
     /// Jump in Y direction
-    fn jump_y(&self, cost: Cost, mut pos: WorldPosition, dy: i32) -> Option<WorldPosition> {
+    fn jump_y(&mut self, cost: Cost, mut pos: WorldPosition, dy: i32) -> Option<WorldPosition> {
         let mut prev_cost_l = self.look(WorldPosition::new(pos.xx.saturating_sub(1), pos.yy));
         let mut prev_cost_r = self.look(WorldPosition::new(pos.xx + 1, pos.yy));
 
@@ -602,7 +638,7 @@ impl PathFinder {
 
     /// Jump diagonally
     fn jump_xy(
-        &self,
+        &mut self,
         cost: Cost,
         mut pos: WorldPosition,
         dx: i32,
@@ -671,7 +707,7 @@ impl PathFinder {
     }
 
     /// Generic jump function that delegates to the appropriate specialized jump function
-    fn jump(&self, cost: Cost, pos: WorldPosition, dx: i32, dy: i32) -> Option<WorldPosition> {
+    fn jump(&mut self, cost: Cost, pos: WorldPosition, dx: i32, dy: i32) -> Option<WorldPosition> {
         if dx != 0 {
             if dy != 0 {
                 self.jump_xy(cost, pos, dx, dy)

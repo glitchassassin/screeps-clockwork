@@ -29,7 +29,7 @@ pub fn js_pathfinder(origin: u32, goals: Vec<u32>) -> Vec<u32> {
                 Goal::new(WorldPosition::from(pos), 0)
             })
             .collect();
-        log(&format!("Pathfinder setup: {}", game::cpu::get_used() - start).to_string());
+        log(&format!("Rust Pathfinder setup: {}", game::cpu::get_used() - start).to_string());
         let start = game::cpu::get_used();
         let options = PathfindingOptions {
             plain_cost: 1,
@@ -37,15 +37,16 @@ pub fn js_pathfinder(origin: u32, goals: Vec<u32>) -> Vec<u32> {
             max_rooms: 100,
             flee: false,
             max_cost: 1500,
-            max_ops: 10000,
+            max_ops: 50000,
             heuristic_weight: 1.0,
         };
         let result = pf.search(WorldPosition::from(origin), goals, options);
-        log(&format!("Pathfinder search: {}", game::cpu::get_used() - start).to_string());
+        log(&format!("Rust Pathfinder search: {}", game::cpu::get_used() - start).to_string());
         if let Ok(result) = result {
-            log(&format!("Pathfinder ops: {}", result.ops).to_string());
-            log(&format!("Pathfinder cost: {}", result.cost).to_string());
-            log(&format!("Pathfinder incomplete: {}", result.incomplete).to_string());
+            log(&format!("Rust Pathfinder ops: {}", result.ops).to_string());
+            log(&format!("Rust Pathfinder cost: {}", result.cost).to_string());
+            log(&format!("Rust Pathfinder length: {}", result.path.len()).to_string());
+            log(&format!("Rust Pathfinder incomplete: {}", result.incomplete).to_string());
             return result
                 .path
                 .into_iter()
