@@ -17,9 +17,9 @@ impl RoomInfo {
     }
 
     pub fn look(&self, xx: u8, yy: u8) -> u8 {
-        if self.cost_matrix[xx as usize][yy as usize] != 0 {
-            return self.cost_matrix[xx as usize][yy as usize];
-        }
+        // if self.cost_matrix[xx as usize][yy as usize] != 0 {
+        //     return self.cost_matrix[xx as usize][yy as usize];
+        // }
         let index = (xx as usize) * 50 + (yy as usize);
         0x03 & (self.terrain[index / 4] >> ((index % 4) * 2))
     }

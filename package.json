@@ -9,6 +9,7 @@
     "build:lib": "wasm-pack build --target web --out-dir src/wasm --config build.rustflags=[\\'-Ctarget-feature=-reference-types\\',\\'-Ctarget-feature=-multivalue\\',\\'-Ctarget-feature=-sign-ext\\'] -Z build-std=std,panic_abort",
     "build:src": "rollup -c",
     "build:docs": "typedoc",
+    "build:pserver": "run-s build:lib build:src && rollup -c --environment DEST:pserver",
     "watch": "run-s build watch:both",
     "watch:lib": "cargo-watch -w lib -s \"npm run build:lib\"",
     "watch:src": "wait-on src/wasm/screeps_clockwork_bg.wasm && rollup -cw",
