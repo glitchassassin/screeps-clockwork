@@ -7,32 +7,17 @@ use lazy_static::lazy_static;
 use screeps::Direction;
 use screeps::Position;
 use screeps::RoomName;
-use std::cmp::Ordering;
-use std::collections::BinaryHeap;
 use std::convert::TryFrom;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_val;
 
 use super::heuristics::range_heuristic;
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone)]
 struct State {
-    f_score: usize,
     g_score: usize,
     position: Position,
     open_direction: Option<Direction>,
-}
-
-impl Ord for State {
-    fn cmp(&self, other: &Self) -> Ordering {
-        other.f_score.cmp(&self.f_score)
-    }
-}
-
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
 }
 
 lazy_static! {
@@ -116,7 +101,8 @@ pub fn astar_multiroom_distance_map(
     heuristic_fn: impl Fn(Position) -> usize,
 ) -> MultiroomDistanceMap {
     set_panic_hook();
-    let mut frontier = BinaryHeap::new();
+    let mut open: Vec<Vec<State>> = vec![Default::default()];
+    let mut min_idx = 0;
     let mut visited = 0;
     let mut multiroom_distance_map = MultiroomDistanceMap::new();
     let cost_matrices = OptionalCache::new(|room: RoomName| get_cost_matrix(room));
@@ -125,8 +111,7 @@ pub fn astar_multiroom_distance_map(
 
     // Initialize with start positions
     for position in start {
-        frontier.push(State {
-            f_score: 0,
+        open[0].push(State {
             g_score: 0,
             position,
             open_direction: None,
@@ -144,62 +129,70 @@ pub fn astar_multiroom_distance_map(
         };
     let mut current_room_distance_map = multiroom_distance_map.get_or_create_room_map(current_room);
 
-    while let Some(State {
-        f_score: _,
-        g_score,
-        position,
-        open_direction,
-    }) = frontier.pop()
-    {
-        if g_score >= max_tile_distance {
-            continue;
-        }
+    while min_idx < open.len() {
+        while let Some(State {
+            g_score,
+            position,
+            open_direction,
+        }) = open[min_idx].pop()
+        {
+            if g_score >= max_tile_distance {
+                continue;
+            }
 
-        for neighbor in neighbors_with_open_direction(position, next_directions(open_direction)) {
-            if neighbor.room_name() != current_room {
-                let next_matrix = cost_matrices.get_or_create(neighbor.room_name());
+            for neighbor in neighbors_with_open_direction(position, next_directions(open_direction))
+            {
+                if neighbor.room_name() != current_room {
+                    let next_matrix = cost_matrices.get_or_create(neighbor.room_name());
 
-                if let Some(cost_matrix) = next_matrix {
-                    current_room_cost_matrix = cost_matrix;
-                    current_room = neighbor.room_name();
-                    current_room_distance_map =
-                        multiroom_distance_map.get_or_create_room_map(current_room);
-                } else {
+                    if let Some(cost_matrix) = next_matrix {
+                        current_room_cost_matrix = cost_matrix;
+                        current_room = neighbor.room_name();
+                        current_room_distance_map =
+                            multiroom_distance_map.get_or_create_room_map(current_room);
+                    } else {
+                        continue;
+                    }
+                }
+
+                // Per room, we need...
+                // - A cost matrix
+                // - The distance map
+                let terrain_cost = current_room_cost_matrix.get(neighbor.xy());
+                if terrain_cost >= 255 {
+                    // impassable terrain
                     continue;
                 }
-            }
 
-            // Per room, we need...
-            // - A cost matrix
-            // - The distance map
-            let terrain_cost = current_room_cost_matrix.get(neighbor.xy());
-            if terrain_cost >= 255 {
-                // impassable terrain
-                continue;
-            }
+                let next_cost = g_score.saturating_add(terrain_cost as usize);
 
-            let next_cost = g_score.saturating_add(terrain_cost as usize);
+                if current_room_distance_map[neighbor.xy()] <= next_cost {
+                    // already visited and better path found
+                    continue;
+                }
 
-            if current_room_distance_map[neighbor.xy()] <= next_cost {
-                // already visited and better path found
-                continue;
-            }
+                let h_score = heuristic_fn(neighbor);
+                let f_score = next_cost.saturating_add(h_score);
 
-            let h_score = heuristic_fn(neighbor);
-            let f_score = next_cost.saturating_add(h_score);
-            frontier.push(State {
-                f_score,
-                g_score: next_cost,
-                position: neighbor,
-                open_direction: position.get_direction_to(neighbor),
-            });
-            current_room_distance_map[neighbor.xy()] = next_cost;
-            visited += 1;
+                while open.len() <= f_score {
+                    open.push(Default::default());
+                }
+                open[f_score].push(State {
+                    g_score: next_cost,
+                    position: neighbor,
+                    open_direction: position.get_direction_to(neighbor),
+                });
+                current_room_distance_map[neighbor.xy()] = next_cost;
+                visited += 1;
 
-            if goal_fn(neighbor) || visited >= max_tiles {
-                return multiroom_distance_map;
+                min_idx = min_idx.min(f_score);
+
+                if goal_fn(neighbor) || visited >= max_tiles {
+                    return multiroom_distance_map;
+                }
             }
         }
+        min_idx += 1;
     }
 
     multiroom_distance_map
