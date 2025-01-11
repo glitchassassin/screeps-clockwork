@@ -30,16 +30,19 @@ export function runVisualizers(visualizers: FlagVisualizer[]) {
     const visualizer = visualizers[i];
     // display the visualizer name and colors
     const x = 1;
-    const y = i * 1.5;
-    viz.rect(x, y, 1, 1, {
+    let font_size = 0.2;
+    const y = i * (font_size + 0.2);
+    const rect_width = font_size + 0.2;
+    const rect_height = (font_size + 0.2);
+    viz.rect(x, y, rect_width, rect_height, {
       fill: COLOR_LIST[visualizer.color1],
       opacity: 1
     });
-    viz.rect(x + 1, y, 1, 1, {
+    viz.rect(x + rect_width, y, rect_width, rect_height, {
       fill: COLOR_LIST[visualizer.color2],
       opacity: 1
     });
-    viz.text(visualizer.name, x + 2.5, y + 0.8, { font: '0.8', align: 'left' });
+    viz.text(visualizer.name, x + rect_width * 2 + 0.2, y + font_size + 0.05, { font: font_size, align: 'left' });
 
     // fetch the flags and run the visualizer
     const flags = Object.values(Game.flags).reduce(
