@@ -169,14 +169,16 @@ export default [
         try {
           // Measure Clockwork results
           clockworkTime = cpuTime(() => {
-            const result = jpsPath([from], [to], {
-              costMatrixCallback: getTerrainCostMatrix,
-              maxOps: 10000
-            });
-            if (result) {
+            const distanceMap = ephemeral(
+              astarMultiroomDistanceMap([from], [to], {
+                costMatrixCallback: getTerrainCostMatrix,
+                maxTiles: 10000
+              })
+            );
+            if (distanceMap) {
               // console.log('Clockwork ops', result.ops);
               clockworkResult = {
-                path: result.toArray(),
+                path: distanceMap.pathToOrigin(to),
                 ops: 0,
                 cost: 0,
                 incomplete: false

@@ -18,3 +18,4 @@ wasm-pack.log
 node_modules
 dist
 pkg
+screeps.json
