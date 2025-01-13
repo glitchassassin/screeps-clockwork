@@ -8,7 +8,8 @@ use super::distance_map::DistanceMap;
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct MultiroomDistanceMap {
-    maps: HashMap<RoomName, DistanceMap>,
+    #[wasm_bindgen(skip)]
+    pub maps: HashMap<RoomName, DistanceMap>,
 }
 
 impl MultiroomDistanceMap {
