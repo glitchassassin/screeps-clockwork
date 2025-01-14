@@ -1,5 +1,6 @@
 use screeps::{Direction, Position, RoomCoordinate, RoomName};
 
+use lazy_static::lazy_static;
 /// If the position is on a room edge, return the corresponding room edge.
 /// Otherwise, just return the position.
 pub fn corresponding_room_edge(position: Position) -> Position {
@@ -50,19 +51,77 @@ pub fn neighbors_without_edges(position: Position) -> impl Iterator<Item = Posit
         .filter_map(move |dir| position.checked_add_direction(*dir).ok())
 }
 
-/// Adjacency in Screeps is not perfectly euclidean: we need to apply
-/// special rules at room edges.
-pub fn neighbors_with_open_direction<'a>(
-    position: Position,
-    directions: &'a [Direction],
-) -> impl Iterator<Item = Position> + 'a {
-    directions
-        .into_iter()
-        .filter_map(move |dir| position.checked_add_direction(*dir).ok())
-        .map(corresponding_room_edge)
-}
-
 /// Calculate the Manhattan distance between two rooms.
 pub fn manhattan_distance(room1: &RoomName, room2: &RoomName) -> usize {
     (room1.x_coord().abs_diff(room2.x_coord()) + room1.y_coord().abs_diff(room2.y_coord())) as usize
+}
+
+lazy_static! {
+    static ref DIRECTION_LOOKUP: [Vec<Direction>; 9] = [
+        // Any direction
+        vec![
+            Direction::Top,
+            Direction::TopRight,
+            Direction::Right,
+            Direction::BottomRight,
+            Direction::Bottom,
+            Direction::BottomLeft,
+            Direction::Left,
+            Direction::TopLeft,
+        ],
+        // Direction::Top
+        vec![Direction::Top, Direction::TopRight, Direction::TopLeft],
+        // Direction::TopRight
+        vec![
+            Direction::TopRight,
+            Direction::Top,
+            Direction::Right,
+            Direction::BottomRight,
+            Direction::TopLeft,
+        ],
+        // Direction::Right
+        vec![
+            Direction::Right,
+            Direction::BottomRight,
+            Direction::TopRight,
+        ],
+        // Direction::BottomRight
+        vec![
+            Direction::BottomRight,
+            Direction::Right,
+            Direction::Bottom,
+            Direction::TopRight,
+            Direction::BottomLeft,
+        ],
+        // Direction::Bottom
+        vec![
+            Direction::Bottom,
+            Direction::BottomRight,
+            Direction::BottomLeft,
+        ],
+        // Direction::BottomLeft
+        vec![
+            Direction::BottomLeft,
+            Direction::Left,
+            Direction::Bottom,
+            Direction::TopLeft,
+            Direction::BottomRight,
+        ],
+        // Direction::Left
+        vec![Direction::Left, Direction::BottomLeft, Direction::TopLeft],
+        // Direction::TopLeft
+        vec![
+            Direction::TopLeft,
+            Direction::Top,
+            Direction::Left,
+            Direction::BottomLeft,
+            Direction::TopRight,
+        ],
+    ];
+}
+
+/// Returns the next directions to consider, based on the direction from which the tile
+/// was entered. Lateral directions can be ruled out as an optimization.
+pub fn next_directions(open_direction: Option<Direction>) -> &'static [Direction] {
+    &DIRECTION_LOOKUP[open_direction.map(|d| d as usize).unwrap_or(0)]
 }
