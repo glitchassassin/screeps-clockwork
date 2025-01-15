@@ -22,19 +22,22 @@ import { ClockworkMultiroomDistanceMap } from './multiroomDistanceMap';
  */
 export function astarMultiroomDistanceMap(
   start: RoomPosition[],
-  destinations: RoomPosition[],
   {
     costMatrixCallback,
     maxTiles = MAX_USIZE,
-    maxTileDistance = MAX_USIZE
+    maxTileDistance = MAX_USIZE,
+    anyOfDestinations,
+    allOfDestinations
   }: {
     costMatrixCallback: (room: string) => ClockworkCostMatrix | undefined;
     maxTiles?: number;
     maxTileDistance?: number;
+    anyOfDestinations?: RoomPosition[];
+    allOfDestinations?: RoomPosition[];
   }
 ) {
-  if (!destinations?.length) {
-    throw new Error('At least one destination must be set');
+  if ([maxTiles, maxTileDistance].every(n => n === MAX_USIZE) && !anyOfDestinations && !allOfDestinations) {
+    throw new Error('At least one of maxTiles, maxTileDistance, anyOfDestinations, or allOfDestinations must be set');
   }
 
   const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
@@ -43,7 +46,8 @@ export function astarMultiroomDistanceMap(
     (room: number) => costMatrixCallback(fromPackedRoomName(room)),
     maxTiles,
     maxTileDistance,
-    new Uint32Array(destinations.map(pos => pos.__packedPos))
+    anyOfDestinations ? new Uint32Array(anyOfDestinations.map(pos => pos.__packedPos)) : undefined,
+    allOfDestinations ? new Uint32Array(allOfDestinations.map(pos => pos.__packedPos)) : undefined
   );
   return new ClockworkMultiroomDistanceMap(result);
 }
