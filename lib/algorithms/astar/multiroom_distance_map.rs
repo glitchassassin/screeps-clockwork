@@ -32,7 +32,7 @@ pub fn astar_multiroom_distance_map(
     start: Vec<Position>,
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
     max_rooms: usize,
-    max_tiles: usize,
+    max_ops: usize,
     max_path_cost: usize,
     heuristic_fn: impl Fn(Position) -> usize,
     any_of_destinations: Option<Vec<Position>>,
@@ -44,7 +44,7 @@ pub fn astar_multiroom_distance_map(
     let mut open: Vec<Vec<State>> = vec![Default::default()];
     let mut min_idx = 0;
     // We use this to limit the search to the given number of tiles.
-    let mut tiles_remaining = max_tiles;
+    let mut tiles_remaining = max_ops;
     let mut cached_room_data = RoomDataCache::new(max_rooms, get_cost_matrix);
     let any_of_targets: HashSet<Position> = any_of_destinations
         .clone()
@@ -185,7 +185,7 @@ pub fn js_astar_multiroom_distance_map(
     start_packed: Vec<u32>,
     get_cost_matrix: &js_sys::Function,
     max_rooms: usize,
-    max_tiles: usize,
+    max_ops: usize,
     max_path_cost: usize,
     // TODO: Destinations need to include a range
     any_of_destinations: Option<Vec<u32>>,
@@ -249,7 +249,7 @@ pub fn js_astar_multiroom_distance_map(
             cost_matrix
         },
         max_rooms,
-        max_tiles,
+        max_ops,
         max_path_cost,
         heuristic_fn,
         any_of_destinations,

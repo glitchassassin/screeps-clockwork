@@ -35,10 +35,9 @@ export function dijkstraDistanceMap(start: RoomPosition[], costMatrix: Clockwork
  * factor in terrain costs (0-255, where 255 is impassable).
  *
  * This calculates a distance map across multiple rooms, with a few configurable limits:
- * - `maxTiles`: The maximum number of tiles to explore.
+ * - `maxOps`: The maximum number of pathfinding operations to perform.
  * - `maxRooms`: The maximum number of rooms to explore.
- * - `maxRoomDistance`: Don't explore rooms further (in Manhattan distance) than this.
- * - `maxTileDistance`: Don't explore tiles further (in accumulated cost) than this.
+ * - `maxPathCost`: Don't explore tiles with a greater path cost than this.
  *
  * At least one of these limits must be set.
  *
@@ -50,23 +49,23 @@ export function dijkstraMultiroomDistanceMap(
   start: RoomPosition[],
   {
     costMatrixCallback,
-    maxTiles = MAX_USIZE,
+    maxOps = MAX_USIZE,
     maxRooms = MAX_USIZE,
-    maxTileDistance = MAX_USIZE,
+    maxPathCost = MAX_USIZE,
     anyOfDestinations,
     allOfDestinations
   }: {
     costMatrixCallback: (room: string) => ClockworkCostMatrix | undefined;
-    maxTiles?: number;
+    maxOps?: number;
     maxRooms?: number;
-    maxTileDistance?: number;
+    maxPathCost?: number;
     anyOfDestinations?: RoomPosition[];
     allOfDestinations?: RoomPosition[];
   }
 ) {
-  if ([maxTiles, maxRooms, maxTileDistance].every(n => n === MAX_USIZE) && !anyOfDestinations && !allOfDestinations) {
+  if ([maxOps, maxRooms, maxPathCost].every(n => n === MAX_USIZE) && !anyOfDestinations && !allOfDestinations) {
     throw new Error(
-      'At least one of maxTiles, maxRooms, maxTileDistance, anyOfDestinations, or allOfDestinations must be set'
+      'At least one of maxOps, maxRooms, maxPathCost, anyOfDestinations, or allOfDestinations must be set'
     );
   }
 
@@ -74,9 +73,9 @@ export function dijkstraMultiroomDistanceMap(
   const result = js_dijkstra_multiroom_distance_map(
     startPacked,
     (room: number) => costMatrixCallback(fromPackedRoomName(room)),
-    maxTiles,
+    maxOps,
     maxRooms,
-    maxTileDistance,
+    maxPathCost,
     anyOfDestinations ? new Uint32Array(anyOfDestinations.map(pos => pos.__packedPos)) : undefined,
     allOfDestinations ? new Uint32Array(allOfDestinations.map(pos => pos.__packedPos)) : undefined
   );
