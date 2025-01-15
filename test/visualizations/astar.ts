@@ -28,7 +28,7 @@ export default [
       const distanceMap = ephemeral(
         astarMultiroomDistanceMap([originFlag.pos], {
           costMatrixCallback: getTerrainCostMatrix,
-          maxTiles: 10000,
+          maxOps: 10000,
           allOfDestinations: targetFlags.map(flag => flag.pos)
         })
       );
@@ -53,7 +53,7 @@ export default [
       const distanceMap = ephemeral(
         astarMultiroomDistanceMap([originFlag.pos], {
           costMatrixCallback: getTerrainCostMatrix,
-          maxTiles: 10000,
+          maxOps: 10000,
           anyOfDestinations: [targetFlag.pos]
         })
       );

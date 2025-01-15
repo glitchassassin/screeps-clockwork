@@ -34,10 +34,9 @@ export function bfsDistanceMap(start: RoomPosition[], costMatrix: ClockworkCostM
  * matrix as passable), so it's faster but less useful than Dijkstra's algorithm.
  *
  * This calculates a distance map across multiple rooms, with a few configurable limits:
- * - `maxTiles`: The maximum number of tiles to explore.
+ * - `maxOps`: The maximum number of pathfinding operations to perform.
  * - `maxRooms`: The maximum number of rooms to explore.
- * - `maxRoomDistance`: Don't explore rooms further (in Manhattan distance) than this.
- * - `maxTileDistance`: Don't explore tiles further (in Chebyshev distance) than this.
+ * - `maxPathCost`: Don't explore tiles with a greater path cost than this.
  *
  * At least one of these limits must be set.
  *
@@ -49,23 +48,23 @@ export function bfsMultiroomDistanceMap(
   start: RoomPosition[],
   {
     costMatrixCallback,
-    maxTiles = MAX_USIZE,
+    maxOps = MAX_USIZE,
     maxRooms = MAX_USIZE,
-    maxTileDistance = MAX_USIZE,
+    maxPathCost = MAX_USIZE,
     anyOfDestinations,
     allOfDestinations
   }: {
     costMatrixCallback: (room: string) => ClockworkCostMatrix | undefined;
-    maxTiles?: number;
+    maxOps?: number;
     maxRooms?: number;
-    maxTileDistance?: number;
+    maxPathCost?: number;
     anyOfDestinations?: RoomPosition[];
     allOfDestinations?: RoomPosition[];
   }
 ) {
-  if ([maxTiles, maxRooms, maxTileDistance].every(n => n === MAX_USIZE) && !anyOfDestinations && !allOfDestinations) {
+  if ([maxOps, maxRooms, maxPathCost].every(n => n === MAX_USIZE) && !anyOfDestinations && !allOfDestinations) {
     throw new Error(
-      'At least one of maxTiles, maxRooms, maxRoomDistance, maxTileDistance, anyOfDestinations, or allOfDestinations must be set'
+      'At least one of maxOps, maxRooms, maxRoomDistance, maxPathCost, anyOfDestinations, or allOfDestinations must be set'
     );
   }
 
@@ -73,9 +72,9 @@ export function bfsMultiroomDistanceMap(
   const result = js_bfs_multiroom_distance_map(
     startPacked,
     (room: number) => costMatrixCallback(fromPackedRoomName(room)),
-    maxTiles,
+    maxOps,
     maxRooms,
-    maxTileDistance,
+    maxPathCost,
     anyOfDestinations ? new Uint32Array(anyOfDestinations.map(pos => pos.__packedPos)) : undefined,
     allOfDestinations ? new Uint32Array(allOfDestinations.map(pos => pos.__packedPos)) : undefined
   );

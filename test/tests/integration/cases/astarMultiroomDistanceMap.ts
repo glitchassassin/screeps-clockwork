@@ -17,7 +17,7 @@ describe('astarMultiroomDistanceMap', () => {
     const distanceMap = ephemeral(
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        maxTiles: 2500,
+        maxOps: 2500,
         anyOfDestinations: [new RoomPosition(30, 25, 'W1N1')]
       })
     );
@@ -35,7 +35,7 @@ describe('astarMultiroomDistanceMap', () => {
     const distanceMap = ephemeral(
       astarMultiroomDistanceMap([new RoomPosition(25, 26, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        maxTiles: 2500,
+        maxOps: 2500,
         anyOfDestinations: [new RoomPosition(25, 23, 'W1N1')]
       })
     );
@@ -75,7 +75,7 @@ describe('astarMultiroomDistanceMap', () => {
     const distanceMap = ephemeral(
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: roomName => (roomName === 'W1N1' ? costMatrix : undefined),
-        maxTiles: 2500,
+        maxOps: 2500,
         anyOfDestinations: [new RoomPosition(25, 23, 'W1N1')]
       })
     );
@@ -83,12 +83,12 @@ describe('astarMultiroomDistanceMap', () => {
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N2'))).toBe(UNREACHABLE);
     expect(distanceMap.get(new RoomPosition(25, 25, 'W2N1'))).toBe(UNREACHABLE);
   });
-  it('should respect maxTiles', () => {
+  it('should respect maxOps', () => {
     const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     const distanceMap = ephemeral(
       astarMultiroomDistanceMap([new RoomPosition(1, 1, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        maxTiles: 100,
+        maxOps: 100,
         anyOfDestinations: [new RoomPosition(48, 48, 'W1N1')]
       })
     );
@@ -102,12 +102,12 @@ describe('astarMultiroomDistanceMap', () => {
     }
     expect(explored).toBeLessThan(101);
   }, 10);
-  it('should respect maxTileDistance', () => {
+  it('should respect maxPathCost', () => {
     const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     const distanceMap = ephemeral(
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        maxTileDistance: 10,
+        maxPathCost: 10,
         anyOfDestinations: [new RoomPosition(48, 48, 'W1N1')]
       })
     );
