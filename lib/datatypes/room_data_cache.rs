@@ -21,31 +21,40 @@ where
     room_data: Vec<RoomData>,
     room_map: HashMap<RoomName, usize>,
     cost_matrix_creator: F,
+    rooms_available: usize,
 }
 
 impl<F> RoomDataCache<F>
 where
     F: Fn(RoomName) -> Option<ClockworkCostMatrix>,
 {
-    pub fn new(cost_matrix_creator: F) -> Self {
+    pub fn new(max_rooms: usize, cost_matrix_creator: F) -> Self {
         Self {
             room_data: vec![],
             room_map: HashMap::new(),
             cost_matrix_creator,
+            rooms_available: max_rooms,
         }
     }
 
-    pub fn get_room_key(&mut self, room: RoomName) -> usize {
+    pub fn get_room_key(&mut self, room: RoomName) -> Option<usize> {
         if let Some(room_key) = self.room_map.get(&room) {
-            return *room_key;
+            return Some(*room_key);
+        }
+        if self.rooms_available == 0 {
+            return None;
         }
         self.room_data.push(RoomData {
             cost_matrix: (self.cost_matrix_creator)(room),
             distance_map: DistanceMap::new(),
             room_name: room,
         });
-        self.room_map.insert(room, self.room_data.len() - 1);
-        self.room_data.len() - 1
+        let key = self.room_data.len() - 1;
+        self.room_map.insert(room, key);
+        if self.room_data[key].cost_matrix.is_some() {
+            self.rooms_available -= 1;
+        }
+        Some(key)
     }
 }
 
