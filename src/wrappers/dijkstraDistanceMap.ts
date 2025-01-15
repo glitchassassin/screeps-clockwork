@@ -52,7 +52,6 @@ export function dijkstraMultiroomDistanceMap(
     costMatrixCallback,
     maxTiles = MAX_USIZE,
     maxRooms = MAX_USIZE,
-    maxRoomDistance = MAX_USIZE,
     maxTileDistance = MAX_USIZE,
     anyOfDestinations,
     allOfDestinations
@@ -60,19 +59,14 @@ export function dijkstraMultiroomDistanceMap(
     costMatrixCallback: (room: string) => ClockworkCostMatrix | undefined;
     maxTiles?: number;
     maxRooms?: number;
-    maxRoomDistance?: number;
     maxTileDistance?: number;
     anyOfDestinations?: RoomPosition[];
     allOfDestinations?: RoomPosition[];
   }
 ) {
-  if (
-    [maxTiles, maxRooms, maxRoomDistance, maxTileDistance].every(n => n === MAX_USIZE) &&
-    !anyOfDestinations &&
-    !allOfDestinations
-  ) {
+  if ([maxTiles, maxRooms, maxTileDistance].every(n => n === MAX_USIZE) && !anyOfDestinations && !allOfDestinations) {
     throw new Error(
-      'At least one of maxTiles, maxRooms, maxRoomDistance, maxTileDistance, anyOfDestinations, or allOfDestinations must be set'
+      'At least one of maxTiles, maxRooms, maxTileDistance, anyOfDestinations, or allOfDestinations must be set'
     );
   }
 
@@ -82,7 +76,6 @@ export function dijkstraMultiroomDistanceMap(
     (room: number) => costMatrixCallback(fromPackedRoomName(room)),
     maxTiles,
     maxRooms,
-    maxRoomDistance,
     maxTileDistance,
     anyOfDestinations ? new Uint32Array(anyOfDestinations.map(pos => pos.__packedPos)) : undefined,
     allOfDestinations ? new Uint32Array(allOfDestinations.map(pos => pos.__packedPos)) : undefined

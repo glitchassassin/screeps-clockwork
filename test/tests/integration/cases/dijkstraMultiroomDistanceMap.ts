@@ -88,16 +88,6 @@ describe('dijkstraMultiroomDistanceMap', () => {
     );
     expect(distanceMap.getRooms().length).toBe(2);
   }, 10);
-  it('should respect maxRoomDistance', () => {
-    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
-    const distanceMap = ephemeral(
-      dijkstraMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
-        costMatrixCallback: () => costMatrix,
-        maxRoomDistance: 1
-      })
-    );
-    expect(distanceMap.getRooms().length).toBe(5);
-  }, 15);
   it('should respect maxTiles', () => {
     const costMatrix = ephemeral(new ClockworkCostMatrix(1));
     const distanceMap = ephemeral(

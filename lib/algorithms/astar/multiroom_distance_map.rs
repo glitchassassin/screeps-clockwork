@@ -1,6 +1,7 @@
 use crate::algorithms::map::{corresponding_room_edge, next_directions};
 use crate::datatypes::ClockworkCostMatrix;
 use crate::datatypes::MultiroomDistanceMap;
+use crate::datatypes::RoomDataCache;
 use crate::utils::set_panic_hook;
 use screeps::Direction;
 use screeps::Position;
@@ -12,7 +13,6 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_val;
 
 use super::heuristics::range_heuristic;
-use super::room_data_cache::RoomDataCache;
 
 #[derive(Copy, Clone)]
 struct State {
@@ -31,6 +31,7 @@ struct State {
 pub fn astar_multiroom_distance_map(
     start: Vec<Position>,
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
+    max_rooms: usize,
     max_tiles: usize,
     max_path_cost: usize,
     heuristic_fn: impl Fn(Position) -> usize,
@@ -44,7 +45,7 @@ pub fn astar_multiroom_distance_map(
     let mut min_idx = 0;
     // We use this to limit the search to the given number of tiles.
     let mut tiles_remaining = max_tiles;
-    let mut cached_room_data = RoomDataCache::new(get_cost_matrix);
+    let mut cached_room_data = RoomDataCache::new(max_rooms, get_cost_matrix);
     let any_of_targets: HashSet<Position> = any_of_destinations
         .clone()
         .unwrap_or_default()
@@ -59,14 +60,16 @@ pub fn astar_multiroom_distance_map(
     // Initialize with start positions
     for position in start {
         let room_key = cached_room_data.get_room_key(position.room_name());
-        open[0].push(State {
-            g_score: 0,
-            position,
-            open_direction: None,
-            room_key,
-        });
-        cached_room_data[room_key].distance_map[position.xy()] = 0;
-        tiles_remaining -= 1;
+        if let Some(room_key) = room_key {
+            open[0].push(State {
+                g_score: 0,
+                position,
+                open_direction: None,
+                room_key,
+            });
+            cached_room_data[room_key].distance_map[position.xy()] = 0;
+            tiles_remaining -= 1;
+        }
     }
 
     // Loop through all open tiles, starting with the lowest f_score.
@@ -100,7 +103,10 @@ pub fn astar_multiroom_distance_map(
                 let room_key = if neighbor.room_name() == current_room_name {
                     room_key
                 } else {
-                    cached_room_data.get_room_key(neighbor.room_name())
+                    match cached_room_data.get_room_key(neighbor.room_name()) {
+                        Some(key) => key,
+                        None => continue,
+                    }
                 };
 
                 // Look up the terrain cost for the neighboring position. If it's impassable,
@@ -178,6 +184,7 @@ pub fn astar_multiroom_distance_map(
 pub fn js_astar_multiroom_distance_map(
     start_packed: Vec<u32>,
     get_cost_matrix: &js_sys::Function,
+    max_rooms: usize,
     max_tiles: usize,
     max_path_cost: usize,
     // TODO: Destinations need to include a range
@@ -241,6 +248,7 @@ pub fn js_astar_multiroom_distance_map(
 
             cost_matrix
         },
+        max_rooms,
         max_tiles,
         max_path_cost,
         heuristic_fn,

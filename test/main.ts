@@ -5,7 +5,9 @@ import { run } from './tests';
 import { visualize } from './visualizations';
 
 export const loop = () => {
-  runTestScenarios();
+  if (Game.cpu.bucket > 500) {
+    runTestScenarios();
+  }
   initialize(true);
   run();
   visualize();

@@ -1,16 +1,21 @@
-use crate::algorithms::map::manhattan_distance;
 use crate::algorithms::map::neighbors;
 use crate::datatypes::ClockworkCostMatrix;
 use crate::datatypes::MultiroomDistanceMap;
+use crate::datatypes::RoomDataCache;
 use crate::utils::set_panic_hook;
 use screeps::Position;
 use screeps::RoomName;
-use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::convert::TryFrom;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_val;
+
+#[derive(Copy, Clone)]
+struct State {
+    position: Position,
+    room_key: usize,
+}
 
 /// Creates a distance map for the given start positions, using a breadth-first search.
 /// This does not factor in terrain costs (treating anything less than 255 in the cost
@@ -36,82 +41,75 @@ pub fn bfs_multiroom_distance_map(
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
     max_tiles: usize,
     max_rooms: usize,
-    max_room_distance: usize,
     max_tile_distance: usize,
     any_of_destinations: Option<Vec<Position>>,
     all_of_destinations: Option<Vec<Position>>,
 ) -> MultiroomDistanceMap {
     set_panic_hook();
-    // Initialize the frontier with the passable positions surrounding the start positions
-    let origin_rooms = start.iter().map(|p| p.room_name()).collect::<HashSet<_>>();
-    let mut frontier = VecDeque::from(start.clone());
+    let mut frontier = VecDeque::new();
     let mut visited = start.iter().cloned().collect::<HashSet<_>>();
     let any_of_destinations =
-        any_of_destinations.and_then(|d| Some(d.iter().cloned().collect::<HashSet<_>>()));
+        any_of_destinations.map(|d| d.iter().cloned().collect::<HashSet<_>>());
     let mut all_of_destinations =
-        all_of_destinations.and_then(|d| Some(d.iter().cloned().collect::<HashSet<_>>()));
-    let mut multiroom_distance_map = MultiroomDistanceMap::new();
-    let mut cost_matrices = HashMap::new();
+        all_of_destinations.map(|d| d.iter().cloned().collect::<HashSet<_>>());
+    let mut cached_room_data = RoomDataCache::new(max_rooms, get_cost_matrix);
 
-    // initialize the distance map with the start positions
+    // Initialize with start positions
     for position in start {
-        multiroom_distance_map.get_or_create_room_map(position.room_name())[position.xy()] = 0;
+        let room_key = cached_room_data.get_room_key(position.room_name());
+        if let Some(room_key) = room_key {
+            cached_room_data[room_key].distance_map[position.xy()] = 0;
+            frontier.push_back(State { position, room_key });
+        }
     }
 
-    while let Some(position) = frontier.pop_front() {
-        let current_distance =
-            multiroom_distance_map.get_or_create_room_map(position.room_name())[position.xy()];
+    while let Some(State { position, room_key }) = frontier.pop_front() {
+        let current_distance = cached_room_data[room_key].distance_map[position.xy()];
+
         if current_distance >= max_tile_distance {
-            // with breadth-first search, the distance map already represents the tile distance
             continue;
         }
+
         for neighbor in neighbors(position).into_iter() {
-            let room_name = neighbor.room_name();
-            let cost_matrix = if let Some(matrix) = cost_matrices.get(&room_name) {
-                // matrix already exists
-                matrix
-            } else if cost_matrices.len() >= max_rooms
-                || origin_rooms
-                    .iter()
-                    .all(|room| manhattan_distance(room, &room_name) > max_room_distance)
-            {
-                // we've reached the max number of rooms
-                continue;
-            } else if let Some(matrix) = get_cost_matrix(neighbor.room_name()) {
-                // matrix doesn't exist, so we need to get it
-                cost_matrices.insert(neighbor.room_name(), matrix);
-                cost_matrices.get(&neighbor.room_name()).unwrap()
+            let neighbor_room_key = match cached_room_data.get_room_key(neighbor.room_name()) {
+                Some(key) => key,
+                None => continue,
+            };
+
+            let cost = if let Some(matrix) = &cached_room_data[neighbor_room_key].cost_matrix {
+                matrix.get_internal().get(neighbor.xy())
             } else {
                 continue;
             };
 
-            let cost = cost_matrix.get_internal().get(neighbor.xy());
-
             if cost < 255 && !visited.contains(&neighbor) {
-                multiroom_distance_map.get_or_create_room_map(neighbor.room_name())
-                    [neighbor.xy()] = current_distance + 1;
-                frontier.push_back(neighbor);
+                cached_room_data[neighbor_room_key].distance_map[neighbor.xy()] =
+                    current_distance + 1;
+                frontier.push_back(State {
+                    position: neighbor,
+                    room_key: neighbor_room_key,
+                });
                 visited.insert(neighbor);
                 if let Some(ref mut all_of_destinations) = all_of_destinations {
                     all_of_destinations.remove(&neighbor);
                     if all_of_destinations.is_empty() {
-                        return multiroom_distance_map; // early exit if all of the destinations are reached
+                        return cached_room_data.into(); // early exit if all of the destinations are reached
                     }
                 }
                 if let Some(ref any_of_destinations) = any_of_destinations {
                     if any_of_destinations.contains(&neighbor) {
-                        return multiroom_distance_map; // early exit if any of the destinations are reached
+                        return cached_room_data.into(); // early exit if any of the destinations are reached
                     }
                 }
             }
 
             if visited.len() >= max_tiles {
-                return multiroom_distance_map;
+                return cached_room_data.into();
             }
         }
     }
 
-    multiroom_distance_map
+    cached_room_data.into()
 }
 
 /// WASM wrapper for the BFS multiroom distance map function.
@@ -134,7 +132,6 @@ pub fn js_bfs_multiroom_distance_map(
     get_cost_matrix: &js_sys::Function,
     max_tiles: usize,
     max_rooms: usize,
-    max_room_distance: usize,
     max_tile_distance: usize,
     any_of_destinations: Option<Vec<u32>>,
     all_of_destinations: Option<Vec<u32>>,
@@ -168,7 +165,6 @@ pub fn js_bfs_multiroom_distance_map(
         },
         max_tiles,
         max_rooms,
-        max_room_distance,
         max_tile_distance,
         any_of_destinations
             .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
