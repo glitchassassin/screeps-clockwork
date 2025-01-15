@@ -26,14 +26,11 @@ export default [
         return;
       }
       const distanceMap = ephemeral(
-        astarMultiroomDistanceMap(
-          [originFlag.pos],
-          targetFlags.map(flag => flag.pos),
-          {
-            costMatrixCallback: getTerrainCostMatrix,
-            maxTiles: 10000
-          }
-        )
+        astarMultiroomDistanceMap([originFlag.pos], {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxTiles: 10000,
+          allOfDestinations: targetFlags.map(flag => flag.pos)
+        })
       );
       for (const room of distanceMap.getRooms()) {
         visualizeDistanceMap(room, distanceMap.getRoom(room)!);
@@ -54,9 +51,10 @@ export default [
       }
 
       const distanceMap = ephemeral(
-        astarMultiroomDistanceMap([originFlag.pos], [targetFlag.pos], {
+        astarMultiroomDistanceMap([originFlag.pos], {
           costMatrixCallback: getTerrainCostMatrix,
-          maxTiles: 10000
+          maxTiles: 10000,
+          anyOfDestinations: [targetFlag.pos]
         })
       );
 

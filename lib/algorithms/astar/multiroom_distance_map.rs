@@ -5,6 +5,7 @@ use crate::utils::set_panic_hook;
 use screeps::Direction;
 use screeps::Position;
 use screeps::RoomName;
+use std::collections::HashSet;
 use std::convert::TryFrom;
 use std::ops::Fn;
 use wasm_bindgen::prelude::*;
@@ -32,8 +33,9 @@ pub fn astar_multiroom_distance_map(
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
     max_tiles: usize,
     max_path_cost: usize,
-    goal_fn: impl Fn(Position) -> bool,
     heuristic_fn: impl Fn(Position) -> usize,
+    any_of_destinations: Option<Vec<Position>>,
+    all_of_destinations: Option<Vec<Position>>,
 ) -> MultiroomDistanceMap {
     set_panic_hook();
     // Since we expect the total cost to be limited (path costs above 1500 rarely make sense),
@@ -43,6 +45,16 @@ pub fn astar_multiroom_distance_map(
     // We use this to limit the search to the given number of tiles.
     let mut tiles_remaining = max_tiles;
     let mut cached_room_data = RoomDataCache::new(get_cost_matrix);
+    let any_of_targets: HashSet<Position> = any_of_destinations
+        .clone()
+        .unwrap_or_default()
+        .into_iter()
+        .collect();
+    let mut all_of_targets: HashSet<Position> = all_of_destinations
+        .clone()
+        .unwrap_or_default()
+        .into_iter()
+        .collect();
 
     // Initialize with start positions
     for position in start {
@@ -140,8 +152,16 @@ pub fn astar_multiroom_distance_map(
                 // if the f_score is lower than the current min_idx, update min_idx
                 min_idx = min_idx.min(f_score);
 
+                // check off targets as they are reached
+                if all_of_destinations.is_some() {
+                    all_of_targets.remove(&neighbor);
+                }
+
                 // If the goal is reached or the max number of tiles has been processed, return the distance map.
-                if goal_fn(neighbor) || tiles_remaining == 0 {
+                if (any_of_destinations.is_some() && any_of_targets.contains(&neighbor))
+                    || (all_of_destinations.is_some() && all_of_targets.is_empty())
+                    || tiles_remaining == 0
+                {
                     return cached_room_data.into();
                 }
             }
@@ -161,19 +181,40 @@ pub fn js_astar_multiroom_distance_map(
     max_tiles: usize,
     max_path_cost: usize,
     // TODO: Destinations need to include a range
-    destinations: Vec<u32>,
+    any_of_destinations: Option<Vec<u32>>,
+    all_of_destinations: Option<Vec<u32>>,
 ) -> MultiroomDistanceMap {
     let start_positions = start_packed
         .iter()
         .map(|pos| Position::from_packed(*pos))
         .collect();
 
-    let destinations: Vec<Position> = destinations
-        .iter()
-        .map(|pos| Position::from_packed(*pos))
+    let any_of_destinations: Option<Vec<Position>> = any_of_destinations.and_then(|destinations| {
+        Some(
+            destinations
+                .iter()
+                .map(|pos| Position::from_packed(*pos))
+                .collect(),
+        )
+    });
+
+    let all_of_destinations: Option<Vec<Position>> = all_of_destinations.and_then(|destinations| {
+        Some(
+            destinations
+                .iter()
+                .map(|pos| Position::from_packed(*pos))
+                .collect(),
+        )
+    });
+
+    let all_destinations: Vec<Position> = all_of_destinations
+        .clone()
+        .unwrap_or_default()
+        .into_iter()
+        .chain(any_of_destinations.clone().unwrap_or_default())
         .collect();
 
-    let heuristic_fn = range_heuristic(&destinations);
+    let heuristic_fn = range_heuristic(&all_destinations);
 
     astar_multiroom_distance_map(
         start_positions,
@@ -202,7 +243,8 @@ pub fn js_astar_multiroom_distance_map(
         },
         max_tiles,
         max_path_cost,
-        |pos| destinations.contains(&pos),
         heuristic_fn,
+        any_of_destinations,
+        all_of_destinations,
     )
 }
