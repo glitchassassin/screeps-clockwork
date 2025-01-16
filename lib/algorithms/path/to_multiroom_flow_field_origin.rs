@@ -8,7 +8,7 @@ use screeps::Position;
 use wasm_bindgen::{prelude::*, throw_str, UnwrapThrowExt};
 
 // Maximum iterations to prevent infinite loops
-const MAX_STEPS: usize = 10000;
+const MAX_STEPS: usize = 2500;
 
 pub fn path_to_multiroom_flow_field_origin(
     start: Position,
@@ -17,13 +17,13 @@ pub fn path_to_multiroom_flow_field_origin(
     let mut path = Path::new();
     let mut visited = HashSet::new();
     let mut current = start;
-    path.add(current);
 
     let mut steps = 0;
 
     while steps < MAX_STEPS {
-        let directions = flow_field.get_directions(current);
+        path.add(current);
 
+        let directions = flow_field.get_directions(current);
         // No valid directions means we've reached the end of the flow field
         if directions.is_empty() {
             return Ok(path);
@@ -31,16 +31,17 @@ pub fn path_to_multiroom_flow_field_origin(
 
         // Always take the first available direction
         let next_direction = directions[0];
-        let next_pos =
-            corresponding_room_edge(current.checked_add_direction(next_direction).unwrap_throw());
+        let next_pos = current.checked_add_direction(next_direction).unwrap_throw();
 
         // Check if we've already visited this position
         if visited.contains(&next_pos) {
             return Err("Cycle detected in flow field");
         }
 
-        current = next_pos;
-        path.add(current);
+        if next_pos.is_room_edge() {
+            path.add(next_pos);
+        }
+        current = corresponding_room_edge(next_pos);
         visited.insert(current);
 
         steps += 1;

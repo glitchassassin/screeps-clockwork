@@ -193,12 +193,28 @@ export function expect<T>(actual: T) {
         throw cleanError(`Expected ${actual} to be greater than ${expected}`);
       }
     },
+    toBeGreaterThanOrEqual: (expected: number) => {
+      if (typeof actual !== 'number') {
+        throw cleanError(`Expected a number but received ${typeof actual}`);
+      }
+      if (actual < expected) {
+        throw cleanError(`Expected ${actual} to be greater than or equal to ${expected}`);
+      }
+    },
     toBeLessThan: (expected: number) => {
       if (typeof actual !== 'number') {
         throw cleanError(`Expected a number but received ${typeof actual}`);
       }
       if (actual >= expected) {
         throw cleanError(`Expected ${actual} to be less than ${expected}`);
+      }
+    },
+    toBeLessThanOrEqual: (expected: number) => {
+      if (typeof actual !== 'number') {
+        throw cleanError(`Expected a number but received ${typeof actual}`);
+      }
+      if (actual > expected) {
+        throw cleanError(`Expected ${actual} to be less than or equal to ${expected}`);
       }
     },
     toContain: (expected: any) => {

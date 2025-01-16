@@ -19,8 +19,8 @@ describe('multiroomMonoFlowFieldPath', () => {
     const clockworkPath = ephemeral(flowField.pathToOrigin(new RoomPosition(25, 25, 'W2N2')));
     const path = clockworkPath.toArray();
 
-    expect(path[0].isEqualTo(new RoomPosition(25, 25, 'W2N2'))).toBeTruthy();
-    expect(path[path.length - 1].isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();
-    expect(path.length).toBe(51);
+    expect(path[0].isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();
+    expect(path[path.length - 1].isEqualTo(new RoomPosition(25, 25, 'W2N2'))).toBeTruthy();
+    expect(path.length).toBe(53);
   }, 15);
 });

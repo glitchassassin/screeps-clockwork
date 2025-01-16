@@ -32,7 +32,7 @@ impl Path {
     }
 
     pub fn add(&mut self, position: Position) {
-        self.0.push(position);
+        self.0.insert(0, position);
     }
 
     pub fn get(&self, index: usize) -> Option<&Position> {

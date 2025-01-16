@@ -8,6 +8,9 @@ use std::collections::HashSet;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_str;
 
+// Maximum iterations to prevent infinite loops (50x50 room size)
+const MAX_STEPS: usize = 2500;
+
 pub fn path_to_multiroom_distance_map_origin(
     start: Position,
     distance_map: &MultiroomDistanceMap,
@@ -15,16 +18,14 @@ pub fn path_to_multiroom_distance_map_origin(
     let mut path = Path::new();
     let mut visited = HashSet::new();
     let mut current = start;
-
-    // Maximum iterations to prevent infinite loops (50x50 room size)
-    const MAX_STEPS: usize = 2500;
     let mut steps = 0;
 
     while steps < MAX_STEPS {
-        let current_distance = distance_map.get(current);
+        path.add(current);
 
-        // If we've reached the origin
+        let current_distance = distance_map.get(current);
         if current_distance == 0 {
+            // We've reached the origin
             return Ok(path);
         }
 
@@ -50,8 +51,10 @@ pub fn path_to_multiroom_distance_map_origin(
             }
 
             // if next is a room edge, jump to the corresponding room edge
+            if next.is_room_edge() {
+                path.add(next);
+            }
             current = corresponding_room_edge(next);
-            path.add(current);
             visited.insert(current);
         } else {
             return Err("No valid path to origin found");
