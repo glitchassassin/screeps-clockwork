@@ -1,6 +1,6 @@
 use crate::datatypes::ClockworkCostMatrix;
+use crate::datatypes::DistanceMap;
 use crate::datatypes::MultiroomDistanceMap;
-use crate::DistanceMap;
 use screeps::RoomName;
 use std::collections::HashMap;
 use std::ops::Fn;

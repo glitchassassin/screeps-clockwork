@@ -1,5 +1,4 @@
-import { FlowField, js_path_to_flow_field_origin } from '../wasm/screeps_clockwork';
-import { ClockworkPath } from './path';
+import { FlowField } from '../wasm/screeps_clockwork';
 
 /**
  * A flow field for a single room that stores multiple directions per tile.
@@ -47,13 +46,5 @@ export class ClockworkFlowField {
    */
   free(): void {
     this._flowField.free();
-  }
-
-  /**
-   * Given a flow field (for a single room), find the path from a given position to
-   * the origin. Never paths through other rooms.
-   */
-  pathToOrigin(start: RoomPosition): ClockworkPath {
-    return new ClockworkPath(js_path_to_flow_field_origin(start.__packedPos, this._flowField));
   }
 }

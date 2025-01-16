@@ -1,4 +1,4 @@
-use screeps::{Direction, Position, RoomCoordinate, RoomName};
+use screeps::{Direction, Position, RoomCoordinate};
 
 use lazy_static::lazy_static;
 /// If the position is on a room edge, return the corresponding room edge.
@@ -49,11 +49,6 @@ pub fn neighbors_without_edges(position: Position) -> impl Iterator<Item = Posit
     PREFERRED_DIRECTIONS
         .iter()
         .filter_map(move |dir| position.checked_add_direction(*dir).ok())
-}
-
-/// Calculate the Manhattan distance between two rooms.
-pub fn manhattan_distance(room1: &RoomName, room2: &RoomName) -> usize {
-    (room1.x_coord().abs_diff(room2.x_coord()) + room1.y_coord().abs_diff(room2.y_coord())) as usize
 }
 
 lazy_static! {

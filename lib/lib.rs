@@ -3,12 +3,6 @@ mod datatypes;
 mod helpers;
 mod utils;
 
-pub use datatypes::DistanceMap;
-pub use datatypes::Fatigue;
-pub use datatypes::FlowField;
-pub use datatypes::Path;
-pub use datatypes::PathFatigue;
-pub use helpers::cost_matrix;
 use screeps::Position;
 use wasm_bindgen::prelude::*;
 
