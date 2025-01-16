@@ -179,7 +179,8 @@ describe('astarMultiroomDistanceMap', () => {
     console.log('PathFinder Time', pathFinderTime);
     console.log('PathFinder Path', pathFinderPath!.path.length);
 
-    expect(clockworkPath!.length).toBeLessThan(pathFinderPath!.path.length + 1); // less than or equal
+    // clockwork path includes the origin, so we add 1 to the path length.
+    expect(clockworkPath!.length).toBeLessThanOrEqual(pathFinderPath!.path.length + 1);
     expect(clockworkTime).toBeLessThan(pathFinderTime);
   }, 50);
 

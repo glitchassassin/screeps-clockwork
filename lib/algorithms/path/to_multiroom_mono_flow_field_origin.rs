@@ -17,11 +17,12 @@ pub fn path_to_multiroom_mono_flow_field_origin(
     let mut path = Path::new();
     let mut visited = HashSet::new();
     let mut current = start;
-    path.add(current);
 
     let mut steps = 0;
 
     while steps < MAX_STEPS {
+        path.add(current);
+
         let next_direction = flow_field.get(current);
 
         // No direction means we've reached the end of the flow field
@@ -30,16 +31,17 @@ pub fn path_to_multiroom_mono_flow_field_origin(
             Some(direction) => direction,
         };
 
-        let next_pos =
-            corresponding_room_edge(current.checked_add_direction(direction).unwrap_throw());
+        let next_pos = current.checked_add_direction(direction).unwrap_throw();
 
         // Check if we've already visited this position
         if visited.contains(&next_pos) {
             return Err("Cycle detected in flow field");
         }
 
-        current = next_pos;
-        path.add(current);
+        if next_pos.is_room_edge() {
+            path.add(next_pos);
+        }
+        current = corresponding_room_edge(next_pos);
         visited.insert(current);
 
         steps += 1;
