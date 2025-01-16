@@ -1,3 +1,30 @@
+## 0.6.0 (2025-01-16)
+
+### Feat
+
+- use RoomDataCache with other algorithms
+- allow anyOf, allOf destinations for A*
+- implement room data cache from PF for more efficiency
+- optimize A* datastructures
+- astar algorithm
+- cost matrix cache struct
+- optimization
+- calculate terrain matrix in Rust
+- add early exit based on destinations
+- add ephemeral and persist helpers
+
+### Fix
+
+- include destination + both edge tiles in paths
+
+### Refactor
+
+- clean up unused code
+- standardize maxOps, maxPathCost
+- clean up A* implementation
+- split out heuristics function for experimentation
+- condense duplicated flow field logic
+
 ## 0.5.0 (2024-12-11)
 
 ### Feat
