@@ -93,6 +93,7 @@ To set up the local Screeps server, you'll need to have docker installed:
 
 ```bash
 cp .env.sample .env # fill this out with the path to your Screeps .nw package and Steam key
+cp screeps.sample.json screeps.json # optionally, override this to connect to your own local Screeps server
 ./reset-docker.sh
 ```
 
