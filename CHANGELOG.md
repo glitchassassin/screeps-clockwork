@@ -1,3 +1,9 @@
+## 0.7.0 (2025-01-31)
+
+### Feat
+
+- specify targets with ranges
+
 ## 0.6.0 (2025-01-16)
 
 ### Feat
