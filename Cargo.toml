@@ -1,6 +1,6 @@
 [package]
 name = "screeps-clockwork"
-version = "0.7.0"
+version = "0.7.1"
 authors = ["Jon <jon.winsley@gmail.com>"]
 edition = "2018"
 
