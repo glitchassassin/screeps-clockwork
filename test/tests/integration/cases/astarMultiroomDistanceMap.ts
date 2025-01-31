@@ -18,8 +18,8 @@ describe('astarMultiroomDistanceMap', () => {
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
         maxOps: 2500,
-        anyOfDestinations: [new RoomPosition(30, 25, 'W1N1')]
-      })
+        anyOfDestinations: [{ pos: new RoomPosition(30, 25, 'W1N1'), range: 0 }]
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(26, 25, 'W1N1'))).toBe(1);
@@ -36,8 +36,8 @@ describe('astarMultiroomDistanceMap', () => {
       astarMultiroomDistanceMap([new RoomPosition(25, 26, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
         maxOps: 2500,
-        anyOfDestinations: [new RoomPosition(25, 23, 'W1N1')]
-      })
+        anyOfDestinations: [{ pos: new RoomPosition(25, 23, 'W1N1'), range: 0 }]
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 26, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(10);
@@ -49,14 +49,14 @@ describe('astarMultiroomDistanceMap', () => {
     expect(() =>
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => new PathFinder.CostMatrix() as any,
-        anyOfDestinations: [new RoomPosition(25, 23, 'W1N1')]
+        anyOfDestinations: [{ pos: new RoomPosition(25, 23, 'W1N1'), range: 0 }]
       })
     ).toThrow('Invalid ClockworkCostMatrix');
 
     expect(() =>
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => 'foo' as any,
-        anyOfDestinations: [new RoomPosition(25, 23, 'W1N1')]
+        anyOfDestinations: [{ pos: new RoomPosition(25, 23, 'W1N1'), range: 0 }]
       })
     ).toThrow('Invalid ClockworkCostMatrix');
 
@@ -65,7 +65,7 @@ describe('astarMultiroomDistanceMap', () => {
       costMatrix.free();
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        anyOfDestinations: [new RoomPosition(25, 23, 'W1N1')]
+        anyOfDestinations: [{ pos: new RoomPosition(25, 23, 'W1N1'), range: 0 }]
       });
     }).toThrow('Invalid ClockworkCostMatrix');
   });
@@ -76,8 +76,8 @@ describe('astarMultiroomDistanceMap', () => {
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: roomName => (roomName === 'W1N1' ? costMatrix : undefined),
         maxOps: 2500,
-        anyOfDestinations: [new RoomPosition(25, 23, 'W1N1')]
-      })
+        anyOfDestinations: [{ pos: new RoomPosition(25, 23, 'W1N1'), range: 0 }]
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N2'))).toBe(UNREACHABLE);
@@ -89,8 +89,8 @@ describe('astarMultiroomDistanceMap', () => {
       astarMultiroomDistanceMap([new RoomPosition(1, 1, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
         maxOps: 100,
-        anyOfDestinations: [new RoomPosition(48, 48, 'W1N1')]
-      })
+        anyOfDestinations: [{ pos: new RoomPosition(48, 48, 'W1N1'), range: 0 }]
+      }).distanceMap
     );
     let explored = 0;
     for (let y = 0; y < 50; y++) {
@@ -108,8 +108,8 @@ describe('astarMultiroomDistanceMap', () => {
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
         maxPathCost: 10,
-        anyOfDestinations: [new RoomPosition(48, 48, 'W1N1')]
-      })
+        anyOfDestinations: [{ pos: new RoomPosition(48, 48, 'W1N1'), range: 0 }]
+      }).distanceMap
     );
     let explored = 0;
     for (let y = 0; y < 50; y++) {
@@ -121,7 +121,7 @@ describe('astarMultiroomDistanceMap', () => {
     }
     expect(explored).toBe(21 * 21);
   });
-  it('should be faster than PathFinder.search', () => {
+  it('should be faster than PathFinder.search across one room', () => {
     const from = new RoomPosition(5, 5, 'W1N1');
     const to = new RoomPosition(45, 45, 'W1N1');
     const iterations = 50;
@@ -153,8 +153,8 @@ describe('astarMultiroomDistanceMap', () => {
           cache.set(roomName, costMatrix);
           return costMatrix;
         },
-        anyOfDestinations: [to]
-      })
+        anyOfDestinations: [{ pos: to, range: 0 }]
+      }).distanceMap
     );
 
     const clockworkTime = cpuTime(() => {
@@ -168,8 +168,70 @@ describe('astarMultiroomDistanceMap', () => {
             cache.set(roomName, costMatrix);
             return costMatrix;
           },
-          anyOfDestinations: [to]
-        })
+          anyOfDestinations: [{ pos: to, range: 0 }]
+        }).distanceMap
+      );
+      clockworkPath = clockworkDistanceMap.pathToOrigin(to);
+    }, iterations);
+
+    console.log('Clockwork Time', clockworkTime);
+    console.log('Clockwork Path', clockworkPath!.length);
+    console.log('PathFinder Time', pathFinderTime);
+    console.log('PathFinder Path', pathFinderPath!.path.length);
+
+    // clockwork path includes the origin, so we add 1 to the path length.
+    expect(clockworkPath!.length).toBeLessThanOrEqual(pathFinderPath!.path.length + 1);
+    expect(clockworkTime).toBeLessThan(pathFinderTime);
+  }, 50);
+  it('should be faster than PathFinder.search across multiple rooms', () => {
+    const from = new RoomPosition(5, 5, 'W1N2');
+    const to = new RoomPosition(5, 5, 'W2N2');
+    const iterations = 5;
+
+    let pathFinderPath: PathFinderPath;
+    const visitedRooms = new Set<string>();
+    const pathFinderTime = cpuTime(() => {
+      pathFinderPath = PathFinder.search(from, to, {
+        maxCost: 1500,
+        maxOps: 10000,
+        roomCallback: roomName => {
+          visitedRooms.add(roomName);
+          return new PathFinder.CostMatrix();
+        },
+        heuristicWeight: 1
+      });
+    }, iterations);
+
+    let clockworkDistanceMap: ClockworkMultiroomDistanceMap;
+    let clockworkPath: ClockworkPath;
+    const cache = new Map<string, ClockworkCostMatrix>();
+    ephemeral(
+      astarMultiroomDistanceMap([from], {
+        costMatrixCallback: roomName => {
+          if (cache.has(roomName)) {
+            return cache.get(roomName);
+          }
+          const costMatrix = ephemeral(getTerrainCostMatrix(roomName));
+          cache.set(roomName, costMatrix);
+          return costMatrix;
+        },
+        anyOfDestinations: [{ pos: to, range: 0 }]
+      }).distanceMap
+    );
+
+    const clockworkTime = cpuTime(() => {
+      clockworkDistanceMap = ephemeral(
+        astarMultiroomDistanceMap([from], {
+          costMatrixCallback: roomName => {
+            if (cache.has(roomName)) {
+              return cache.get(roomName);
+            }
+            const costMatrix = ephemeral(getTerrainCostMatrix(roomName));
+            cache.set(roomName, costMatrix);
+            return costMatrix;
+          },
+          anyOfDestinations: [{ pos: to, range: 0 }]
+        }).distanceMap
       );
       clockworkPath = clockworkDistanceMap.pathToOrigin(to);
     }, iterations);
@@ -189,8 +251,11 @@ describe('astarMultiroomDistanceMap', () => {
     const distanceMap = ephemeral(
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        anyOfDestinations: [new RoomPosition(25, 27, 'W1N1'), new RoomPosition(25, 21, 'W1N1')]
-      })
+        anyOfDestinations: [
+          { pos: new RoomPosition(25, 27, 'W1N1'), range: 0 },
+          { pos: new RoomPosition(25, 21, 'W1N1'), range: 0 }
+        ]
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(25, 27, 'W1N1'))).toBe(2);
@@ -203,8 +268,11 @@ describe('astarMultiroomDistanceMap', () => {
     const distanceMap = ephemeral(
       astarMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        allOfDestinations: [new RoomPosition(25, 27, 'W1N1'), new RoomPosition(25, 21, 'W1N1')]
-      })
+        allOfDestinations: [
+          { pos: new RoomPosition(25, 27, 'W1N1'), range: 0 },
+          { pos: new RoomPosition(25, 21, 'W1N1'), range: 0 }
+        ]
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(25, 27, 'W1N1'))).toBe(2);
@@ -236,8 +304,8 @@ describe('astarMultiroomDistanceMap', () => {
             cache.set(roomName, costMatrix);
             return costMatrix;
           },
-          anyOfDestinations: to
-        })
+          anyOfDestinations: to.map(pos => ({ pos, range: 0 }))
+        }).distanceMap
       );
     }, iterations);
 
@@ -254,8 +322,8 @@ describe('astarMultiroomDistanceMap', () => {
             cache.set(roomName, costMatrix);
             return costMatrix;
           },
-          anyOfDestinations: to
-        })
+          anyOfDestinations: to.map(pos => ({ pos, range: 0 }))
+        }).distanceMap
       );
     }, iterations);
 
@@ -289,8 +357,8 @@ describe('astarMultiroomDistanceMap', () => {
             cache.set(roomName, costMatrix);
             return costMatrix;
           },
-          allOfDestinations: to
-        })
+          allOfDestinations: to.map(pos => ({ pos, range: 0 }))
+        }).distanceMap
       );
     }, iterations);
 
@@ -307,8 +375,8 @@ describe('astarMultiroomDistanceMap', () => {
             cache.set(roomName, costMatrix);
             return costMatrix;
           },
-          allOfDestinations: to
-        })
+          allOfDestinations: to.map(pos => ({ pos, range: 0 }))
+        }).distanceMap
       );
     }, iterations);
 
@@ -317,4 +385,40 @@ describe('astarMultiroomDistanceMap', () => {
 
     expect(astarTime).toBeLessThan(dijkstraTime);
   }, 50);
+
+  it('should find a target at range 10 from destination', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const searchResult = astarMultiroomDistanceMap([new RoomPosition(5, 5, 'W1N1')], {
+      costMatrixCallback: () => costMatrix,
+      anyOfDestinations: [{ pos: new RoomPosition(45, 45, 'W1N1'), range: 10 }]
+    });
+    ephemeral(searchResult.distanceMap);
+
+    expect(searchResult.foundTargets.some(pos => pos.getRangeTo(45, 45) === 10)).toBe(true);
+  });
+
+  it("should find origin when it's within range of target", () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const origin = new RoomPosition(5, 5, 'W1N1');
+    const searchResult = astarMultiroomDistanceMap([origin], {
+      costMatrixCallback: () => costMatrix,
+      anyOfDestinations: [{ pos: new RoomPosition(45, 45, 'W1N1'), range: 50 }]
+    });
+    ephemeral(searchResult.distanceMap);
+
+    console.log(searchResult.foundTargets);
+
+    expect(searchResult.foundTargets.some(pos => pos.isEqualTo(origin))).toBe(true);
+  });
+
+  it('should find target in different room at range', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const searchResult = astarMultiroomDistanceMap([new RoomPosition(5, 5, 'W1N1')], {
+      costMatrixCallback: roomName => (roomName === 'W1N1' || roomName === 'W1N2' ? costMatrix : undefined),
+      anyOfDestinations: [{ pos: new RoomPosition(45, 45, 'W1N2'), range: 50 }]
+    });
+    ephemeral(searchResult.distanceMap);
+
+    expect(searchResult.foundTargets.every(pos => pos.roomName === 'W1N2')).toBe(true);
+  });
 });

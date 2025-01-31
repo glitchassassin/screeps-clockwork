@@ -13,7 +13,7 @@ describe('bfsMultiroomFlowField', () => {
       bfsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
         maxRooms: 1
-      })
+      }).distanceMap
     );
     const flowField = ephemeral(distanceMap.toFlowField());
     expect(flowField.getDirections(new RoomPosition(25, 25, 'W1N1'))).toEqual([]);

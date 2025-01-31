@@ -11,7 +11,7 @@ describe('dijkstraMultiroomDistanceMap', () => {
         costMatrixCallback: () => costMatrix,
         maxRooms: 1,
         maxOps: 2500
-      })
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(26, 25, 'W1N1'))).toBe(1);
@@ -29,7 +29,7 @@ describe('dijkstraMultiroomDistanceMap', () => {
         costMatrixCallback: () => costMatrix,
         maxRooms: 1,
         maxOps: 2500
-      })
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 26, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(10);
@@ -71,7 +71,7 @@ describe('dijkstraMultiroomDistanceMap', () => {
         costMatrixCallback: roomName => (roomName === 'W1N1' ? costMatrix : undefined),
         maxRooms: 4,
         maxOps: 2500
-      })
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N2'))).toBe(UNREACHABLE);
@@ -84,7 +84,7 @@ describe('dijkstraMultiroomDistanceMap', () => {
         costMatrixCallback: () => costMatrix,
         maxRooms: 2,
         maxOps: 10000
-      })
+      }).distanceMap
     );
     expect(distanceMap.getRooms().length).toBe(2);
   }, 10);
@@ -95,7 +95,7 @@ describe('dijkstraMultiroomDistanceMap', () => {
         costMatrixCallback: () => costMatrix,
         maxRooms: 1,
         maxOps: 100
-      })
+      }).distanceMap
     );
     let explored = 0;
     for (let y = 0; y < 50; y++) {
@@ -113,7 +113,7 @@ describe('dijkstraMultiroomDistanceMap', () => {
       dijkstraMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
         maxPathCost: 10
-      })
+      }).distanceMap
     );
     let explored = 0;
     for (let y = 0; y < 50; y++) {
@@ -130,8 +130,11 @@ describe('dijkstraMultiroomDistanceMap', () => {
     const distanceMap = ephemeral(
       dijkstraMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        anyOfDestinations: [new RoomPosition(25, 27, 'W1N1'), new RoomPosition(25, 21, 'W1N1')]
-      })
+        anyOfDestinations: [
+          { pos: new RoomPosition(25, 27, 'W1N1'), range: 0 },
+          { pos: new RoomPosition(25, 21, 'W1N1'), range: 0 }
+        ]
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(25, 27, 'W1N1'))).toBe(2);
@@ -143,12 +146,49 @@ describe('dijkstraMultiroomDistanceMap', () => {
     const distanceMap = ephemeral(
       dijkstraMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
-        allOfDestinations: [new RoomPosition(25, 27, 'W1N1'), new RoomPosition(25, 21, 'W1N1')]
-      })
+        allOfDestinations: [
+          { pos: new RoomPosition(25, 27, 'W1N1'), range: 0 },
+          { pos: new RoomPosition(25, 21, 'W1N1'), range: 0 }
+        ]
+      }).distanceMap
     );
     expect(distanceMap.get(new RoomPosition(25, 25, 'W1N1'))).toBe(0);
     expect(distanceMap.get(new RoomPosition(25, 27, 'W1N1'))).toBe(2);
     expect(distanceMap.get(new RoomPosition(25, 21, 'W1N1'))).toBe(4);
     expect(distanceMap.get(new RoomPosition(25, 1, 'W1N1'))).toBe(UNREACHABLE);
+  });
+
+  it('should find a target at range 10 from destination', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const searchResult = dijkstraMultiroomDistanceMap([new RoomPosition(5, 5, 'W1N1')], {
+      costMatrixCallback: () => costMatrix,
+      anyOfDestinations: [{ pos: new RoomPosition(45, 45, 'W1N1'), range: 10 }]
+    });
+    ephemeral(searchResult.distanceMap);
+
+    expect(searchResult.foundTargets.some(pos => pos.getRangeTo(45, 45) === 10)).toBe(true);
+  });
+
+  it("should find origin when it's within range of target", () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const origin = new RoomPosition(5, 5, 'W1N1');
+    const searchResult = dijkstraMultiroomDistanceMap([origin], {
+      costMatrixCallback: () => costMatrix,
+      anyOfDestinations: [{ pos: new RoomPosition(45, 45, 'W1N1'), range: 50 }]
+    });
+    ephemeral(searchResult.distanceMap);
+
+    expect(searchResult.foundTargets.some(pos => pos.isEqualTo(origin))).toBe(true);
+  });
+
+  it('should find target in different room at range', () => {
+    const costMatrix = ephemeral(new ClockworkCostMatrix(1));
+    const searchResult = dijkstraMultiroomDistanceMap([new RoomPosition(5, 5, 'W1N1')], {
+      costMatrixCallback: roomName => (roomName === 'W1N1' || roomName === 'W1N2' ? costMatrix : undefined),
+      anyOfDestinations: [{ pos: new RoomPosition(45, 45, 'W1N2'), range: 50 }]
+    });
+    ephemeral(searchResult.distanceMap);
+
+    expect(searchResult.foundTargets.every(pos => pos.roomName === 'W1N2')).toBe(true);
   });
 });

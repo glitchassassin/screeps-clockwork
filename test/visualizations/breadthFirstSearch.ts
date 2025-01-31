@@ -25,7 +25,7 @@ export default [
           bfsMultiroomDistanceMap(start, {
             costMatrixCallback: getTerrainCostMatrix,
             maxOps: 10000
-          })
+          }).distanceMap
         );
         for (const room of distanceMap.getRooms()) {
           visualizeDistanceMap(room, distanceMap.getRoom(room)!);
@@ -44,7 +44,7 @@ export default [
           bfsMultiroomDistanceMap(start, {
             costMatrixCallback: getTerrainCostMatrix,
             maxOps: 10000
-          })
+          }).distanceMap
         );
         const flowField = ephemeral(distanceMap.toFlowField());
         for (const room of flowField.getRooms()) {
@@ -64,7 +64,7 @@ export default [
           bfsMultiroomDistanceMap(start, {
             costMatrixCallback: getTerrainCostMatrix,
             maxOps: 10000
-          })
+          }).distanceMap
         );
         const flowField = ephemeral(distanceMap.toMonoFlowField());
         for (const room of flowField.getRooms()) {
@@ -92,7 +92,7 @@ export default [
             costMatrixCallback: getTerrainCostMatrix,
             maxOps: 10000
           }
-        )
+        ).distanceMap
       );
       const flowField = ephemeral(distanceMap.toFlowField());
       const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
@@ -118,7 +118,7 @@ export default [
             costMatrixCallback: getTerrainCostMatrix,
             maxOps: 10000
           }
-        )
+        ).distanceMap
       );
       const path = ephemeral(distanceMap.pathToOrigin(originFlag.pos));
       visualizePath(path.toArray());
@@ -143,7 +143,7 @@ export default [
             costMatrixCallback: getTerrainCostMatrix,
             maxOps: 10000
           }
-        )
+        ).distanceMap
       );
       const flowField = ephemeral(distanceMap.toMonoFlowField());
       const path = ephemeral(flowField.pathToOrigin(originFlag.pos));

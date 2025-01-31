@@ -1,6 +1,5 @@
 use crate::algorithms::map::neighbors;
 use crate::datatypes::ClockworkCostMatrix;
-use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::RoomDataCache;
 use crate::utils::set_panic_hook;
 use screeps::Position;
@@ -10,6 +9,8 @@ use std::collections::VecDeque;
 use std::convert::TryFrom;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_val;
+
+use super::SearchResult;
 
 #[derive(Copy, Clone)]
 struct State {
@@ -42,9 +43,9 @@ pub fn bfs_multiroom_distance_map(
     max_ops: usize,
     max_rooms: usize,
     max_path_cost: usize,
-    any_of_destinations: Option<Vec<Position>>,
-    all_of_destinations: Option<Vec<Position>>,
-) -> MultiroomDistanceMap {
+    any_of_destinations: Option<Vec<(Position, usize)>>,
+    all_of_destinations: Option<Vec<(Position, usize)>>,
+) -> SearchResult {
     set_panic_hook();
     let mut frontier = VecDeque::new();
     let any_of_destinations =
@@ -53,6 +54,43 @@ pub fn bfs_multiroom_distance_map(
         all_of_destinations.map(|d| d.iter().cloned().collect::<HashSet<_>>());
     let mut cached_room_data = RoomDataCache::new(max_rooms, get_cost_matrix);
     let mut ops_remaining = max_ops;
+    let mut found_targets = Vec::new();
+
+    // check if start position matches targets and return early if so
+    for neighbor in start.iter() {
+        if let Some(ref any_of_destinations) = any_of_destinations {
+            if any_of_destinations.iter().any(|(target, range)| {
+                target.room_name() == neighbor.room_name()
+                    && target.get_range_to(*neighbor) <= *range as u32
+            }) {
+                found_targets.push(*neighbor);
+                return SearchResult::new(
+                    cached_room_data.into(),
+                    found_targets,
+                    max_ops - ops_remaining,
+                );
+            }
+        }
+        if let Some(ref mut all_of_destinations) = all_of_destinations {
+            all_of_destinations.retain(|(target, range)| {
+                if target.room_name() == neighbor.room_name()
+                    && target.get_range_to(*neighbor) <= *range as u32
+                {
+                    found_targets.push(*neighbor);
+                    false
+                } else {
+                    true
+                }
+            });
+            if all_of_destinations.is_empty() {
+                return SearchResult::new(
+                    cached_room_data.into(),
+                    found_targets,
+                    max_ops - ops_remaining,
+                );
+            }
+        }
+    }
 
     // Initialize with start positions
     for position in start {
@@ -74,7 +112,11 @@ pub fn bfs_multiroom_distance_map(
     }) = frontier.pop_front()
     {
         if ops_remaining == 0 {
-            return cached_room_data.into();
+            return SearchResult::new(
+                cached_room_data.into(),
+                found_targets,
+                max_ops - ops_remaining,
+            );
         }
         ops_remaining -= 1;
 
@@ -120,20 +162,45 @@ pub fn bfs_multiroom_distance_map(
                 room_key: neighbor_room_key,
             });
             if let Some(ref mut all_of_destinations) = all_of_destinations {
-                all_of_destinations.remove(&neighbor);
+                all_of_destinations.retain(|(target, range)| {
+                    if target.room_name() == neighbor.room_name()
+                        && target.get_range_to(neighbor) <= *range as u32
+                    {
+                        found_targets.push(neighbor);
+                        false
+                    } else {
+                        true
+                    }
+                });
                 if all_of_destinations.is_empty() {
-                    return cached_room_data.into(); // early exit if all of the destinations are reached
+                    return SearchResult::new(
+                        cached_room_data.into(),
+                        found_targets,
+                        max_ops - ops_remaining,
+                    );
                 }
             }
             if let Some(ref any_of_destinations) = any_of_destinations {
-                if any_of_destinations.contains(&neighbor) {
-                    return cached_room_data.into(); // early exit if any of the destinations are reached
+                if any_of_destinations.iter().any(|(target, range)| {
+                    target.room_name() == neighbor.room_name()
+                        && target.get_range_to(neighbor) <= *range as u32
+                }) {
+                    found_targets.push(neighbor);
+                    return SearchResult::new(
+                        cached_room_data.into(),
+                        found_targets,
+                        max_ops - ops_remaining,
+                    );
                 }
             }
         }
     }
 
-    cached_room_data.into()
+    SearchResult::new(
+        cached_room_data.into(),
+        found_targets,
+        max_ops - ops_remaining,
+    )
 }
 
 /// WASM wrapper for the BFS multiroom distance map function.
@@ -159,11 +226,28 @@ pub fn js_bfs_multiroom_distance_map(
     max_path_cost: usize,
     any_of_destinations: Option<Vec<u32>>,
     all_of_destinations: Option<Vec<u32>>,
-) -> MultiroomDistanceMap {
+) -> SearchResult {
     let start_positions = start_packed
         .iter()
         .map(|pos| Position::from_packed(*pos))
         .collect();
+
+    let any_of_destinations: Option<Vec<(Position, usize)>> =
+        any_of_destinations.map(|destinations| {
+            destinations
+                .chunks(2)
+                .map(|chunk| (Position::from_packed(chunk[0]), chunk[1] as usize))
+                .collect()
+        });
+
+    let all_of_destinations: Option<Vec<(Position, usize)>> =
+        all_of_destinations.map(|destinations| {
+            destinations
+                .chunks(2)
+                .map(|chunk| (Position::from_packed(chunk[0]), chunk[1] as usize))
+                .collect()
+        });
+
     bfs_multiroom_distance_map(
         start_positions,
         |room| {
@@ -190,9 +274,7 @@ pub fn js_bfs_multiroom_distance_map(
         max_ops,
         max_rooms,
         max_path_cost,
-        any_of_destinations
-            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
-        all_of_destinations
-            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
+        any_of_destinations,
+        all_of_destinations,
     )
 }
