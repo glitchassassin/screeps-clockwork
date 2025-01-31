@@ -13,7 +13,7 @@ describe('bfsMultiroomMonoFlowField', () => {
       bfsMultiroomDistanceMap([new RoomPosition(25, 25, 'W1N1')], {
         costMatrixCallback: () => costMatrix,
         maxRooms: 1
-      })
+      }).distanceMap
     );
     const flowField = ephemeral(distanceMap.toMonoFlowField());
     expect(flowField.get(new RoomPosition(25, 25, 'W1N1'))).toBeNull();

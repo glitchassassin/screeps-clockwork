@@ -29,8 +29,8 @@ export default [
         astarMultiroomDistanceMap([originFlag.pos], {
           costMatrixCallback: getTerrainCostMatrix,
           maxOps: 10000,
-          allOfDestinations: targetFlags.map(flag => flag.pos)
-        })
+          allOfDestinations: targetFlags.map(flag => ({ pos: flag.pos, range: 0 }))
+        }).distanceMap
       );
       for (const room of distanceMap.getRooms()) {
         visualizeDistanceMap(room, distanceMap.getRoom(room)!);
@@ -54,8 +54,8 @@ export default [
         astarMultiroomDistanceMap([originFlag.pos], {
           costMatrixCallback: getTerrainCostMatrix,
           maxOps: 10000,
-          anyOfDestinations: [targetFlag.pos]
-        })
+          anyOfDestinations: [{ pos: targetFlag.pos, range: 0 }]
+        }).distanceMap
       );
 
       const path = ephemeral(distanceMap.pathToOrigin(targetFlag.pos));

@@ -1,18 +1,17 @@
 use crate::algorithms::map::{corresponding_room_edge, next_directions};
 use crate::datatypes::ClockworkCostMatrix;
-use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::RoomDataCache;
 use crate::utils::set_panic_hook;
 use screeps::Direction;
 use screeps::Position;
 use screeps::RoomName;
-use std::collections::HashSet;
 use std::convert::TryFrom;
 use std::ops::Fn;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_val;
 
-use super::heuristics::range_heuristic;
+use super::heuristics::base_heuristic_with_range;
+use super::SearchResult;
 
 #[derive(Copy, Clone)]
 struct State {
@@ -35,9 +34,9 @@ pub fn astar_multiroom_distance_map(
     max_ops: usize,
     max_path_cost: usize,
     heuristic_fn: impl Fn(Position) -> usize,
-    any_of_destinations: Option<Vec<Position>>,
-    all_of_destinations: Option<Vec<Position>>,
-) -> MultiroomDistanceMap {
+    any_of_destinations: Option<Vec<(Position, usize)>>,
+    all_of_destinations: Option<Vec<(Position, usize)>>,
+) -> SearchResult {
     set_panic_hook();
     // Since we expect the total cost to be limited (path costs above 1500 rarely make sense),
     // we use a vec indexed by the f_score to store the open states rather than a proper priority queue.
@@ -46,16 +45,46 @@ pub fn astar_multiroom_distance_map(
     // We use this to limit the search to the given number of tiles.
     let mut tiles_remaining = max_ops;
     let mut cached_room_data = RoomDataCache::new(max_rooms, get_cost_matrix);
-    let any_of_targets: HashSet<Position> = any_of_destinations
-        .clone()
-        .unwrap_or_default()
-        .into_iter()
-        .collect();
-    let mut all_of_targets: HashSet<Position> = all_of_destinations
-        .clone()
-        .unwrap_or_default()
-        .into_iter()
-        .collect();
+    let any_of_targets: Option<Vec<(Position, usize)>> = any_of_destinations;
+    let mut all_of_targets = all_of_destinations.clone();
+    let mut found_targets = Vec::new();
+
+    // check if start position matches targets and return early if so
+    for neighbor in start.iter() {
+        if let Some(any_of_targets) = &any_of_targets {
+            if any_of_targets.iter().any(|(target, range)| {
+                target.room_name() == neighbor.room_name()
+                    && target.get_range_to(*neighbor) <= *range as u32
+            }) {
+                found_targets.push(*neighbor);
+                return SearchResult::new(
+                    cached_room_data.into(),
+                    found_targets,
+                    max_ops - tiles_remaining,
+                );
+            }
+        }
+        if let Some(all_of_targets) = &mut all_of_targets {
+            let mut i = 0;
+            while i < all_of_targets.len() {
+                if all_of_targets[i].0.room_name() == neighbor.room_name()
+                    && all_of_targets[i].0.get_range_to(*neighbor) <= all_of_targets[i].1 as u32
+                {
+                    found_targets.push(*neighbor);
+                    all_of_targets.remove(i);
+                } else {
+                    i += 1;
+                }
+            }
+            if all_of_targets.is_empty() {
+                return SearchResult::new(
+                    cached_room_data.into(),
+                    found_targets,
+                    max_ops - tiles_remaining,
+                );
+            }
+        }
+    }
 
     // Initialize with start positions
     for position in start {
@@ -159,16 +188,49 @@ pub fn astar_multiroom_distance_map(
                 min_idx = min_idx.min(f_score);
 
                 // check off targets as they are reached
-                if all_of_destinations.is_some() {
-                    all_of_targets.remove(&neighbor);
+                if let Some(all_of_targets) = &mut all_of_targets {
+                    let mut i = 0;
+                    while i < all_of_targets.len() {
+                        if all_of_targets[i].0.room_name() == neighbor.room_name()
+                            && all_of_targets[i].0.get_range_to(neighbor)
+                                <= all_of_targets[i].1 as u32
+                        {
+                            found_targets.push(neighbor);
+                            all_of_targets.remove(i);
+                        } else {
+                            i += 1;
+                        }
+                    }
+                    if all_of_targets.is_empty() {
+                        return SearchResult::new(
+                            cached_room_data.into(),
+                            found_targets,
+                            max_ops - tiles_remaining,
+                        );
+                    }
+                }
+
+                if let Some(any_of_targets) = &any_of_targets {
+                    if any_of_targets.iter().any(|(target, range)| {
+                        target.room_name() == neighbor.room_name()
+                            && target.get_range_to(neighbor) <= *range as u32
+                    }) {
+                        found_targets.push(neighbor);
+                        return SearchResult::new(
+                            cached_room_data.into(),
+                            found_targets,
+                            max_ops - tiles_remaining,
+                        );
+                    }
                 }
 
                 // If the goal is reached or the max number of tiles has been processed, return the distance map.
-                if (any_of_destinations.is_some() && any_of_targets.contains(&neighbor))
-                    || (all_of_destinations.is_some() && all_of_targets.is_empty())
-                    || tiles_remaining == 0
-                {
-                    return cached_room_data.into();
+                if tiles_remaining == 0 {
+                    return SearchResult::new(
+                        cached_room_data.into(),
+                        found_targets,
+                        max_ops - tiles_remaining,
+                    );
                 }
             }
         }
@@ -177,7 +239,11 @@ pub fn astar_multiroom_distance_map(
     }
 
     // If we've processed all tiles and haven't found the goal, return the distance map.
-    cached_room_data.into()
+    SearchResult::new(
+        cached_room_data.into(),
+        found_targets,
+        max_ops - tiles_remaining,
+    )
 }
 
 #[wasm_bindgen]
@@ -190,38 +256,36 @@ pub fn js_astar_multiroom_distance_map(
     // TODO: Destinations need to include a range
     any_of_destinations: Option<Vec<u32>>,
     all_of_destinations: Option<Vec<u32>>,
-) -> MultiroomDistanceMap {
+) -> SearchResult {
     let start_positions = start_packed
         .iter()
         .map(|pos| Position::from_packed(*pos))
         .collect();
 
-    let any_of_destinations: Option<Vec<Position>> = any_of_destinations.and_then(|destinations| {
-        Some(
+    let any_of_destinations: Option<Vec<(Position, usize)>> =
+        any_of_destinations.map(|destinations| {
             destinations
-                .iter()
-                .map(|pos| Position::from_packed(*pos))
-                .collect(),
-        )
-    });
+                .chunks(2)
+                .map(|chunk| (Position::from_packed(chunk[0]), chunk[1] as usize))
+                .collect()
+        });
 
-    let all_of_destinations: Option<Vec<Position>> = all_of_destinations.and_then(|destinations| {
-        Some(
+    let all_of_destinations: Option<Vec<(Position, usize)>> =
+        all_of_destinations.map(|destinations| {
             destinations
-                .iter()
-                .map(|pos| Position::from_packed(*pos))
-                .collect(),
-        )
-    });
+                .chunks(2)
+                .map(|chunk| (Position::from_packed(chunk[0]), chunk[1] as usize))
+                .collect()
+        });
 
-    let all_destinations: Vec<Position> = all_of_destinations
+    let all_destinations: Vec<(Position, usize)> = all_of_destinations
         .clone()
         .unwrap_or_default()
         .into_iter()
-        .chain(any_of_destinations.clone().unwrap_or_default())
+        .chain(any_of_destinations.clone().unwrap_or_default().into_iter())
         .collect();
 
-    let heuristic_fn = range_heuristic(&all_destinations);
+    let heuristic_fn = base_heuristic_with_range(&all_destinations);
 
     astar_multiroom_distance_map(
         start_positions,

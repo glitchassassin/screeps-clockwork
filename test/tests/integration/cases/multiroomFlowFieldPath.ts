@@ -13,7 +13,7 @@ describe('multiroomFlowFieldPath', () => {
           return undefined;
         },
         maxRooms: 3
-      })
+      }).distanceMap
     );
     const flowField = ephemeral(distanceMap.toFlowField());
     const clockworkPath = ephemeral(flowField.pathToOrigin(new RoomPosition(25, 25, 'W2N2')));

@@ -18,7 +18,7 @@ describe('multiroomDistanceMapPath', () => {
           return undefined;
         },
         maxRooms: 2
-      })
+      }).distanceMap
     );
     const clockworkPath = ephemeral(distanceMap.pathToOrigin(new RoomPosition(25, 25, 'W1N2')));
     const path = clockworkPath.toArray();

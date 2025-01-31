@@ -1,7 +1,7 @@
 import { MAX_USIZE } from '../utils/constants';
 import { fromPackedRoomName } from '../utils/fromPacked';
 import { ClockworkCostMatrix, js_bfs_multiroom_distance_map } from '../wasm/screeps_clockwork';
-import { ClockworkMultiroomDistanceMap } from './multiroomDistanceMap';
+import { fromPackedSearchResult } from './searchResult';
 
 /**
  * Create a distance map for the given start positions, using a breadth-first search.
@@ -33,8 +33,8 @@ export function bfsMultiroomDistanceMap(
     maxOps?: number;
     maxRooms?: number;
     maxPathCost?: number;
-    anyOfDestinations?: RoomPosition[];
-    allOfDestinations?: RoomPosition[];
+    anyOfDestinations?: { pos: RoomPosition; range: number }[];
+    allOfDestinations?: { pos: RoomPosition; range: number }[];
   }
 ) {
   if ([maxOps, maxRooms, maxPathCost].every(n => n === MAX_USIZE) && !anyOfDestinations && !allOfDestinations) {
@@ -50,8 +50,23 @@ export function bfsMultiroomDistanceMap(
     maxOps,
     maxRooms,
     maxPathCost,
-    anyOfDestinations ? new Uint32Array(anyOfDestinations.map(pos => pos.__packedPos)) : undefined,
-    allOfDestinations ? new Uint32Array(allOfDestinations.map(pos => pos.__packedPos)) : undefined
+    anyOfDestinations
+      ? new Uint32Array(
+          anyOfDestinations.reduce((acc, { pos, range }) => {
+            acc.push(pos.__packedPos, range);
+            return acc;
+          }, [] as number[])
+        )
+      : undefined,
+    allOfDestinations
+      ? new Uint32Array(
+          allOfDestinations.reduce((acc, { pos, range }) => {
+            acc.push(pos.__packedPos, range);
+            return acc;
+          }, [] as number[])
+        )
+      : undefined
   );
-  return new ClockworkMultiroomDistanceMap(result);
+
+  return fromPackedSearchResult(result);
 }

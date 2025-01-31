@@ -1,6 +1,5 @@
-use crate::algorithms::astar::multiroom_distance_map::astar_multiroom_distance_map;
+use crate::algorithms::distance_map::astar::astar_multiroom_distance_map;
 use crate::datatypes::ClockworkCostMatrix;
-use crate::datatypes::MultiroomDistanceMap;
 use crate::utils::set_panic_hook;
 use screeps::Position;
 use screeps::RoomName;
@@ -8,15 +7,17 @@ use std::convert::TryFrom;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::throw_val;
 
+use super::SearchResult;
+
 pub fn dijkstra_multiroom_distance_map(
     start: Vec<Position>,
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
     max_ops: usize,
     max_rooms: usize,
     max_path_cost: usize,
-    any_of_destinations: Option<Vec<Position>>,
-    all_of_destinations: Option<Vec<Position>>,
-) -> MultiroomDistanceMap {
+    any_of_destinations: Option<Vec<(Position, usize)>>,
+    all_of_destinations: Option<Vec<(Position, usize)>>,
+) -> SearchResult {
     set_panic_hook();
 
     astar_multiroom_distance_map(
@@ -42,11 +43,28 @@ pub fn js_dijkstra_multiroom_distance_map(
     max_path_cost: usize,
     any_of_destinations: Option<Vec<u32>>,
     all_of_destinations: Option<Vec<u32>>,
-) -> MultiroomDistanceMap {
+) -> SearchResult {
     let start_positions = start_packed
         .iter()
         .map(|pos| Position::from_packed(*pos))
         .collect();
+
+    let any_of_destinations: Option<Vec<(Position, usize)>> =
+        any_of_destinations.map(|destinations| {
+            destinations
+                .chunks(2)
+                .map(|chunk| (Position::from_packed(chunk[0]), chunk[1] as usize))
+                .collect()
+        });
+
+    let all_of_destinations: Option<Vec<(Position, usize)>> =
+        all_of_destinations.map(|destinations| {
+            destinations
+                .chunks(2)
+                .map(|chunk| (Position::from_packed(chunk[0]), chunk[1] as usize))
+                .collect()
+        });
+
     dijkstra_multiroom_distance_map(
         start_positions,
         |room| {
@@ -73,9 +91,7 @@ pub fn js_dijkstra_multiroom_distance_map(
         max_ops,
         max_rooms,
         max_path_cost,
-        any_of_destinations
-            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
-        all_of_destinations
-            .and_then(|d| Some(d.iter().map(|pos| Position::from_packed(*pos)).collect())),
+        any_of_destinations,
+        all_of_destinations,
     )
 }
