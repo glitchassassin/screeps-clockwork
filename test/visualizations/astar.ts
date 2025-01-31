@@ -2,10 +2,8 @@ import {
   astarMultiroomDistanceMap,
   ClockworkCostMatrix,
   getTerrainCostMatrix as clockworkGetTerrainCostMatrix,
-  ClockworkPath,
   ephemeral
 } from '../../src/index';
-
 
 import { cpuTime } from '../utils/cpuTime';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
@@ -26,15 +24,17 @@ interface ComparisonResult {
 }
 
 type CpuComparisonVisualizer = FlagVisualizer & {
-  positionQueue: Array<{x: number, y: number}>;
+  positionQueue: Array<{ x: number; y: number }>;
   results: Map<string, ComparisonResult>;
   initialized: boolean;
 };
 
-function getTerrainCostMatrix(room: string, { plainCost, swampCost, wallCost }: { plainCost?: number; swampCost?: number; wallCost?: number; } = {}) {
+function getTerrainCostMatrix(
+  room: string,
+  { plainCost, swampCost, wallCost }: { plainCost?: number; swampCost?: number; wallCost?: number } = {}
+) {
   return ephemeral(clockworkGetTerrainCostMatrix(room, { plainCost, swampCost, wallCost }));
 }
-
 
 let avg_cw_time = 0;
 let avg_pf_time = 0;
@@ -97,7 +97,7 @@ export default [
     color1: COLOR_YELLOW,
     color2: COLOR_YELLOW,
     // Queue to store positions that need processing
-    positionQueue: [] as Array<{x: number, y: number}>,
+    positionQueue: [] as Array<{ x: number; y: number }>,
     // Store detailed results to persist across ticks
     results: new Map<string, ComparisonResult>(),
     // Flag to track if we've initialized the queue
@@ -132,8 +132,11 @@ export default [
         // Add all walkable positions to queue
         for (let y = 0; y < 50; y++) {
           for (let x = 0; x < 50; x++) {
-            if (terrain.get(x, y) !== TERRAIN_MASK_WALL && !(originFlag.pos.roomName === targetRoom && originFlag.pos.x === x && originFlag.pos.y === y)) {
-              this.positionQueue.push({x, y});
+            if (
+              terrain.get(x, y) !== TERRAIN_MASK_WALL &&
+              !(originFlag.pos.roomName === targetRoom && originFlag.pos.x === x && originFlag.pos.y === y)
+            ) {
+              this.positionQueue.push({ x, y });
             }
           }
         }
@@ -148,43 +151,50 @@ export default [
       const startCpu = Game.cpu.getUsed();
       const cpuLimit = 100; // CPU limit per tick
       let iterations = 3;
-      while (this.positionQueue.length > 0 && (Game.cpu.getUsed() - startCpu) < cpuLimit) {
+      while (this.positionQueue.length > 0 && Game.cpu.getUsed() - startCpu < cpuLimit) {
         const pos = this.positionQueue.pop()!;
         const to = new RoomPosition(pos.x, pos.y, targetRoom);
         const from = originFlag.pos;
 
         // Measure PathFinder results
         let pathFinderResult;
-        const pathFinderTime = cpuTime(() => {
-          pathFinderResult = PathFinder.search(from, {pos: to, range: 0}, {
-            maxCost: 1500,
-            maxOps: 10000,
-            roomCallback: roomName => new PathFinder.CostMatrix(),
-            heuristicWeight: 1
-          });
-        }, iterations) / iterations;
+        const pathFinderTime =
+          cpuTime(() => {
+            pathFinderResult = PathFinder.search(
+              from,
+              { pos: to, range: 0 },
+              {
+                maxCost: 1500,
+                maxOps: 10000,
+                roomCallback: roomName => new PathFinder.CostMatrix(),
+                heuristicWeight: 1
+              }
+            );
+          }, iterations) / iterations;
 
         let clockworkResult;
         let clockworkTime = Infinity;
         try {
           // Measure Clockwork results
-          clockworkTime = cpuTime(() => {
-            const distanceMap = ephemeral(
-              astarMultiroomDistanceMap([from], [to], {
-                costMatrixCallback: getTerrainCostMatrix,
-                maxTiles: 10000
-              })
-            );
-            if (distanceMap) {
-              // console.log('Clockwork ops', result.ops);
-              clockworkResult = {
-                path: distanceMap.pathToOrigin(to),
-                ops: 0,
-                cost: 0,
-                incomplete: false
-              };
-            }
-          }, iterations) / iterations;
+          clockworkTime =
+            cpuTime(() => {
+              const distanceMap = ephemeral(
+                astarMultiroomDistanceMap([from], {
+                  costMatrixCallback: getTerrainCostMatrix,
+                  maxOps: 10000,
+                  anyOfDestinations: [{ pos: to, range: 0 }]
+                }).distanceMap
+              );
+              if (distanceMap) {
+                // console.log('Clockwork ops', result.ops);
+                clockworkResult = {
+                  path: distanceMap.pathToOrigin(to),
+                  ops: 0,
+                  cost: 0,
+                  incomplete: false
+                };
+              }
+            }, iterations) / iterations;
         } catch (e) {
           console.log('Error at position', pos.x, pos.y, e);
         }
@@ -230,7 +240,8 @@ export default [
         const { clockwork, pathfinder } = result;
         // console.log("posStr", posStr, "clockwork", clockwork.ops, "pathfinder", pathfinder.ops);
         // Compare path optimality
-        if (false) { //(clockwork.cost !== pathfinder.cost || clockwork.path.length !== pathfinder.path.length) {
+        if (false) {
+          //(clockwork.cost !== pathfinder.cost || clockwork.path.length !== pathfinder.path.length) {
           // One algorithm found a better path
           // console.log('Clockwork cost', clockwork.cost, 'clockwork path length', clockwork.path.length, 'Pathfinder cost', pathfinder.cost, 'pathfinder path length', pathfinder.path.length);
           const clockworkWon = clockwork.cost <= pathfinder.cost && clockwork.path.length <= pathfinder.path.length;
@@ -259,43 +270,28 @@ export default [
           // Paths are equally optimal, compare ops and CPU
           const clockworkBetterCpu = clockwork.cpu <= pathfinder.cpu;
           const clockworkBetterOps = clockwork.ops <= pathfinder.ops;
-          const cpu = (clockwork.cpu - pathfinder.cpu).toFixed(2); 
-          const ops = (clockwork.ops - pathfinder.ops);
+          const cpu = (clockwork.cpu - pathfinder.cpu).toFixed(2);
+          const ops = clockwork.ops - pathfinder.ops;
           if (ops === 0 || true) {
-            viz.text(
-              cpu,
-              x,
-              y + 0.1,
-              {
-                color: clockworkBetterCpu ? 'green' : 'red',
-                font: 0.4,
-                align: 'center',
-                opacity: 1
-              }
-            );
+            viz.text(cpu, x, y + 0.1, {
+              color: clockworkBetterCpu ? 'green' : 'red',
+              font: 0.4,
+              align: 'center',
+              opacity: 1
+            });
           } else {
-            viz.text(
-              cpu,
-              x,
-              y,
-              {
-                color: clockworkBetterCpu ? 'green' : 'red',
-                font: 0.3,
-                align: 'center',
-                opacity: 1
-              }
-            );
-            viz.text(
-              ops.toString(),
-              x,
-              y + 0.3,
-              {
-                color: clockworkBetterOps ? 'green' : 'red',
-                font: 0.3,
-                align: 'center',
-                opacity: 1
-              }
-            );
+            viz.text(cpu, x, y, {
+              color: clockworkBetterCpu ? 'green' : 'red',
+              font: 0.3,
+              align: 'center',
+              opacity: 1
+            });
+            viz.text(ops.toString(), x, y + 0.3, {
+              color: clockworkBetterOps ? 'green' : 'red',
+              font: 0.3,
+              align: 'center',
+              opacity: 1
+            });
           }
 
           // viz.circle(x, y, {
@@ -310,17 +306,19 @@ export default [
 
       // Show progress
       if (this.positionQueue.length > 0) {
-        console.log(`CPU Usage Map: ${Math.floor((1 - this.positionQueue.length / 2500) * 100)}% complete, ${this.positionQueue.length} positions remaining`);
+        console.log(
+          `CPU Usage Map: ${Math.floor((1 - this.positionQueue.length / 2500) * 100)}% complete, ${this.positionQueue.length} positions remaining`
+        );
       } else {
         console.log('CPU Usage Map: Complete!');
-        
+
         // Calculate and display overall statistics
         let totalPositions = this.results.size;
         let betterPaths = 0;
         let equalPaths = 0;
         let betterCpu = 0;
         let betterOps = 0;
-        
+
         for (const result of this.results.values()) {
           const { clockwork, pathfinder } = result;
           if (clockwork.cost < pathfinder.cost || clockwork.path.length < pathfinder.path.length) {
@@ -331,16 +329,18 @@ export default [
             if (clockwork.ops < pathfinder.ops) betterOps++;
           }
         }
-        
-        console.log(`
+
+        console.log(
+          `
           Statistics:
           Total Positions: ${totalPositions}
-          Better Paths: ${betterPaths} (${((betterPaths/totalPositions)*100).toFixed(1)}%)
-          Equal Paths: ${equalPaths} (${((equalPaths/totalPositions)*100).toFixed(1)}%)
+          Better Paths: ${betterPaths} (${((betterPaths / totalPositions) * 100).toFixed(1)}%)
+          Equal Paths: ${equalPaths} (${((equalPaths / totalPositions) * 100).toFixed(1)}%)
           Of Equal Paths:
-            Better CPU: ${betterCpu} (${((betterCpu/equalPaths)*100).toFixed(1)}%)
-            Better Ops: ${betterOps} (${((betterOps/equalPaths)*100).toFixed(1)}%)
-        `.replace(/^ +/gm, ''));
+            Better CPU: ${betterCpu} (${((betterCpu / equalPaths) * 100).toFixed(1)}%)
+            Better Ops: ${betterOps} (${((betterOps / equalPaths) * 100).toFixed(1)}%)
+        `.replace(/^ +/gm, '')
+        );
       }
     }
   } as CpuComparisonVisualizer
