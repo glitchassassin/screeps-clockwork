@@ -15,7 +15,7 @@ default = ["console_error_panic_hook"]
 js-sys = "0.3"
 log = "0.4"
 fern = "0.7"
-screeps-game-api = "0.22"
+screeps-game-api = "0.23"
 wasm-bindgen = "0.2.84"
 web-sys = { version = "0.3", features = ["console"] }
 
