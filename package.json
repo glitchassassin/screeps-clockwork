@@ -37,7 +37,7 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-typescript": "^12.1.1",
     "@rollup/plugin-wasm": "^6.2.2",
-    "@types/node": "^22.10.1",
+    "@types/node": "^24.0.3",
     "@types/screeps": "^3.3.0",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
