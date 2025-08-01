@@ -371,7 +371,7 @@ dependencies = [
  "js-sys",
  "lazy_static",
  "log",
- "screeps-game-api",
+ "screeps-game-api 0.23.1",
  "screeps-game-utils",
  "wasm-bindgen",
  "web-sys",
@@ -397,13 +397,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "screeps-game-api"
+version = "0.23.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63c4212d104bb403cdb387c3205e3ae056cb09f5d0227526470d878f69993a61"
+dependencies = [
+ "arrayvec",
+ "enum-iterator",
+ "enum_dispatch",
+ "js-sys",
+ "num-derive",
+ "num-traits",
+ "serde",
+ "serde-wasm-bindgen",
+ "serde_json",
+ "serde_repr",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "screeps-game-utils"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb12354a462cba45552e938073c37081fd748a8ce6a22f9e3f82ac951f6adeee"
 dependencies = [
  "chrono",
- "screeps-game-api",
+ "screeps-game-api 0.22.0",
  "serde",
  "serde_json",
  "serde_with",
