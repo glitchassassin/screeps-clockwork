@@ -3,7 +3,7 @@ import { Path } from '../wasm/screeps_clockwork';
 
 /**
  * A path from a start position to an end position. Typically returned by a
- * function like `pathToFlowFieldOrigin` rather than created directly.
+ * function like `ClockworkMultiroomFlowField.pathToOrigin` rather than created directly.
  */
 export class ClockworkPath {
   constructor(private readonly path: Path) {}
