@@ -4,7 +4,9 @@ import {
   js_path_to_multiroom_distance_map_origin,
   MultiroomDistanceMap,
   multiroomFlowField,
-  multiroomMonoFlowField
+  multiroomMonoFlowField,
+  PathPreferenceGonality,
+  PathPreferenceTurns
 } from '../wasm/screeps_clockwork';
 import { ClockworkMultiroomFlowField } from './multiroomFlowField';
 import { ClockworkMultiroomMonoFlowField } from './multiroomMonoFlowField';
@@ -56,7 +58,7 @@ export class ClockworkMultiroomDistanceMap {
    * Path to the origin from a given position.
    */
   pathToOrigin(start: RoomPosition): ClockworkPath {
-    return new ClockworkPath(js_path_to_multiroom_distance_map_origin(start.__packedPos, this._map));
+    return new ClockworkPath(js_path_to_multiroom_distance_map_origin(start.__packedPos, this._map, PathPreferenceGonality.None, PathPreferenceTurns.None));
   }
 
   /**

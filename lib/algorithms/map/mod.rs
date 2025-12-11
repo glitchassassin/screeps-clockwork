@@ -51,6 +51,25 @@ pub fn neighbors_without_edges(position: Position) -> impl Iterator<Item = Posit
         .filter_map(move |dir| position.checked_add_direction(*dir).ok())
 }
 
+/// Adjacency in Screeps is not perfectly euclidean: we need to apply
+/// special rules at room edges.
+pub fn neighbors_directions(position: Position) -> impl Iterator<Item = (Position,Direction)> {
+    PREFERRED_DIRECTIONS
+        .iter()
+        .map(move |dir| (position.checked_add_direction(*dir),*dir))
+        .filter(|tuple| tuple.0.ok().is_some())
+        .map(|tuple| (corresponding_room_edge(tuple.0.unwrap()),tuple.1))
+}
+/// Adjacency in Screeps is not perfectly euclidean: we need to apply
+/// special rules at room edges.
+pub fn neighbors_directions_without_edges(position: Position) -> impl Iterator<Item = (Position,Direction)> {
+    PREFERRED_DIRECTIONS
+        .iter()
+        .map(move |dir| (position.checked_add_direction(*dir),*dir))
+        .filter(|tuple| tuple.0.ok().is_some())
+        .map(|tuple| (tuple.0.unwrap(),tuple.1))
+}
+
 lazy_static! {
     static ref DIRECTION_LOOKUP: [Vec<Direction>; 9] = [
         // Any direction

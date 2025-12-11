@@ -1,5 +1,8 @@
 use crate::algorithms::map::corresponding_room_edge;
+use crate::algorithms::map::neighbors_directions_without_edges;
 use crate::algorithms::map::neighbors_without_edges;
+use crate::algorithms::path::preference::PathPreferenceGonality;
+use crate::algorithms::path::preference::PathPreferenceTurns;
 use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::Path;
 use crate::log;
@@ -14,6 +17,8 @@ const MAX_STEPS: usize = 2500;
 pub fn path_to_multiroom_distance_map_origin(
     start: Position,
     distance_map: &MultiroomDistanceMap,
+    prefer_diagonal: PathPreferenceGonality,
+    prefer_turns: PathPreferenceTurns
 ) -> Result<Path, &'static str> {
     let mut path = Path::new();
     let mut visited = HashSet::new();
@@ -33,12 +38,40 @@ pub fn path_to_multiroom_distance_map_origin(
         let mut next_pos = None;
         let mut min_distance = usize::MAX;
 
-        for neighbor in neighbors_without_edges(current) {
-            let neighbor_distance = distance_map.get(neighbor);
+        if prefer_diagonal != PathPreferenceGonality::None || prefer_turns != PathPreferenceTurns::None {
+            let mut prev_direction = None;
+            for (neighbor, direction) in neighbors_directions_without_edges(current) {
+                let neighbor_distance = distance_map.get(neighbor);
 
-            if neighbor_distance < min_distance {
-                min_distance = neighbor_distance;
-                next_pos = Some(neighbor);
+                let mut better = false;
+                if neighbor_distance < min_distance {
+                    better = true;
+                } else if neighbor_distance == min_distance {
+                    if prefer_turns != PathPreferenceTurns::None {
+                        if (prefer_turns == PathPreferenceTurns::Straight) == (match prev_direction {None=>false,Some(prev_direction)=>direction == prev_direction}) {
+                            better = true;
+                        }
+                        if !better && prefer_diagonal != PathPreferenceGonality::None {
+                            if (prefer_diagonal == PathPreferenceGonality::Diagonal) == direction.is_diagonal() {
+                                better = true;
+                            }
+                        }
+                    }
+                }
+                if better {
+                    min_distance = neighbor_distance;
+                    next_pos = Some(neighbor);
+                }
+                prev_direction = Some(direction);
+            }
+        } else {
+            for neighbor in neighbors_without_edges(current) {
+                let neighbor_distance = distance_map.get(neighbor);
+
+                if neighbor_distance < min_distance {
+                    min_distance = neighbor_distance;
+                    next_pos = Some(neighbor);
+                }
             }
         }
 
@@ -70,8 +103,10 @@ pub fn path_to_multiroom_distance_map_origin(
 pub fn js_path_to_multiroom_distance_map_origin(
     start: u32,
     distance_map: &MultiroomDistanceMap,
+    prefer_diagonal: PathPreferenceGonality,
+    prefer_turns: PathPreferenceTurns
 ) -> Path {
-    match path_to_multiroom_distance_map_origin(Position::from_packed(start), distance_map) {
+    match path_to_multiroom_distance_map_origin(Position::from_packed(start), distance_map, prefer_diagonal, prefer_turns) {
         Ok(path) => path,
         Err(e) => throw_str(&format!(
             "Error calculating path to multiroom distance map origin: {}",
