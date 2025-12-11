@@ -102,7 +102,7 @@ impl<'a> Iterator for DistanceMapEnumerate<'a> {
 
 impl DistanceMap {
     /// Returns an iterator that yields (RoomXY, &T) pairs
-    pub fn enumerate(&self) -> DistanceMapEnumerate {
+    pub fn enumerate(&'_ self) -> DistanceMapEnumerate<'_> {
         DistanceMapEnumerate {
             tile_map: self,
             current_index: 0,
