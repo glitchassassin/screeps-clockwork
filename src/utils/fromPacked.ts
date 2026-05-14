@@ -1,6 +1,9 @@
 export function fromPacked(packedPos: number): RoomPosition {
   const pos = Object.create(RoomPosition.prototype);
-  pos.__packedPos = packedPos;
+  // Screeps stores __packedPos as a signed int32, while Clockwork receives
+  // packed positions from WASM as u32. Re-sign the same bits so Map lookups and
+  // direct comparisons against native RoomPosition.__packedPos values work.
+  pos.__packedPos = packedPos | 0;
   return pos;
 }
 
