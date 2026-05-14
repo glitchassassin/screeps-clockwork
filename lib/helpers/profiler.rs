@@ -198,9 +198,7 @@ impl Profiler {
             ));
         }
 
-        unsafe {
-            log(&table);
-        }
+        log(&table);
     }
 
     pub fn reset(&self) {
