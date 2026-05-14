@@ -5,6 +5,16 @@ updates:
     schedule:
       interval: daily
       time: '08:00'
+    groups:
+      major-updates:
+        update-types:
+          - major
+      minor-updates:
+        update-types:
+          - minor
+      patch-updates:
+        update-types:
+          - patch
     open-pull-requests-limit: 10
 
   - package-ecosystem: npm
@@ -12,6 +22,16 @@ updates:
     schedule:
       interval: daily
       time: '08:00'
+    groups:
+      major-updates:
+        update-types:
+          - major
+      minor-updates:
+        update-types:
+          - minor
+      patch-updates:
+        update-types:
+          - patch
     open-pull-requests-limit: 10
     ignore:
       # source-map v0.6.1 is the last version that supports synchronous API
