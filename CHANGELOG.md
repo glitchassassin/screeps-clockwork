@@ -1,3 +1,9 @@
+## 0.7.2 (2026-05-14)
+
+### Fix
+
+- convert packedPos to signed int32 for correct JS-land comparisons
+
 ## 0.7.1 (2025-01-31)
 
 ### Fix
