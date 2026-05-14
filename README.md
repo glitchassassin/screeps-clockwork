@@ -63,7 +63,7 @@ Dependencies to build and run the project:
 curl https://sh.rustup.rs -sSf | sh
 
 # Install wasm-pack
-curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+curl https://wasm-bindgen.github.io/wasm-pack/installer/init.sh -sSf | sh
 
 # Install Bacon for Rust watch builds
 cargo install --locked bacon

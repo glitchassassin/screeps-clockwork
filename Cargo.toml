@@ -3,6 +3,9 @@ name = "screeps-clockwork"
 version = "0.7.2"
 authors = ["Jon <jon.winsley@gmail.com>"]
 edition = "2018"
+description = "A WASM movement library for Screeps"
+license-file = "LICENSE"
+repository = "https://github.com/glitchassassin/screeps-clockwork"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
