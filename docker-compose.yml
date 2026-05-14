@@ -1,12 +1,24 @@
 services:
   client:
-    image: node:16
-    working_dir: /home/root/client
-    command: sh -c 'npm install --log-level=error --no-progress laverdet/screeps-steamless-client && npx screeps-steamless-client --package /screeps.nw --host 0.0.0.0 --internal_backend http://screeps:21025 --backend http://localhost:21025'
-    environment:
-      SCREEPS_NW_PATH: ${SCREEPS_NW_PATH:?"Missing screeps nw file"}
+    image: node:24-alpine
+    command:
+      - npx
+      - --yes
+      - screepers-steamless-client
+      - --package
+      - /screeps.nw
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - --internal_backend
+      - http://screeps:21025
+    depends_on:
+      screeps:
+        condition: service_started
     volumes:
-      - ${SCREEPS_NW_PATH}:/screeps.nw
+      - npm-cache:/root/.npm
+      - ${SCREEPS_NW_PATH:?Missing SCREEPS_NW_PATH in .env}:/screeps.nw:ro
     ports:
       - 8080:8080/tcp
     restart: unless-stopped
@@ -41,6 +53,7 @@ services:
     restart: unless-stopped
 
 volumes:
+  npm-cache:
   redis-data:
   mongo-data:
   screeps-data:

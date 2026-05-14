@@ -25,8 +25,8 @@ describe('getRange', () => {
     }, 1000);
     expect(clockworkDistance).toEqual(referenceDistance);
 
-    console.log('referenceTime (1000 iterations)', referenceTime);
-    console.log('clockworkTime (1000 iterations)', clockworkTime);
+    console.logUnsafe('referenceTime (1000 iterations)', referenceTime);
+    console.logUnsafe('clockworkTime (1000 iterations)', clockworkTime);
     expect(clockworkTime).toBeLessThan(referenceTime * 2);
   }, 20);
   it('should match the Screeps baseline', () => {
@@ -42,8 +42,8 @@ describe('getRange', () => {
     }, 1000);
     expect(clockworkDistance).toEqual(referenceDistance);
 
-    console.log('referenceTime (1000 iterations)', referenceTime);
-    console.log('clockworkTime (1000 iterations)', clockworkTime);
+    console.logUnsafe('referenceTime (1000 iterations)', referenceTime);
+    console.logUnsafe('clockworkTime (1000 iterations)', clockworkTime);
     expect(clockworkTime).toBeLessThan(referenceTime * 2);
   }, 20);
 });

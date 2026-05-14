@@ -4,8 +4,7 @@
     "rootDir": ".",
     "outDir": "./dist",
     "declaration": true,
-    "declarationDir": "./dist",
-    "baseUrl": "src/"
+    "declarationDir": "./dist"
   },
   "include": ["src/**/*", "types.d.ts"],
   "exclude": ["node_modules", "dist", "dist_test", "*.config.js", "test"]

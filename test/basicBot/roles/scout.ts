@@ -20,9 +20,10 @@ export const scout = {
       Memory.rooms[creep.pos.roomName] = {
         visited: true
       };
-      Object.values(Game.map.describeExits(creep.pos.roomName)).forEach(
-        adjacentRoom => (Memory.rooms[adjacentRoom] ??= {})
-      );
+      const exits = Game.map.describeExits(creep.pos.roomName);
+      if (exits) {
+        Object.values(exits).forEach(adjacentRoom => (Memory.rooms[adjacentRoom] ??= {}));
+      }
     }
 
     // If we reached the previous target, pick a new one

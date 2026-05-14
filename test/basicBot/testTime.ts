@@ -4,5 +4,5 @@ export function testTime(label: string, fn: () => void) {
     fn();
   }
   const end = Game.cpu.getUsed();
-  console.log(`${label}: ${(end - start).toFixed(3)} for 1000 iterations`);
+  console.logUnsafe(`${label}: ${(end - start).toFixed(3)} for 1000 iterations`);
 }

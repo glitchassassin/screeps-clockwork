@@ -72,7 +72,7 @@ export function run(cpuThreshold = 20): TestResult {
 
       const { skip, fn, name, timeout } = suite.tests[currentTestIndex];
       if (skip) {
-        console.log(`[ ${yellow('SKIP')}    ] ${suite.name} - ${name}`);
+        console.logUnsafe(`[ ${yellow('SKIP')}    ] ${suite.name} - ${name}`);
         currentTestIndex++;
         continue;
       }
@@ -86,9 +86,9 @@ export function run(cpuThreshold = 20): TestResult {
         fn();
         suite.afterEach?.();
       } catch (error) {
-        console.log(`[ ${red('FAIL')}    ] ${suite.name} - ${name}`);
+        console.logUnsafe(`[ ${red('FAIL')}    ] ${suite.name} - ${name}`);
         if (error instanceof Error) {
-          console.log(ErrorMapper.sourceMappedStackTrace(error));
+          console.logUnsafe(ErrorMapper.sourceMappedStackTrace(error));
         }
         hasFailures = true;
         continue;
@@ -98,14 +98,14 @@ export function run(cpuThreshold = 20): TestResult {
       }
 
       if (cpuUsed > timeoutLimit) {
-        console.log(
+        console.logUnsafe(
           `[ ${red('TIMEOUT')} ] ${suite.name} - ${name} (${cpuUsed.toFixed(2)} CPU > ${timeoutLimit} CPU limit)`
         );
         hasFailures = true;
         continue;
       }
 
-      console.log(`[ ${green('PASS')}    ] ${suite.name} - ${name} (${cpuUsed.toFixed(2)} CPU)`);
+      console.logUnsafe(`[ ${green('PASS')}    ] ${suite.name} - ${name} (${cpuUsed.toFixed(2)} CPU)`);
     }
 
     currentTestIndex = 0;
@@ -113,10 +113,10 @@ export function run(cpuThreshold = 20): TestResult {
   }
 
   if (hasFailures) {
-    if (someRan) console.log('❌ Some tests failed');
+    if (someRan) console.logUnsafe('❌ Some tests failed');
     return 'failure';
   } else {
-    if (someRan) console.log('✅ All tests passed');
+    if (someRan) console.logUnsafe('✅ All tests passed');
     return 'success';
   }
 }

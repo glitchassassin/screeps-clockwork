@@ -14,7 +14,7 @@ export class ClockworkPath {
    * @example
    * ```typescript
    * for (const pos of path) {
-   *   console.log(pos);
+   *   console.logUnsafe(pos);
    * }
    * ```
    */
@@ -39,7 +39,7 @@ export class ClockworkPath {
    * @example
    * ```typescript
    * for (const pos of path.reversed()) {
-   *   console.log(pos);
+   *   console.logUnsafe(pos);
    * }
    * ```
    */

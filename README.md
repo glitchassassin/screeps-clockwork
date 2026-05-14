@@ -65,6 +65,9 @@ curl https://sh.rustup.rs -sSf | sh
 # Install wasm-pack
 curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
+# Install Bacon for Rust watch builds
+cargo install --locked bacon
+
 # Add rust-src component
 rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
 
@@ -75,9 +78,9 @@ rustup default nightly
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
 # Install node
-nvm install --lts
-nvm use --lts
-nvm alias default --lts # optional
+nvm install
+nvm use
+nvm alias default 24 # optional
 
 # install project dependencies
 npm install

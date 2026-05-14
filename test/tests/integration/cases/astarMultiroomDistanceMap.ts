@@ -174,10 +174,10 @@ describe('astarMultiroomDistanceMap', () => {
       clockworkPath = clockworkDistanceMap.pathToOrigin(to);
     }, iterations);
 
-    console.log('Clockwork Time', clockworkTime);
-    console.log('Clockwork Path', clockworkPath!.length);
-    console.log('PathFinder Time', pathFinderTime);
-    console.log('PathFinder Path', pathFinderPath!.path.length);
+    console.logUnsafe('Clockwork Time', clockworkTime);
+    console.logUnsafe('Clockwork Path', clockworkPath!.length);
+    console.logUnsafe('PathFinder Time', pathFinderTime);
+    console.logUnsafe('PathFinder Path', pathFinderPath!.path.length);
 
     // clockwork path includes the origin, so we add 1 to the path length.
     expect(clockworkPath!.length).toBeLessThanOrEqual(pathFinderPath!.path.length + 1);
@@ -236,10 +236,10 @@ describe('astarMultiroomDistanceMap', () => {
       clockworkPath = clockworkDistanceMap.pathToOrigin(to);
     }, iterations);
 
-    console.log('Clockwork Time', clockworkTime);
-    console.log('Clockwork Path', clockworkPath!.length);
-    console.log('PathFinder Time', pathFinderTime);
-    console.log('PathFinder Path', pathFinderPath!.path.length);
+    console.logUnsafe('Clockwork Time', clockworkTime);
+    console.logUnsafe('Clockwork Path', clockworkPath!.length);
+    console.logUnsafe('PathFinder Time', pathFinderTime);
+    console.logUnsafe('PathFinder Path', pathFinderPath!.path.length);
 
     // clockwork path includes the origin, so we add 1 to the path length.
     expect(clockworkPath!.length).toBeLessThanOrEqual(pathFinderPath!.path.length + 1);
@@ -327,8 +327,8 @@ describe('astarMultiroomDistanceMap', () => {
       );
     }, iterations);
 
-    console.log('A* Time', astarTime);
-    console.log('Dijkstra Time', dijkstraTime);
+    console.logUnsafe('A* Time', astarTime);
+    console.logUnsafe('Dijkstra Time', dijkstraTime);
 
     expect(astarTime).toBeLessThan(dijkstraTime);
   }, 50);
@@ -380,8 +380,8 @@ describe('astarMultiroomDistanceMap', () => {
       );
     }, iterations);
 
-    console.log('A* Time', astarTime);
-    console.log('Dijkstra Time', dijkstraTime);
+    console.logUnsafe('A* Time', astarTime);
+    console.logUnsafe('Dijkstra Time', dijkstraTime);
 
     expect(astarTime).toBeLessThan(dijkstraTime);
   }, 50);
@@ -406,7 +406,7 @@ describe('astarMultiroomDistanceMap', () => {
     });
     ephemeral(searchResult.distanceMap);
 
-    console.log(searchResult.foundTargets);
+    console.logUnsafe(searchResult.foundTargets);
 
     expect(searchResult.foundTargets.some(pos => pos.isEqualTo(origin))).toBe(true);
   });

@@ -41,10 +41,10 @@ describe('clockworkCostMatrix', () => {
         }
       }
     });
-    console.log('clockworkSetTime', clockworkSetTime);
-    console.log('screepsSetTime', screepsSetTime);
-    console.log('clockworkGetTime', clockworkGetTime);
-    console.log('screepsGetTime', screepsGetTime);
+    console.logUnsafe('clockworkSetTime', clockworkSetTime);
+    console.logUnsafe('screepsSetTime', screepsSetTime);
+    console.logUnsafe('clockworkGetTime', clockworkGetTime);
+    console.logUnsafe('screepsGetTime', screepsGetTime);
     expect(clockworkSetTime + clockworkGetTime).toBeLessThan((screepsSetTime + screepsGetTime) * 2);
   });
   it('should fill terrain data faster than screeps', () => {
@@ -54,8 +54,8 @@ describe('clockworkCostMatrix', () => {
     const screepsTime = cpuTime(() => {
       referenceGetTerrainCostMatrix('W1N1', { plainCost: 1, swampCost: 5, wallCost: 255 });
     }, 10);
-    console.log('clockworkTime', clockworkTime);
-    console.log('screepsTime', screepsTime);
+    console.logUnsafe('clockworkTime', clockworkTime);
+    console.logUnsafe('screepsTime', screepsTime);
     expect(clockworkTime).toBeLessThan(screepsTime);
   }, 20);
 });

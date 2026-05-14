@@ -47,13 +47,13 @@ export function initialize(verbose = false) {
   console.error = console_error;
   const start = Game.cpu.getUsed();
   if (!wasm_bytes) wasm_bytes = require('screeps_clockwork.wasm');
-  if (verbose && !initialized) console.log('[clockwork] wasm_bytes loaded');
+  if (verbose && !initialized) console.logUnsafe('[clockwork] wasm_bytes loaded');
   if (!wasm_module) wasm_module = new WebAssembly.Module(wasm_bytes);
-  if (verbose && !initialized) console.log('[clockwork] wasm_module loaded');
+  if (verbose && !initialized) console.logUnsafe('[clockwork] wasm_module loaded');
   if (!wasm_instance) wasm_instance = initSync({ module: wasm_module });
   if (verbose && !initialized) {
-    console.log('[clockwork] wasm_instance loaded');
-    console.log(`[clockwork] version ${version()} initialized with ${(Game.cpu.getUsed() - start).toFixed(2)} CPU`);
+    console.logUnsafe('[clockwork] wasm_instance loaded');
+    console.logUnsafe(`[clockwork] version ${version()} initialized with ${(Game.cpu.getUsed() - start).toFixed(2)} CPU`);
   }
   initialized = true;
 }
@@ -76,5 +76,5 @@ function console_error() {
       }
     })
     .join(' ');
-  console.log('ERROR:', processedArgs);
+  console.logUnsafe('ERROR:', processedArgs);
 }

@@ -11,7 +11,7 @@
     "build:docs": "typedoc",
     "build:pserver": "run-s build:lib build:src && rollup -c --environment DEST:pserver",
     "watch": "run-s build watch:both",
-    "watch:lib": "cargo-watch -w lib -s \"npm run build:lib\"",
+    "watch:lib": "bacon --headless -j build-lib",
     "watch:src": "wait-on src/wasm/screeps_clockwork_bg.wasm && rollup -cw",
     "watch:pserver": "rollup -cw --environment DEST:pserver",
     "watch:both": "run-p watch:lib watch:pserver"
@@ -37,7 +37,7 @@
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-typescript": "^12.1.1",
     "@rollup/plugin-wasm": "^6.2.2",
-    "@types/node": "^25.8.0",
+    "@types/node": "^24.12.4",
     "@types/screeps": "^3.3.0",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",

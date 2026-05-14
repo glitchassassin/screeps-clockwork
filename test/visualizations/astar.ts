@@ -186,7 +186,7 @@ export default [
                 }).distanceMap
               );
               if (distanceMap) {
-                // console.log('Clockwork ops', result.ops);
+                // console.logUnsafe('Clockwork ops', result.ops);
                 clockworkResult = {
                   path: distanceMap.pathToOrigin(to),
                   ops: 0,
@@ -196,14 +196,14 @@ export default [
               }
             }, iterations) / iterations;
         } catch (e) {
-          console.log('Error at position', pos.x, pos.y, e);
+          console.logUnsafe('Error at position', pos.x, pos.y, e);
         }
 
         if (clockworkResult) {
           // @ts-ignore
-          console.log('Clockwork ops', clockworkResult.ops, 'pathfinder ops', pathFinderResult?.ops);
+          console.logUnsafe('Clockwork ops', clockworkResult.ops, 'pathfinder ops', pathFinderResult?.ops);
           // if (clockworkResult.cost > pathFinderResult?.cost) {
-          //   console.log('Clockwork cost', clockworkResult.cost, 'pathfinder cost', pathFinderResult?.cost);
+          //   console.logUnsafe('Clockwork cost', clockworkResult.cost, 'pathfinder cost', pathFinderResult?.cost);
           // }
           // Store detailed results
           const comparison: ComparisonResult = {
@@ -238,12 +238,12 @@ export default [
       for (const [posStr, result] of this.results) {
         const [x, y] = posStr.split(',').map(Number);
         const { clockwork, pathfinder } = result;
-        // console.log("posStr", posStr, "clockwork", clockwork.ops, "pathfinder", pathfinder.ops);
+        // console.logUnsafe("posStr", posStr, "clockwork", clockwork.ops, "pathfinder", pathfinder.ops);
         // Compare path optimality
         if (false) {
           //(clockwork.cost !== pathfinder.cost || clockwork.path.length !== pathfinder.path.length) {
           // One algorithm found a better path
-          // console.log('Clockwork cost', clockwork.cost, 'clockwork path length', clockwork.path.length, 'Pathfinder cost', pathfinder.cost, 'pathfinder path length', pathfinder.path.length);
+          // console.logUnsafe('Clockwork cost', clockwork.cost, 'clockwork path length', clockwork.path.length, 'Pathfinder cost', pathfinder.cost, 'pathfinder path length', pathfinder.path.length);
           const clockworkWon = clockwork.cost <= pathfinder.cost && clockwork.path.length <= pathfinder.path.length;
           let cost = pathfinder.cost - clockwork.cost;
           let length = pathfinder.path.length - clockwork.path.length;
@@ -306,11 +306,11 @@ export default [
 
       // Show progress
       if (this.positionQueue.length > 0) {
-        console.log(
+        console.logUnsafe(
           `CPU Usage Map: ${Math.floor((1 - this.positionQueue.length / 2500) * 100)}% complete, ${this.positionQueue.length} positions remaining`
         );
       } else {
-        console.log('CPU Usage Map: Complete!');
+        console.logUnsafe('CPU Usage Map: Complete!');
 
         // Calculate and display overall statistics
         let totalPositions = this.results.size;
@@ -330,7 +330,7 @@ export default [
           }
         }
 
-        console.log(
+        console.logUnsafe(
           `
           Statistics:
           Total Positions: ${totalPositions}

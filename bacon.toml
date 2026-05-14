@@ -1,0 +1,5 @@
+[jobs.build-lib]
+command = ["npm", "run", "build:lib"]
+need_stdout = true
+default_watch = false
+watch = ["lib", "Cargo.toml", "Cargo.lock"]

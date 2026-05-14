@@ -5,10 +5,10 @@
     "lib": ["esnext", "webworker"],
     "allowJs": true,
     "strict": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "types": ["node", "screeps"],
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "downlevelIteration": true
+    "forceConsistentCasingInFileNames": true
   }
 }
