@@ -1,0 +1,54 @@
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: '/'
+    schedule:
+      interval: daily
+      time: '08:00'
+    groups:
+      major-updates:
+        patterns:
+          - '*'
+        update-types:
+          - major
+      minor-updates:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+      patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+    open-pull-requests-limit: 10
+
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: daily
+      time: '08:00'
+    groups:
+      major-updates:
+        patterns:
+          - '*'
+        update-types:
+          - major
+      minor-updates:
+        patterns:
+          - '*'
+        update-types:
+          - minor
+      patch-updates:
+        patterns:
+          - '*'
+        update-types:
+          - patch
+    open-pull-requests-limit: 10
+    ignore:
+      # source-map v0.6.1 is the last version that supports synchronous API
+      - dependency-name: source-map
+        versions: ['*']
+      # rollup versions after 2.79.2 break things
+      - dependency-name: rollup
+        versions: ['*']
