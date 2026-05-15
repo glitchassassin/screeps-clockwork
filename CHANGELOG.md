@@ -1,3 +1,9 @@
+## 0.9.1 (2026-05-15)
+
+### Fix
+
+- stop distance map paths at edge origins
+
 ## 0.9.0 (2026-05-15)
 
 ### BREAKING CHANGE
