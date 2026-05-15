@@ -379,9 +379,9 @@ dependencies = [
 
 [[package]]
 name = "screeps-game-api"
-version = "0.22.0"
+version = "0.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "308c280d489519ad3fee67fabf62fffb38742f8865ade32e8939e0a8567cf7c4"
+checksum = "63c4212d104bb403cdb387c3205e3ae056cb09f5d0227526470d878f69993a61"
 dependencies = [
  "arrayvec",
  "enum-iterator",
@@ -398,9 +398,9 @@ dependencies = [
 
 [[package]]
 name = "screeps-game-utils"
-version = "0.22.1"
+version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb12354a462cba45552e938073c37081fd748a8ce6a22f9e3f82ac951f6adeee"
+checksum = "02b7db4ec03981c4b9e5e3d162c2cc0c6b71aaa116eb710063a67f5ea75f72d7"
 dependencies = [
  "chrono",
  "screeps-game-api",
