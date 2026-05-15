@@ -8,7 +8,7 @@ use wasm_bindgen::prelude::*;
 /// Creates a monodirectional flow field for the given distance map.
 #[wasm_bindgen(js_name = "multiroomMonoFlowField")]
 pub fn multiroom_mono_flow_field(
-    distance_map: MultiroomDistanceMap,
+    distance_map: &MultiroomDistanceMap,
     direction_order: DirectionOrder,
 ) -> MultiroomMonoFlowField {
     set_panic_hook();

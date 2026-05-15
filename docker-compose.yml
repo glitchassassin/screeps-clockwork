@@ -10,7 +10,7 @@ services:
       - --host
       - 0.0.0.0
       - --port
-      - "8080"
+      - '8080'
       - --internal_backend
       - http://screeps:21025
     depends_on:
@@ -23,7 +23,9 @@ services:
       - 8080:8080/tcp
     restart: unless-stopped
   screeps:
-    image: ghcr.io/jomik/screeps-server:edge
+    build:
+      context: ./docker/screeps-server-node-flags
+    image: screeps-clockwork-server:node24-v8-flags
     volumes:
       - ./config.yml:/screeps/config.yml
       - screeps-data:/screeps
@@ -34,6 +36,7 @@ services:
       MONGO_HOST: mongo
       REDIS_HOST: redis
       STEAM_KEY: ${STEAM_KEY:?"Missing steam key"}
+      SCREEPS_NODE_V8_FLAGS: ${SCREEPS_NODE_V8_FLAGS:---no-liftoff --no-wasm-lazy-compilation --wasm-wrapper-tiering-budget=0}
     restart: unless-stopped
 
   curl:

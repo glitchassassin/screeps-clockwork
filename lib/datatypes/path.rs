@@ -2,7 +2,7 @@ use js_sys::Math::ceil;
 use screeps::{
     game::{map::get_room_terrain, rooms},
     look::STRUCTURES,
-    Position, RoomXY, StructureProperties, StructureType, Terrain,
+    Position, RoomXY, StructureType, Terrain,
 };
 use wasm_bindgen::{prelude::*, UnwrapThrowExt};
 

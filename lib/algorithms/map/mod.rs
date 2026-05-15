@@ -5,19 +5,19 @@ use lazy_static::lazy_static;
 /// If the position is on a room edge, return the corresponding room edge.
 /// Otherwise, just return the position.
 pub fn corresponding_room_edge(position: Position) -> Position {
-    if position.x() == RoomCoordinate(0) {
+    if position.x() == RoomCoordinate::MIN {
         return position.checked_add_direction(Direction::Left).unwrap();
     }
 
-    if position.x() == RoomCoordinate(49) {
+    if position.x() == RoomCoordinate::MAX {
         return position.checked_add_direction(Direction::Right).unwrap();
     }
 
-    if position.y() == RoomCoordinate(0) {
+    if position.y() == RoomCoordinate::MIN {
         return position.checked_add_direction(Direction::Top).unwrap();
     }
 
-    if position.y() == RoomCoordinate(49) {
+    if position.y() == RoomCoordinate::MAX {
         return position.checked_add_direction(Direction::Bottom).unwrap();
     }
 

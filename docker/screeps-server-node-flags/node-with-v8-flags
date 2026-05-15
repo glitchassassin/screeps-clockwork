@@ -1,0 +1,12 @@
+#!/bin/sh
+set -eu
+
+export NODE_PATH="/screeps/node_modules${NODE_PATH:+:$NODE_PATH}"
+
+if [ -n "${SCREEPS_NODE_V8_FLAGS:-}" ]; then
+  # Intentionally split SCREEPS_NODE_V8_FLAGS into individual Node flags.
+  # Example: SCREEPS_NODE_V8_FLAGS="--liftoff-only --no-wasm-tier-up"
+  exec /usr/local/bin/node $SCREEPS_NODE_V8_FLAGS "$@"
+fi
+
+exec /usr/local/bin/node "$@"
