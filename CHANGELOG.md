@@ -1,3 +1,14 @@
+## 0.8.0 (2026-05-15)
+
+### Feat
+
+- add configurable preference for diagonal paths
+
+### Fix
+
+- stabilize node24 benchmarks, upgrade screeps-game-api, fix ownership bug
+- update for latest screeps version/node 24
+
 ## 0.7.2 (2026-05-14)
 
 ### Fix
