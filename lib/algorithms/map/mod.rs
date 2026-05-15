@@ -1,4 +1,5 @@
-use screeps::{Direction, Position, RoomCoordinate};
+use screeps::{Direction, Position, RoomCoordinate, RoomXY};
+use wasm_bindgen::prelude::*;
 
 use lazy_static::lazy_static;
 /// If the position is on a room edge, return the corresponding room edge.
@@ -23,7 +24,14 @@ pub fn corresponding_room_edge(position: Position) -> Position {
     position
 }
 
-static PREFERRED_DIRECTIONS: [Direction; 8] = [
+#[wasm_bindgen]
+#[derive(Debug, Copy, Clone)]
+pub enum DirectionOrder {
+    CardinalFirst = 0,
+    DiagonalFirst = 1,
+}
+
+static CARDINAL_FIRST_DIRECTIONS: [Direction; 8] = [
     Direction::Top,
     Direction::Right,
     Direction::Bottom,
@@ -34,10 +42,28 @@ static PREFERRED_DIRECTIONS: [Direction; 8] = [
     Direction::TopLeft,
 ];
 
+static DIAGONAL_FIRST_DIRECTIONS: [Direction; 8] = [
+    Direction::TopRight,
+    Direction::BottomRight,
+    Direction::BottomLeft,
+    Direction::TopLeft,
+    Direction::Top,
+    Direction::Right,
+    Direction::Bottom,
+    Direction::Left,
+];
+
+pub fn preferred_directions(order: DirectionOrder) -> &'static [Direction; 8] {
+    match order {
+        DirectionOrder::CardinalFirst => &CARDINAL_FIRST_DIRECTIONS,
+        DirectionOrder::DiagonalFirst => &DIAGONAL_FIRST_DIRECTIONS,
+    }
+}
+
 /// Adjacency in Screeps is not perfectly euclidean: we need to apply
 /// special rules at room edges.
-pub fn neighbors(position: Position) -> impl Iterator<Item = Position> {
-    PREFERRED_DIRECTIONS
+pub fn neighbors(position: Position, order: DirectionOrder) -> impl Iterator<Item = Position> {
+    preferred_directions(order)
         .iter()
         .filter_map(move |dir| position.checked_add_direction(*dir).ok())
         .map(corresponding_room_edge)
@@ -45,10 +71,19 @@ pub fn neighbors(position: Position) -> impl Iterator<Item = Position> {
 
 /// Adjacency in Screeps is not perfectly euclidean: we need to apply
 /// special rules at room edges.
-pub fn neighbors_without_edges(position: Position) -> impl Iterator<Item = Position> {
-    PREFERRED_DIRECTIONS
+pub fn neighbors_without_edges(
+    position: Position,
+    order: DirectionOrder,
+) -> impl Iterator<Item = Position> {
+    preferred_directions(order)
         .iter()
         .filter_map(move |dir| position.checked_add_direction(*dir).ok())
+}
+
+pub fn room_xy_neighbors(position: RoomXY, order: DirectionOrder) -> impl Iterator<Item = RoomXY> {
+    preferred_directions(order)
+        .iter()
+        .filter_map(move |dir| position.checked_add_direction(*dir))
 }
 
 lazy_static! {

@@ -4,13 +4,14 @@ import 'fastestsmallesttextencoderdecoder-encodeinto/EncoderDecoderTogether.min.
 import {
   type InitOutput,
   ClockworkCostMatrix,
+  DirectionOrder,
   DistanceMap,
   FlowField,
   MonoFlowField,
   initSync,
   version
 } from './wasm/screeps_clockwork';
-export { ClockworkCostMatrix, DistanceMap, FlowField, MonoFlowField };
+export { ClockworkCostMatrix, DirectionOrder, DistanceMap, FlowField, MonoFlowField };
 
 export * from './utils/cleanup';
 export * from './wrappers/astarDistanceMap';
@@ -53,7 +54,9 @@ export function initialize(verbose = false) {
   if (!wasm_instance) wasm_instance = initSync({ module: wasm_module });
   if (verbose && !initialized) {
     console.logUnsafe('[clockwork] wasm_instance loaded');
-    console.logUnsafe(`[clockwork] version ${version()} initialized with ${(Game.cpu.getUsed() - start).toFixed(2)} CPU`);
+    console.logUnsafe(
+      `[clockwork] version ${version()} initialized with ${(Game.cpu.getUsed() - start).toFixed(2)} CPU`
+    );
   }
   initialized = true;
 }

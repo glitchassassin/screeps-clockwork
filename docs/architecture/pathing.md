@@ -15,6 +15,7 @@ We might want to generate a path:
   - Cheapest: Pick from multiple directions deterministically based on min direction
   - Aesthetic: Pick from multiple directions deterministically based on closest angle to the destination
   - Distributed: Pick from multiple directions randomly to distribute traffic
+  - Diagonal: Prefer diagonal paths (many benefits in Screeps)
 
 3. If the destination is in range, return the path. If a point already on the path is found, throw an error (invalid flow field). If we run out of directions, throw an error (invalid flow field).
 

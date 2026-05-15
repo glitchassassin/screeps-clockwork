@@ -1,6 +1,7 @@
 import { fromPackedRoomName, packRoomName } from '../utils/fromPacked';
 import {
   DistanceMap,
+  DirectionOrder,
   js_path_to_multiroom_distance_map_origin,
   MultiroomDistanceMap,
   multiroomFlowField,
@@ -9,6 +10,12 @@ import {
 import { ClockworkMultiroomFlowField } from './multiroomFlowField';
 import { ClockworkMultiroomMonoFlowField } from './multiroomMonoFlowField';
 import { ClockworkPath } from './path';
+
+export interface DirectionOrderOptions {
+  directionOrder?: DirectionOrder;
+}
+
+const DEFAULT_DIRECTION_ORDER = DirectionOrder.CardinalFirst;
 
 /**
  * A distance map that covers multiple rooms. Typically returned by a function
@@ -54,22 +61,35 @@ export class ClockworkMultiroomDistanceMap {
 
   /**
    * Path to the origin from a given position.
+   * Pass `DirectionOrder.DiagonalFirst` to prefer diagonal steps when multiple neighbors are equally close.
    */
-  pathToOrigin(start: RoomPosition): ClockworkPath {
-    return new ClockworkPath(js_path_to_multiroom_distance_map_origin(start.__packedPos, this._map));
+  pathToOrigin(start: RoomPosition, options: DirectionOrderOptions = {}): ClockworkPath {
+    return new ClockworkPath(
+      js_path_to_multiroom_distance_map_origin(
+        start.__packedPos,
+        this._map,
+        options.directionOrder ?? DEFAULT_DIRECTION_ORDER
+      )
+    );
   }
 
   /**
    * Flow field for this distance map.
+   * Pass `DirectionOrder.DiagonalFirst` to prefer diagonal directions when multiple neighbors are equally close.
    */
-  toFlowField(): ClockworkMultiroomFlowField {
-    return new ClockworkMultiroomFlowField(multiroomFlowField(this._map));
+  toFlowField(options: DirectionOrderOptions = {}): ClockworkMultiroomFlowField {
+    return new ClockworkMultiroomFlowField(
+      multiroomFlowField(this._map, options.directionOrder ?? DEFAULT_DIRECTION_ORDER)
+    );
   }
 
   /**
    * Mono-directional flow field for this distance map.
+   * Pass `DirectionOrder.DiagonalFirst` to prefer diagonal directions when multiple neighbors are equally close.
    */
-  toMonoFlowField(): ClockworkMultiroomMonoFlowField {
-    return new ClockworkMultiroomMonoFlowField(multiroomMonoFlowField(this._map));
+  toMonoFlowField(options: DirectionOrderOptions = {}): ClockworkMultiroomMonoFlowField {
+    return new ClockworkMultiroomMonoFlowField(
+      multiroomMonoFlowField(this._map, options.directionOrder ?? DEFAULT_DIRECTION_ORDER)
+    );
   }
 }

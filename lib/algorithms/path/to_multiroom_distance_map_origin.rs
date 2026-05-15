@@ -1,5 +1,6 @@
 use crate::algorithms::map::corresponding_room_edge;
 use crate::algorithms::map::neighbors_without_edges;
+use crate::algorithms::map::DirectionOrder;
 use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::Path;
 use crate::log;
@@ -14,6 +15,7 @@ const MAX_STEPS: usize = 2500;
 pub fn path_to_multiroom_distance_map_origin(
     start: Position,
     distance_map: &MultiroomDistanceMap,
+    direction_order: DirectionOrder,
 ) -> Result<Path, &'static str> {
     let mut path = Path::new();
     let mut visited = HashSet::new();
@@ -33,7 +35,7 @@ pub fn path_to_multiroom_distance_map_origin(
         let mut next_pos = None;
         let mut min_distance = usize::MAX;
 
-        for neighbor in neighbors_without_edges(current) {
+        for neighbor in neighbors_without_edges(current, direction_order) {
             let neighbor_distance = distance_map.get(neighbor);
 
             if neighbor_distance < min_distance {
@@ -70,8 +72,13 @@ pub fn path_to_multiroom_distance_map_origin(
 pub fn js_path_to_multiroom_distance_map_origin(
     start: u32,
     distance_map: &MultiroomDistanceMap,
+    direction_order: DirectionOrder,
 ) -> Path {
-    match path_to_multiroom_distance_map_origin(Position::from_packed(start), distance_map) {
+    match path_to_multiroom_distance_map_origin(
+        Position::from_packed(start),
+        distance_map,
+        direction_order,
+    ) {
         Ok(path) => path,
         Err(e) => throw_str(&format!(
             "Error calculating path to multiroom distance map origin: {}",

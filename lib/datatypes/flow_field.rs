@@ -1,3 +1,4 @@
+use crate::algorithms::map::{preferred_directions, DirectionOrder};
 use screeps::{Direction, RoomCoordinate};
 use wasm_bindgen::prelude::*;
 
@@ -9,12 +10,21 @@ use wasm_bindgen::prelude::*;
 #[derive(Debug, Clone)]
 pub struct FlowField {
     data: [u8; 2500],
+    direction_order: DirectionOrder,
 }
 
 impl FlowField {
     /// Create a new flow field.
     pub fn new() -> Self {
-        FlowField { data: [0; 2500] }
+        Self::new_with_direction_order(DirectionOrder::CardinalFirst)
+    }
+
+    /// Create a new flow field with the given tie-break order for directions.
+    pub fn new_with_direction_order(direction_order: DirectionOrder) -> Self {
+        FlowField {
+            data: [0; 2500],
+            direction_order,
+        }
     }
 
     /// Get the internal value for a given coordinate.
@@ -31,7 +41,7 @@ impl FlowField {
     pub fn get_directions(&self, x: RoomCoordinate, y: RoomCoordinate) -> Vec<Direction> {
         let value = self.get(x, y);
         let mut directions = Vec::new();
-        for direction in Direction::iter().cloned() {
+        for direction in preferred_directions(self.direction_order).iter().cloned() {
             if value & (1 << direction as u8) != 0 {
                 directions.push(direction);
             }

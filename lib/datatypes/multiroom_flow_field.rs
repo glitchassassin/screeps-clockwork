@@ -1,3 +1,4 @@
+use crate::algorithms::map::DirectionOrder;
 use screeps::{Direction, Position, RoomName};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
@@ -9,13 +10,20 @@ use super::flow_field::FlowField;
 #[derive(Debug, Clone)]
 pub struct MultiroomFlowField {
     maps: HashMap<RoomName, FlowField>,
+    direction_order: DirectionOrder,
 }
 
 impl MultiroomFlowField {
     /// Creates a new empty multiroom flow field
     pub fn new() -> Self {
+        Self::new_with_direction_order(DirectionOrder::CardinalFirst)
+    }
+
+    /// Creates a new empty multiroom flow field with the given tie-break order.
+    pub fn new_with_direction_order(direction_order: DirectionOrder) -> Self {
         MultiroomFlowField {
             maps: HashMap::new(),
+            direction_order,
         }
     }
 
@@ -30,7 +38,11 @@ impl MultiroomFlowField {
     /// Sets the flow field value at a given position
     pub fn set(&mut self, pos: Position, value: u8) {
         let room_name = pos.room_name();
-        let map = self.maps.entry(room_name).or_insert_with(FlowField::new);
+        let direction_order = self.direction_order;
+        let map = self
+            .maps
+            .entry(room_name)
+            .or_insert_with(|| FlowField::new_with_direction_order(direction_order));
         map.set(pos.x(), pos.y(), value);
     }
 
@@ -46,7 +58,10 @@ impl MultiroomFlowField {
 
     /// Gets a mutable reference to the FlowField for a given room, creating it if it doesn't exist
     pub fn get_or_create_room_map(&mut self, room_name: RoomName) -> &mut FlowField {
-        self.maps.entry(room_name).or_insert_with(FlowField::new)
+        let direction_order = self.direction_order;
+        self.maps
+            .entry(room_name)
+            .or_insert_with(|| FlowField::new_with_direction_order(direction_order))
     }
 
     /// Gets the list of valid directions at a given position across rooms
@@ -60,14 +75,22 @@ impl MultiroomFlowField {
     /// Sets the list of valid directions at a given position across rooms
     pub fn set_directions(&mut self, pos: Position, directions: Vec<Direction>) {
         let room_name = pos.room_name();
-        let map = self.maps.entry(room_name).or_insert_with(FlowField::new);
+        let direction_order = self.direction_order;
+        let map = self
+            .maps
+            .entry(room_name)
+            .or_insert_with(|| FlowField::new_with_direction_order(direction_order));
         map.set_directions(pos.x(), pos.y(), directions);
     }
 
     /// Adds a direction to the list of valid directions at a given position across rooms
     pub fn add_direction(&mut self, pos: Position, direction: Direction) {
         let room_name = pos.room_name();
-        let map = self.maps.entry(room_name).or_insert_with(FlowField::new);
+        let direction_order = self.direction_order;
+        let map = self
+            .maps
+            .entry(room_name)
+            .or_insert_with(|| FlowField::new_with_direction_order(direction_order));
         map.add_direction(pos.x(), pos.y(), direction);
     }
 }

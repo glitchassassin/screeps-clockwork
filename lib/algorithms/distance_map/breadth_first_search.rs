@@ -1,4 +1,4 @@
-use crate::algorithms::map::neighbors;
+use crate::algorithms::map::{neighbors, DirectionOrder};
 use crate::datatypes::ClockworkCostMatrix;
 use crate::datatypes::RoomDataCache;
 use crate::utils::set_panic_hook;
@@ -124,7 +124,7 @@ pub fn bfs_multiroom_distance_map(
             continue;
         }
 
-        for neighbor in neighbors(position).into_iter() {
+        for neighbor in neighbors(position, DirectionOrder::CardinalFirst).into_iter() {
             let neighbor_room_key = if neighbor.room_name() == position.room_name() {
                 room_key
             } else {
