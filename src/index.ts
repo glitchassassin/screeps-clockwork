@@ -1,19 +1,9 @@
 /// <reference types="../types.d.ts" />
 import 'fastestsmallesttextencoderdecoder-encodeinto/EncoderDecoderTogether.min.js';
 
-import {
-  type InitOutput,
-  ClockworkCostMatrix,
-  DirectionOrder,
-  DistanceMap,
-  FlowField,
-  MonoFlowField,
-  initSync,
-  version
-} from './wasm/screeps_clockwork';
-export { ClockworkCostMatrix, DirectionOrder, DistanceMap, FlowField, MonoFlowField };
+import { type InitOutput, ClockworkCostMatrix, DirectionOrder, initSync, version } from './wasm/screeps_clockwork';
+export { ClockworkCostMatrix, DirectionOrder };
 
-export * from './utils/cleanup';
 export * from './wrappers/astarDistanceMap';
 export * from './wrappers/bfsDistanceMap';
 export * from './wrappers/dijkstraDistanceMap';

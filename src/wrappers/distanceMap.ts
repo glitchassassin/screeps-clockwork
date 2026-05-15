@@ -26,11 +26,4 @@ export class ClockworkDistanceMap {
   toArray(): Uint32Array {
     return this._map.toArray();
   }
-
-  /**
-   * Frees the memory allocated for this distance map.
-   */
-  free() {
-    this._map.free();
-  }
 }

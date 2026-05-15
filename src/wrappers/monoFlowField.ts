@@ -19,11 +19,4 @@ export class ClockworkMonoFlowField {
   set(x: number, y: number, value?: DirectionConstant): void {
     this._flowField.set(x, y, value);
   }
-
-  /**
-   * Free the memory allocated for this flow field.
-   */
-  free(): void {
-    this._flowField.free();
-  }
 }

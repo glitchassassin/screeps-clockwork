@@ -6,4 +6,4 @@ Internally, it's simply a list of 2500 unsigned integers (one for each tile). Th
 
 ## Implementation Details
 
-Clockwork uses the [`LocalCostMatrix` from screeps-game-api](https://github.com/rustyscreeps/screeps-game-api/) internally, but exposes a `ClockworkCostMatrix` class with `get` and `set` methods similar to `PathFinder.CostMatrix`. These have approximately the same cost as the PathFinder version, but you'll need to make sure you clean up the ClockworkCostMatrix with `.free()` when you don't need it any more - it won't be garbage-collected automatically.
+Clockwork uses the [`LocalCostMatrix` from screeps-game-api](https://github.com/rustyscreeps/screeps-game-api/) internally, but exposes a `ClockworkCostMatrix` class with `get` and `set` methods similar to `PathFinder.CostMatrix`. These have approximately the same cost as the PathFinder version. Rust-backed allocations are released by JavaScript finalizers once the wrapper object is no longer reachable.

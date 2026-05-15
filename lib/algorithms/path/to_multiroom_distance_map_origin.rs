@@ -7,7 +7,6 @@ use crate::log;
 use screeps::Position;
 use std::collections::HashSet;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen::throw_str;
 
 // Maximum iterations to prevent infinite loops (50x50 room size)
 const MAX_STEPS: usize = 2500;
@@ -73,16 +72,17 @@ pub fn js_path_to_multiroom_distance_map_origin(
     start: u32,
     distance_map: &MultiroomDistanceMap,
     direction_order: DirectionOrder,
-) -> Path {
+) -> Result<Path, JsValue> {
     match path_to_multiroom_distance_map_origin(
         Position::from_packed(start),
         distance_map,
         direction_order,
     ) {
-        Ok(path) => path,
-        Err(e) => throw_str(&format!(
+        Ok(path) => Ok(path),
+        Err(e) => Err(js_sys::Error::new(&format!(
             "Error calculating path to multiroom distance map origin: {}",
             e
-        )),
+        ))
+        .into()),
     }
 }

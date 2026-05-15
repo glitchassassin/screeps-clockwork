@@ -1,12 +1,12 @@
 import { fromPackedRoomName, packRoomName } from '../utils/fromPacked';
 import {
-  DistanceMap,
   DirectionOrder,
   js_path_to_multiroom_distance_map_origin,
   MultiroomDistanceMap,
   multiroomFlowField,
   multiroomMonoFlowField
 } from '../wasm/screeps_clockwork';
+import { ClockworkDistanceMap } from './distanceMap';
 import { ClockworkMultiroomFlowField } from './multiroomFlowField';
 import { ClockworkMultiroomMonoFlowField } from './multiroomMonoFlowField';
 import { ClockworkPath } from './path';
@@ -41,8 +41,9 @@ export class ClockworkMultiroomDistanceMap {
   /**
    * Get the DistanceMap for a given room.
    */
-  getRoom(room: string): DistanceMap | undefined {
-    return this._map.get_room(packRoomName(room));
+  getRoom(room: string): ClockworkDistanceMap | undefined {
+    const map = this._map.get_room(packRoomName(room));
+    return map ? new ClockworkDistanceMap(map) : undefined;
   }
 
   /**
@@ -50,13 +51,6 @@ export class ClockworkMultiroomDistanceMap {
    */
   getRooms(): string[] {
     return [...this._map.get_rooms()].map(room => fromPackedRoomName(room));
-  }
-
-  /**
-   * Free the memory allocated for this distance map.
-   */
-  free() {
-    this._map.free();
   }
 
   /**

@@ -9,7 +9,6 @@ export function fromPackedSearchResult(result: SearchResult) {
   }, [] as RoomPosition[]);
   const distanceMap = new ClockworkMultiroomDistanceMap(result.distance_map);
   const ops = result.ops;
-  result.free();
 
   return {
     distanceMap,

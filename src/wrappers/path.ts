@@ -103,11 +103,4 @@ export class ClockworkPath {
     }
     return result;
   }
-
-  /**
-   * Free the memory allocated for this path.
-   */
-  free() {
-    this.path.free();
-  }
 }

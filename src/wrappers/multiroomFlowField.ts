@@ -69,11 +69,4 @@ export class ClockworkMultiroomFlowField {
   pathToOrigin(start: RoomPosition): ClockworkPath {
     return new ClockworkPath(js_path_to_multiroom_flow_field_origin(start.__packedPos, this._flowField));
   }
-
-  /**
-   * Free the memory allocated for this flow field.
-   */
-  free(): void {
-    this._flowField.free();
-  }
 }

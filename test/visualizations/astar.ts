@@ -1,8 +1,7 @@
 import {
   astarMultiroomDistanceMap,
   ClockworkCostMatrix,
-  getTerrainCostMatrix as clockworkGetTerrainCostMatrix,
-  ephemeral
+  getTerrainCostMatrix as clockworkGetTerrainCostMatrix
 } from '../../src/index';
 
 import { cpuTime } from '../utils/cpuTime';
@@ -33,7 +32,7 @@ function getTerrainCostMatrix(
   room: string,
   { plainCost, swampCost, wallCost }: { plainCost?: number; swampCost?: number; wallCost?: number } = {}
 ) {
-  return ephemeral(clockworkGetTerrainCostMatrix(room, { plainCost, swampCost, wallCost }));
+  return clockworkGetTerrainCostMatrix(room, { plainCost, swampCost, wallCost });
 }
 
 let avg_cw_time = 0;
@@ -54,13 +53,11 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const distanceMap = ephemeral(
-        astarMultiroomDistanceMap([originFlag.pos], {
-          costMatrixCallback: getTerrainCostMatrix,
-          maxOps: 10000,
-          allOfDestinations: targetFlags.map(flag => ({ pos: flag.pos, range: 0 }))
-        }).distanceMap
-      );
+      const distanceMap = astarMultiroomDistanceMap([originFlag.pos], {
+        costMatrixCallback: getTerrainCostMatrix,
+        maxOps: 10000,
+        allOfDestinations: targetFlags.map(flag => ({ pos: flag.pos, range: 0 }))
+      }).distanceMap;
       for (const room of distanceMap.getRooms()) {
         visualizeDistanceMap(room, distanceMap.getRoom(room)!);
       }
@@ -79,15 +76,13 @@ export default [
         return;
       }
 
-      const distanceMap = ephemeral(
-        astarMultiroomDistanceMap([originFlag.pos], {
-          costMatrixCallback: getTerrainCostMatrix,
-          maxOps: 10000,
-          anyOfDestinations: [{ pos: targetFlag.pos, range: 0 }]
-        }).distanceMap
-      );
+      const distanceMap = astarMultiroomDistanceMap([originFlag.pos], {
+        costMatrixCallback: getTerrainCostMatrix,
+        maxOps: 10000,
+        anyOfDestinations: [{ pos: targetFlag.pos, range: 0 }]
+      }).distanceMap;
 
-      const path = ephemeral(distanceMap.pathToOrigin(targetFlag.pos));
+      const path = distanceMap.pathToOrigin(targetFlag.pos);
       const pathArray = path.toArray();
       visualizePath(pathArray);
     }
@@ -178,13 +173,11 @@ export default [
           // Measure Clockwork results
           clockworkTime =
             cpuTime(() => {
-              const distanceMap = ephemeral(
-                astarMultiroomDistanceMap([from], {
-                  costMatrixCallback: getTerrainCostMatrix,
-                  maxOps: 10000,
-                  anyOfDestinations: [{ pos: to, range: 0 }]
-                }).distanceMap
-              );
+              const distanceMap = astarMultiroomDistanceMap([from], {
+                costMatrixCallback: getTerrainCostMatrix,
+                maxOps: 10000,
+                anyOfDestinations: [{ pos: to, range: 0 }]
+              }).distanceMap;
               if (distanceMap) {
                 // console.logUnsafe('Clockwork ops', result.ops);
                 clockworkResult = {

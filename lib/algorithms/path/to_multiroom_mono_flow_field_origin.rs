@@ -5,7 +5,7 @@ use crate::{
     datatypes::{MultiroomMonoFlowField, Path},
 };
 use screeps::Position;
-use wasm_bindgen::{prelude::*, throw_str, UnwrapThrowExt};
+use wasm_bindgen::prelude::*;
 
 // Maximum iterations to prevent infinite loops
 const MAX_STEPS: usize = 10000;
@@ -31,7 +31,9 @@ pub fn path_to_multiroom_mono_flow_field_origin(
             Some(direction) => direction,
         };
 
-        let next_pos = current.checked_add_direction(direction).unwrap_throw();
+        let next_pos = current
+            .checked_add_direction(direction)
+            .map_err(|_| "Direction points outside room bounds")?;
 
         // Check if we've already visited this position
         if visited.contains(&next_pos) {
@@ -54,12 +56,13 @@ pub fn path_to_multiroom_mono_flow_field_origin(
 pub fn js_path_to_multiroom_mono_flow_field_origin(
     start: u32,
     flow_field: &MultiroomMonoFlowField,
-) -> Path {
+) -> Result<Path, JsValue> {
     match path_to_multiroom_mono_flow_field_origin(Position::from_packed(start), flow_field) {
-        Ok(path) => path,
-        Err(e) => throw_str(&format!(
+        Ok(path) => Ok(path),
+        Err(e) => Err(js_sys::Error::new(&format!(
             "Error calculating path to multiroom mono flow field origin: {}",
             e
-        )),
+        ))
+        .into()),
     }
 }

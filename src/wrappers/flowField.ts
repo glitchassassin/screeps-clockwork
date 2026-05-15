@@ -40,11 +40,4 @@ export class ClockworkFlowField {
   addDirection(x: number, y: number, direction: DirectionConstant): void {
     this._flowField.addDirection(x, y, direction);
   }
-
-  /**
-   * Free the memory allocated for this flow field.
-   */
-  free(): void {
-    this._flowField.free();
-  }
 }

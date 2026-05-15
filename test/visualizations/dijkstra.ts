@@ -1,8 +1,4 @@
-import {
-  getTerrainCostMatrix as clockworkGetTerrainCostMatrix,
-  dijkstraMultiroomDistanceMap,
-  ephemeral
-} from '../../src/index';
+import { getTerrainCostMatrix as clockworkGetTerrainCostMatrix, dijkstraMultiroomDistanceMap } from '../../src/index';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
 import { visualizeDistanceMap } from './helpers/visualizeDistanceMap';
 import { visualizeFlowField } from './helpers/visualizeFlowField';
@@ -10,7 +6,7 @@ import { visualizeMonoFlowField } from './helpers/visualizeMonoFlowField';
 import { visualizePath } from './helpers/visualizePath';
 
 function getTerrainCostMatrix(room: string) {
-  return ephemeral(clockworkGetTerrainCostMatrix(room));
+  return clockworkGetTerrainCostMatrix(room);
 }
 
 export default [
@@ -21,12 +17,10 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const distanceMap = ephemeral(
-          dijkstraMultiroomDistanceMap(start, {
-            costMatrixCallback: getTerrainCostMatrix,
-            maxOps: 10000
-          }).distanceMap
-        );
+        const distanceMap = dijkstraMultiroomDistanceMap(start, {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxOps: 10000
+        }).distanceMap;
         for (const room of distanceMap.getRooms()) {
           visualizeDistanceMap(room, distanceMap.getRoom(room)!);
         }
@@ -40,13 +34,11 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const distanceMap = ephemeral(
-          dijkstraMultiroomDistanceMap(start, {
-            costMatrixCallback: getTerrainCostMatrix,
-            maxOps: 10000
-          }).distanceMap
-        );
-        const flowField = ephemeral(distanceMap.toFlowField());
+        const distanceMap = dijkstraMultiroomDistanceMap(start, {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxOps: 10000
+        }).distanceMap;
+        const flowField = distanceMap.toFlowField();
         for (const room of flowField.getRooms()) {
           visualizeFlowField(room, flowField.getRoom(room)!);
         }
@@ -60,13 +52,11 @@ export default [
     run(rooms) {
       for (const room in rooms) {
         const start = rooms[room].map(flag => flag.pos);
-        const distanceMap = ephemeral(
-          dijkstraMultiroomDistanceMap(start, {
-            costMatrixCallback: getTerrainCostMatrix,
-            maxOps: 10000
-          }).distanceMap
-        );
-        const flowField = ephemeral(distanceMap.toMonoFlowField());
+        const distanceMap = dijkstraMultiroomDistanceMap(start, {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxOps: 10000
+        }).distanceMap;
+        const flowField = distanceMap.toMonoFlowField();
         for (const room of flowField.getRooms()) {
           visualizeMonoFlowField(room, flowField.getRoom(room)!);
         }
@@ -85,17 +75,15 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const distanceMap = ephemeral(
-        dijkstraMultiroomDistanceMap(
-          targetFlags.map(flag => flag.pos),
-          {
-            costMatrixCallback: getTerrainCostMatrix,
-            maxOps: 10000
-          }
-        ).distanceMap
-      );
-      const flowField = ephemeral(distanceMap.toFlowField());
-      const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
+      const distanceMap = dijkstraMultiroomDistanceMap(
+        targetFlags.map(flag => flag.pos),
+        {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxOps: 10000
+        }
+      ).distanceMap;
+      const flowField = distanceMap.toFlowField();
+      const path = flowField.pathToOrigin(originFlag.pos);
       visualizePath(path.toArray());
     }
   },
@@ -111,16 +99,14 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const distanceMap = ephemeral(
-        dijkstraMultiroomDistanceMap(
-          targetFlags.map(flag => flag.pos),
-          {
-            costMatrixCallback: getTerrainCostMatrix,
-            maxOps: 10000
-          }
-        ).distanceMap
-      );
-      const path = ephemeral(distanceMap.pathToOrigin(originFlag.pos));
+      const distanceMap = dijkstraMultiroomDistanceMap(
+        targetFlags.map(flag => flag.pos),
+        {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxOps: 10000
+        }
+      ).distanceMap;
+      const path = distanceMap.pathToOrigin(originFlag.pos);
       visualizePath(path.toArray());
     }
   },
@@ -136,17 +122,15 @@ export default [
       if (!originFlag || targetFlags.length === 0) {
         return;
       }
-      const distanceMap = ephemeral(
-        dijkstraMultiroomDistanceMap(
-          targetFlags.map(flag => flag.pos),
-          {
-            costMatrixCallback: getTerrainCostMatrix,
-            maxOps: 10000
-          }
-        ).distanceMap
-      );
-      const flowField = ephemeral(distanceMap.toMonoFlowField());
-      const path = ephemeral(flowField.pathToOrigin(originFlag.pos));
+      const distanceMap = dijkstraMultiroomDistanceMap(
+        targetFlags.map(flag => flag.pos),
+        {
+          costMatrixCallback: getTerrainCostMatrix,
+          maxOps: 10000
+        }
+      ).distanceMap;
+      const flowField = distanceMap.toMonoFlowField();
+      const path = flowField.pathToOrigin(originFlag.pos);
       visualizePath(path.toArray());
     }
   }
