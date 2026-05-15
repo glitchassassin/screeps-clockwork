@@ -1,3 +1,13 @@
+## 0.9.0 (2026-05-15)
+
+### BREAKING CHANGE
+
+- remove the Clockwork ephemeral/persist cleanup helpers and wrapper-level free methods. Rust-backed objects now follow JavaScript reachability and wasm-bindgen finalization; advanced callers can still use free on raw wasm-bindgen exports like ClockworkCostMatrix.
+
+### Feat
+
+- rely on wasm finalizers for cleanup
+
 ## 0.8.0 (2026-05-15)
 
 ### Feat
