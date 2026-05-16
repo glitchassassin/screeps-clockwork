@@ -1,3 +1,9 @@
+## 0.11.0 (2026-05-16)
+
+### Feat
+
+- add public type exports for distance maps
+
 ## 0.10.0 (2026-05-16)
 
 ### Fix
