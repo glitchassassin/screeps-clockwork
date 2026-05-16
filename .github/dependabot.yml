@@ -40,3 +40,20 @@ updates:
       # rollup versions after 2.79.2 break things
       - dependency-name: rollup
         versions: ['*']
+
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: daily
+      time: '08:00'
+    groups:
+      major-updates:
+        update-types:
+          - major
+      minor-updates:
+        update-types:
+          - minor
+      patch-updates:
+        update-types:
+          - patch
+    open-pull-requests-limit: 10

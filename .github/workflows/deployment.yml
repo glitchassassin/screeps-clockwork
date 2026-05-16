@@ -21,7 +21,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -41,14 +41,14 @@ jobs:
           rustup target add wasm32-unknown-unknown
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
       # Add Node dependency caching
       - name: Cache node modules
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -60,7 +60,7 @@ jobs:
 
       # Cache wasm-pack output
       - name: Cache wasm-pack output
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: wasm
           key: ${{ runner.os }}-wasm-${{ hashFiles('lib/**') }}
@@ -72,13 +72,13 @@ jobs:
         run: npm run build:docs
 
       - name: Upload dist folder as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist-artifact
           path: dist
 
       - name: Upload docs folder as artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs-artifact
           path: dist_docs
@@ -88,12 +88,12 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: dist-artifact
           path: dist
@@ -119,22 +119,22 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v8
         with:
           name: docs-artifact
           path: dist_docs
       - name: Copy API docs
         run: cp -r ./dist_docs ./docs/api
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./docs
           destination: ./_site
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
 
   deploy-docs:
     environment:
@@ -145,4 +145,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
