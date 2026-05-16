@@ -17,5 +17,5 @@ until docker compose run --rm curl -s http://client:8080/#!/map -o /dev/null; do
   echo "Waiting for client..."
   sleep 5
 done
-docker compose run --rm curl -X POST http://client:8080/api/register/submit -H 'Content-Type: application/json' -d '{"email":"clockwork@example.com","password":"passw0rd","username":"clockwork","tutorialDone":false,"modules":{},"branches":[]}'
+docker compose run --rm curl -X POST http://client:8080/\(http://screeps:21025\)/api/register/submit -H 'Content-Type: application/json' -d '{"email":"clockwork@example.com","password":"passw0rd","username":"clockwork","tutorialDone":false,"modules":{},"branches":[]}'
 docker compose run --rm curl -X POST http://localhost:21028/cli -d 'utils.setCPULimit("clockwork", 500)'
