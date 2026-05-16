@@ -14,6 +14,8 @@ export * from './wrappers/monoFlowField';
 export * from './wrappers/multiroomFlowField';
 export * from './wrappers/multiroomMonoFlowField';
 export * from './wrappers/path';
+export type { ClockworkDistanceMap } from './wrappers/distanceMap';
+export type { ClockworkMultiroomDistanceMap } from './wrappers/multiroomDistanceMap';
 
 declare namespace WebAssembly {
   class Module {
