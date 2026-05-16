@@ -1,3 +1,10 @@
+## 0.10.0 (2026-05-16)
+
+### Fix
+
+- correct semantics for pathToOrigin
+- update reset-docker user setup for new client
+
 ## 0.9.1 (2026-05-15)
 
 ### Fix

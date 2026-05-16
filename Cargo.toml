@@ -1,6 +1,6 @@
 [package]
 name = "screeps-clockwork"
-version = "0.9.1"
+version = "0.10.0"
 authors = ["Jon <jon.winsley@gmail.com>"]
 edition = "2018"
 description = "A WASM movement library for Screeps"
