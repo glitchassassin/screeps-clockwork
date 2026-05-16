@@ -127,9 +127,9 @@ mod tests {
         .unwrap();
 
         assert_eq!(path.len(), 3);
-        assert_eq!(path.get(0), Some(&origin));
+        assert_eq!(path.get(0), Some(&start));
         assert_eq!(path.get(1), Some(&midpoint));
-        assert_eq!(path.get(2), Some(&start));
+        assert_eq!(path.get(2), Some(&origin));
     }
 
     #[test]

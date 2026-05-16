@@ -19,7 +19,7 @@ describe('multiroomDistanceMapPath', () => {
       maxRooms: 2
     }).distanceMap;
     const clockworkPath = distanceMap.pathToOrigin(new RoomPosition(25, 25, 'W1N2'));
-    const path = clockworkPath.toArray();
+    const path = clockworkPath.toArrayReversed();
 
     expect(path[0].isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();
     expect(path[path.length - 1].isEqualTo(new RoomPosition(25, 25, 'W1N2'))).toBeTruthy();

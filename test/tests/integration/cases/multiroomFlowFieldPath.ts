@@ -15,7 +15,7 @@ describe('multiroomFlowFieldPath', () => {
     }).distanceMap;
     const flowField = distanceMap.toFlowField();
     const clockworkPath = flowField.pathToOrigin(new RoomPosition(25, 25, 'W2N2'));
-    const path = clockworkPath.toArray();
+    const path = clockworkPath.toArrayReversed();
 
     expect(path[0].isEqualTo(new RoomPosition(25, 25, 'W1N1'))).toBeTruthy();
     expect(path[path.length - 1].isEqualTo(new RoomPosition(25, 25, 'W2N2'))).toBeTruthy();
