@@ -473,6 +473,7 @@ dependencies = [
  "criterion",
  "js-sys",
  "screeps-game-api",
+ "serde_json",
  "wasm-bindgen",
 ]
 

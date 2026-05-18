@@ -3,9 +3,6 @@ use std::collections::HashMap;
 use screeps::{Position, RoomCoordinate, RoomName, RoomXY};
 use screeps_clockwork::bench_support::ClockworkCostMatrix;
 
-mod private_server_sector;
-mod realistic_rooms;
-
 const ROOM_SIZE: usize = 50;
 const ROOM_AREA: usize = ROOM_SIZE * ROOM_SIZE;
 const PLAIN_COST: u8 = 1;
@@ -41,8 +38,8 @@ pub fn distance_map_scenarios() -> Vec<DistanceMapScenario> {
     vec![
         empty_room_scenario(),
         empty_multiroom_scenario(),
-        realistic_w1s45_scenario(),
-        realistic_w8n31_scenario(),
+        realistic_w1n1_scenario(),
+        realistic_w8n8_scenario(),
         private_server_sector_scenario(),
     ]
 }
@@ -77,59 +74,80 @@ fn empty_multiroom_scenario() -> DistanceMapScenario {
     }
 }
 
-fn realistic_w1s45_scenario() -> DistanceMapScenario {
-    let room_name = room("W1S45");
+fn realistic_w1n1_scenario() -> DistanceMapScenario {
+    let room_name = room("W1N1");
+    let terrain = private_server_room_terrain("W1N1");
     DistanceMapScenario {
-        name: "realistic_room/W1S45_controller_to_source",
+        name: "realistic_room/private_server_W1N1",
         start: position(16, 14, room_name),
         target: position(14, 45, room_name),
         target_range: 1,
         max_rooms: 1,
         max_ops: ROOM_AREA,
         max_path_cost: 1_000,
-        cost_matrices: std::iter::once((
-            room_name,
-            terrain_cost_matrix(realistic_rooms::W1S45_TERRAIN),
-        ))
-        .collect(),
+        cost_matrices: std::iter::once((room_name, terrain_cost_matrix(&terrain))).collect(),
         fallback_cost_matrix: None,
     }
 }
 
-fn realistic_w8n31_scenario() -> DistanceMapScenario {
-    let room_name = room("W8N31");
+fn realistic_w8n8_scenario() -> DistanceMapScenario {
+    let room_name = room("W8N8");
+    let terrain = private_server_room_terrain("W8N8");
     DistanceMapScenario {
-        name: "realistic_room/W8N31_source_to_source",
-        start: position(10, 38, room_name),
+        name: "realistic_room/private_server_W8N8",
+        start: position(29, 41, room_name),
         target: position(37, 19, room_name),
         target_range: 1,
         max_rooms: 1,
         max_ops: ROOM_AREA,
         max_path_cost: 1_000,
-        cost_matrices: std::iter::once((
-            room_name,
-            terrain_cost_matrix(realistic_rooms::W8N31_TERRAIN),
-        ))
-        .collect(),
+        cost_matrices: std::iter::once((room_name, terrain_cost_matrix(&terrain))).collect(),
         fallback_cost_matrix: None,
     }
 }
 
 fn private_server_sector_scenario() -> DistanceMapScenario {
+    let sector = private_server_sector();
     DistanceMapScenario {
         name: "private_server_sector/W1N1_to_W9N9",
         start: position(29, 41, room("W1N1")),
         target: position(8, 41, room("W9N9")),
         target_range: 1,
-        max_rooms: private_server_sector::DEFAULT_PRIVATE_SERVER_SECTOR.len(),
-        max_ops: ROOM_AREA * private_server_sector::DEFAULT_PRIVATE_SERVER_SECTOR.len(),
+        max_rooms: sector.len(),
+        max_ops: ROOM_AREA * sector.len(),
         max_path_cost: 50_000,
-        cost_matrices: private_server_sector::DEFAULT_PRIVATE_SERVER_SECTOR
+        cost_matrices: sector
             .iter()
             .map(|(room_name, terrain)| (room(room_name), terrain_cost_matrix(terrain)))
             .collect(),
         fallback_cost_matrix: None,
     }
+}
+
+fn private_server_room_terrain(room_name: &str) -> String {
+    private_server_sector()
+        .remove(room_name)
+        .unwrap_or_else(|| panic!("Missing private server terrain for {}", room_name))
+}
+
+fn private_server_sector() -> HashMap<String, String> {
+    let fixture: serde_json::Value =
+        serde_json::from_str(include_str!("terrain/private_server_sector.json"))
+            .expect("private server sector terrain fixture should be valid JSON");
+    fixture["rooms"]
+        .as_object()
+        .expect("private server sector terrain fixture should contain a rooms object")
+        .iter()
+        .map(|(room_name, terrain)| {
+            (
+                room_name.clone(),
+                terrain
+                    .as_str()
+                    .expect("private server terrain value should be a string")
+                    .to_string(),
+            )
+        })
+        .collect()
 }
 
 fn terrain_cost_matrix(terrain: &str) -> ClockworkCostMatrix {

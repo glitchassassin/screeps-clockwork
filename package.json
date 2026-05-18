@@ -24,6 +24,14 @@
     "build:lib": "wasm-pack build --target web --out-dir src/wasm --config build.rustflags=[\\'-Ctarget-feature=-reference-types\\',\\'-Ctarget-feature=-multivalue\\',\\'-Ctarget-feature=-sign-ext\\'] -Z build-std=std,panic_abort",
     "build:src": "rollup -c",
     "build:docs": "typedoc",
+    "bench:rust": "cargo bench --features bench --bench distance_map",
+    "bench:wasm:build": "wasm-pack build --target nodejs --out-dir benches/wasm/pkg --config \"build.rustflags=['-Ctarget-feature=-reference-types','-Ctarget-feature=-multivalue','-Ctarget-feature=-sign-ext']\" -Z build-std=std,panic_abort && cp benches/wasm/pkg/screeps_clockwork.js benches/wasm/pkg/screeps_clockwork.cjs",
+    "bench:wasm:run": "vitest bench benches/wasm",
+    "bench:wasm": "run-s bench:wasm:build bench:wasm:run",
+    "bench:wasm:save": "run-s bench:wasm:build bench:wasm:save:run",
+    "bench:wasm:save:run": "mkdir -p target/wasm-bench && vitest bench benches/wasm --outputJson target/wasm-bench/main.json",
+    "bench:wasm:compare": "run-s bench:wasm:build bench:wasm:compare:run",
+    "bench:wasm:compare:run": "vitest bench benches/wasm --compare target/wasm-bench/main.json",
     "build:pserver": "run-s build:lib build:src && rollup -c --environment DEST:pserver",
     "watch": "run-s build watch:both",
     "watch:lib": "bacon --headless -j build-lib",
@@ -66,7 +74,8 @@
     "source-map": "0.6.1",
     "tslib": "^2.8.1",
     "typedoc": "^0.28.5",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "4.1.6"
   },
   "dependencies": {
     "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22"
