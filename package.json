@@ -17,7 +17,7 @@
     "format:check:rust": "cargo fmt --check",
     "typecheck": "run-s typecheck:ts typecheck:rust",
     "typecheck:ts": "run-s typecheck:ts:src typecheck:ts:test",
-    "typecheck:ts:src": "tsc -p tsconfig.json --noEmit",
+    "typecheck:ts:src": "tsc -p tsconfig.src.json --noEmit",
     "typecheck:ts:test": "tsc -p tsconfig.test.json --noEmit",
     "typecheck:rust": "cargo check --target wasm32-unknown-unknown --all-features",
     "build": "run-s build:lib build:src",

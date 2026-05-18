@@ -40,7 +40,7 @@ module.exports = [
         ]
       }),
       commonjs(),
-      typescript({ tsconfig: './tsconfig.json' })
+      typescript({ tsconfig: './tsconfig.src.json' })
     ],
     output: {
       file: 'dist/index.js',
