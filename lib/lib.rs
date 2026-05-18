@@ -6,6 +6,7 @@ mod utils;
 #[cfg(feature = "bench")]
 pub mod bench_support {
     pub use crate::algorithms::distance_map::astar::astar_multiroom_distance_map;
+    pub use crate::algorithms::distance_map::breadth_first_search::bfs_multiroom_distance_map;
     pub use crate::algorithms::distance_map::dijkstra::dijkstra_multiroom_distance_map;
     pub use crate::algorithms::distance_map::heuristics::base_heuristic_with_range;
     pub use crate::datatypes::ClockworkCostMatrix;
