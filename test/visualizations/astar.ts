@@ -145,8 +145,8 @@ export default [
 
         // Measure PathFinder results
         let pathFinderResult;
-        const pathFinderTime =
-          cpuTime(() => {
+        const pathFinderTime = cpuTime(
+          () => {
             pathFinderResult = PathFinder.search(
               from,
               { pos: to, range: 0 },
@@ -157,14 +157,16 @@ export default [
                 heuristicWeight: 1
               }
             );
-          }, iterations) / iterations;
+          },
+          { iterations }
+        ).mean;
 
         let clockworkResult;
         let clockworkTime = Infinity;
         try {
           // Measure Clockwork results
-          clockworkTime =
-            cpuTime(() => {
+          clockworkTime = cpuTime(
+            () => {
               const distanceMap = astarMultiroomDistanceMap([from], {
                 costMatrixCallback: getTerrainCostMatrix,
                 maxOps: 10000,
@@ -179,7 +181,9 @@ export default [
                   incomplete: false
                 };
               }
-            }, iterations) / iterations;
+            },
+            { iterations }
+          ).mean;
         } catch (e) {
           console.logUnsafe('Error at position', pos.x, pos.y, e);
         }
