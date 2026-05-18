@@ -51,7 +51,7 @@ The data types might look like this:
 
 ```ts
 type Path = Array<RoomPosition>;
-type PathFatigue = Array<0 | 1 | 2 | 10>;
+type FatigueCosts = Array<0 | 1 | 2 | 10>;
 type PathCursor = {
   index: number;
   direction: 'forward' | 'backward';

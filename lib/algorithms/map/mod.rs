@@ -1,7 +1,6 @@
 use screeps::{Direction, Position, RoomCoordinate, RoomXY};
 use wasm_bindgen::prelude::*;
 
-use lazy_static::lazy_static;
 /// If the position is on a room edge, return the corresponding room edge.
 /// Otherwise, just return the position.
 pub fn corresponding_room_edge(position: Position) -> Position {
@@ -117,72 +116,80 @@ pub fn room_xy_neighbors(position: RoomXY, order: DirectionOrder) -> impl Iterat
         .filter_map(move |dir| position.checked_add_direction(*dir))
 }
 
-lazy_static! {
-    static ref DIRECTION_LOOKUP: [Vec<Direction>; 9] = [
-        // Any direction
-        vec![
-            Direction::Top,
-            Direction::TopRight,
-            Direction::Right,
-            Direction::BottomRight,
-            Direction::Bottom,
-            Direction::BottomLeft,
-            Direction::Left,
-            Direction::TopLeft,
-        ],
-        // Direction::Top
-        vec![Direction::Top, Direction::TopRight, Direction::TopLeft],
-        // Direction::TopRight
-        vec![
-            Direction::TopRight,
-            Direction::Top,
-            Direction::Right,
-            Direction::BottomRight,
-            Direction::TopLeft,
-        ],
-        // Direction::Right
-        vec![
-            Direction::Right,
-            Direction::BottomRight,
-            Direction::TopRight,
-        ],
-        // Direction::BottomRight
-        vec![
-            Direction::BottomRight,
-            Direction::Right,
-            Direction::Bottom,
-            Direction::TopRight,
-            Direction::BottomLeft,
-        ],
-        // Direction::Bottom
-        vec![
-            Direction::Bottom,
-            Direction::BottomRight,
-            Direction::BottomLeft,
-        ],
-        // Direction::BottomLeft
-        vec![
-            Direction::BottomLeft,
-            Direction::Left,
-            Direction::Bottom,
-            Direction::TopLeft,
-            Direction::BottomRight,
-        ],
-        // Direction::Left
-        vec![Direction::Left, Direction::BottomLeft, Direction::TopLeft],
-        // Direction::TopLeft
-        vec![
-            Direction::TopLeft,
-            Direction::Top,
-            Direction::Left,
-            Direction::BottomLeft,
-            Direction::TopRight,
-        ],
-    ];
-}
+static ANY_DIRECTIONS: [Direction; 8] = [
+    Direction::Top,
+    Direction::TopRight,
+    Direction::Right,
+    Direction::BottomRight,
+    Direction::Bottom,
+    Direction::BottomLeft,
+    Direction::Left,
+    Direction::TopLeft,
+];
+
+static TOP_DIRECTIONS: [Direction; 3] = [Direction::Top, Direction::TopRight, Direction::TopLeft];
+
+static TOP_RIGHT_DIRECTIONS: [Direction; 5] = [
+    Direction::TopRight,
+    Direction::Top,
+    Direction::Right,
+    Direction::BottomRight,
+    Direction::TopLeft,
+];
+
+static RIGHT_DIRECTIONS: [Direction; 3] = [
+    Direction::Right,
+    Direction::BottomRight,
+    Direction::TopRight,
+];
+
+static BOTTOM_RIGHT_DIRECTIONS: [Direction; 5] = [
+    Direction::BottomRight,
+    Direction::Right,
+    Direction::Bottom,
+    Direction::TopRight,
+    Direction::BottomLeft,
+];
+
+static BOTTOM_DIRECTIONS: [Direction; 3] = [
+    Direction::Bottom,
+    Direction::BottomRight,
+    Direction::BottomLeft,
+];
+
+static BOTTOM_LEFT_DIRECTIONS: [Direction; 5] = [
+    Direction::BottomLeft,
+    Direction::Left,
+    Direction::Bottom,
+    Direction::TopLeft,
+    Direction::BottomRight,
+];
+
+static LEFT_DIRECTIONS: [Direction; 3] =
+    [Direction::Left, Direction::BottomLeft, Direction::TopLeft];
+
+static TOP_LEFT_DIRECTIONS: [Direction; 5] = [
+    Direction::TopLeft,
+    Direction::Top,
+    Direction::Left,
+    Direction::BottomLeft,
+    Direction::TopRight,
+];
+
+static DIRECTION_LOOKUP: [&[Direction]; 9] = [
+    &ANY_DIRECTIONS,
+    &TOP_DIRECTIONS,
+    &TOP_RIGHT_DIRECTIONS,
+    &RIGHT_DIRECTIONS,
+    &BOTTOM_RIGHT_DIRECTIONS,
+    &BOTTOM_DIRECTIONS,
+    &BOTTOM_LEFT_DIRECTIONS,
+    &LEFT_DIRECTIONS,
+    &TOP_LEFT_DIRECTIONS,
+];
 
 /// Returns the next directions to consider, based on the direction from which the tile
 /// was entered. Lateral directions can be ruled out as an optimization.
 pub fn next_directions(open_direction: Option<Direction>) -> &'static [Direction] {
-    &DIRECTION_LOOKUP[open_direction.map(|d| d as usize).unwrap_or(0)]
+    DIRECTION_LOOKUP[open_direction.map(|d| d as usize).unwrap_or(0)]
 }
