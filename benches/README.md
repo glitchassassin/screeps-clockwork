@@ -19,4 +19,4 @@ Then make the change and compare against it:
 cargo bench --features bench --bench distance_map -- --baseline committed
 ```
 
-The `bench` feature exposes internal Rust algorithm entry points for Criterion without changing the normal WASM API surface. The benchmark targets cover BFS, Dijkstra, and A* distance-map searches against empty rooms and committed terrain fixtures extracted from `~/repos/autoscreeps`.
+The `bench` feature exposes internal Rust algorithm entry points for Criterion without changing the normal WASM API surface. The benchmark targets cover BFS, Dijkstra, A* distance-map searches, flow-field generation, and path extraction against empty rooms and committed terrain fixtures extracted from `~/repos/autoscreeps`.
