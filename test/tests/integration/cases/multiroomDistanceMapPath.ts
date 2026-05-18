@@ -34,13 +34,13 @@ describe('multiroomDistanceMapPath', () => {
     }).distanceMap;
 
     const defaultPath = distanceMap.pathToOrigin(new RoomPosition(27, 26, 'W1N1'));
-    const defaultPositions = defaultPath.toArray();
+    const defaultPositions = defaultPath.toArrayReversed();
     expect(defaultPositions[1].isEqualTo(new RoomPosition(26, 26, 'W1N1'))).toBeTruthy();
 
     const diagonalPath = distanceMap.pathToOrigin(new RoomPosition(27, 26, 'W1N1'), {
       directionOrder: DirectionOrder.DiagonalFirst
     });
-    const diagonalPositions = diagonalPath.toArray();
+    const diagonalPositions = diagonalPath.toArrayReversed();
     expect(diagonalPositions[1].isEqualTo(new RoomPosition(26, 25, 'W1N1'))).toBeTruthy();
   });
 });

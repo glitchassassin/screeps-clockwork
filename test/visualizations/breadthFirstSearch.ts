@@ -84,7 +84,7 @@ export default [
       ).distanceMap;
       const flowField = distanceMap.toFlowField();
       const path = flowField.pathToOrigin(originFlag.pos);
-      visualizePath(path.toArray());
+      visualizePath(path.toArrayReversed());
     }
   },
   {
@@ -107,7 +107,7 @@ export default [
         }
       ).distanceMap;
       const path = distanceMap.pathToOrigin(originFlag.pos);
-      visualizePath(path.toArray());
+      visualizePath(path.toArrayReversed());
     }
   },
   {
@@ -131,7 +131,7 @@ export default [
       ).distanceMap;
       const flowField = distanceMap.toMonoFlowField();
       const path = flowField.pathToOrigin(originFlag.pos);
-      visualizePath(path.toArray());
+      visualizePath(path.toArrayReversed());
     }
   }
 ] satisfies FlagVisualizer[];

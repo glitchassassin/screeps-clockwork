@@ -83,7 +83,7 @@ export default [
       }).distanceMap;
 
       const path = distanceMap.pathToOrigin(targetFlag.pos);
-      const pathArray = path.toArray();
+      const pathArray = path.toArrayReversed();
       visualizePath(pathArray);
     }
   },
