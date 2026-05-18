@@ -27,6 +27,7 @@ struct State {
 
 /// Creates a distance map for the given start positions, using A* to optimize the search and
 /// find the shortest path to the given destinations.
+#[allow(clippy::too_many_arguments)]
 pub fn astar_multiroom_distance_map(
     start: Vec<Position>,
     get_cost_matrix: impl Fn(RoomName) -> Option<ClockworkCostMatrix>,
@@ -142,7 +143,7 @@ pub fn astar_multiroom_distance_map(
                 let terrain_cost =
                     if let Some(cost_matrix) = &cached_room_data[room_key].cost_matrix {
                         let terrain_cost = cost_matrix.get(neighbor.xy());
-                        if terrain_cost >= 255 {
+                        if terrain_cost == 255 {
                             // impassable terrain
                             continue;
                         }
@@ -281,7 +282,7 @@ pub fn js_astar_multiroom_distance_map(
         .clone()
         .unwrap_or_default()
         .into_iter()
-        .chain(any_of_destinations.clone().unwrap_or_default().into_iter())
+        .chain(any_of_destinations.clone().unwrap_or_default())
         .collect();
 
     let heuristic_fn = base_heuristic_with_range(&all_destinations);
@@ -299,7 +300,7 @@ pub fn js_astar_multiroom_distance_map(
                 Err(e) => throw_val(e),
             };
 
-            let cost_matrix = if value.is_undefined() {
+            if value.is_undefined() {
                 None
             } else {
                 Some(
@@ -307,9 +308,7 @@ pub fn js_astar_multiroom_distance_map(
                         .ok()
                         .expect_throw("Invalid ClockworkCostMatrix"),
                 )
-            };
-
-            cost_matrix
+            }
         },
         max_rooms,
         max_ops,

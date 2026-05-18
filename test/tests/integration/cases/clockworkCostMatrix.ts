@@ -48,7 +48,9 @@ describe('clockworkCostMatrix', () => {
     expect(clockworkSetTime + clockworkGetTime).toBeLessThan((screepsSetTime + screepsGetTime) * 2);
   });
   it('should fill terrain data faster than screeps', () => {
-    const clockworkTime = cpuTime(() => {}, 10);
+    const clockworkTime = cpuTime(() => {
+      getTerrainCostMatrix('W1N1', { plainCost: 1, swampCost: 5, wallCost: 255 });
+    }, 10);
     const screepsTime = cpuTime(() => {
       referenceGetTerrainCostMatrix('W1N1', { plainCost: 1, swampCost: 5, wallCost: 255 });
     }, 10);

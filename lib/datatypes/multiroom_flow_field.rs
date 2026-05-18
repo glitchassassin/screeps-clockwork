@@ -69,7 +69,7 @@ impl MultiroomFlowField {
         self.maps
             .get(&pos.room_name())
             .map(|map| map.get_directions(pos.x(), pos.y()))
-            .unwrap_or(Vec::new())
+            .unwrap_or_default()
     }
 
     /// Sets the list of valid directions at a given position across rooms

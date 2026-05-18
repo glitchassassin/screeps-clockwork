@@ -1,8 +1,4 @@
-import {
-  astarMultiroomDistanceMap,
-  ClockworkCostMatrix,
-  getTerrainCostMatrix as clockworkGetTerrainCostMatrix
-} from '../../src/index';
+import { astarMultiroomDistanceMap, getTerrainCostMatrix as clockworkGetTerrainCostMatrix } from '../../src/index';
 
 import { cpuTime } from '../utils/cpuTime';
 import { FlagVisualizer } from './helpers/FlagVisualizer';
@@ -35,10 +31,6 @@ function getTerrainCostMatrix(
   return clockworkGetTerrainCostMatrix(room, { plainCost, swampCost, wallCost });
 }
 
-let avg_cw_time = 0;
-let avg_pf_time = 0;
-
-const cache = new Map<string, ClockworkCostMatrix>();
 export default [
   {
     name: 'A* Multiroom Distance Map',
@@ -71,7 +63,7 @@ export default [
      * Visualization of a Dijkstra multiroom distance map-based path.
      */
     run(rooms) {
-      const [originFlag, targetFlag, ...rest] = Object.values(rooms).reduce((acc, flags) => [...acc, ...flags], []);
+      const [originFlag, targetFlag] = Object.values(rooms).reduce((acc, flags) => [...acc, ...flags], []);
       if (!originFlag || !targetFlag) {
         return;
       }
@@ -105,7 +97,7 @@ export default [
      * Processes positions incrementally across ticks to stay within CPU limits.
      */
     run(rooms) {
-      const [originFlag, targetFlag, ...rest] = Object.values(rooms).reduce((acc, flags) => [...acc, ...flags], []);
+      const [originFlag, targetFlag] = Object.values(rooms).reduce((acc, flags) => [...acc, ...flags], []);
       if (!originFlag || !targetFlag) {
         this.initialized = false;
         this.positionQueue = [];
@@ -145,7 +137,7 @@ export default [
       // Process positions until we hit CPU limit or queue is empty
       const startCpu = Game.cpu.getUsed();
       const cpuLimit = 100; // CPU limit per tick
-      let iterations = 3;
+      const iterations = 3;
       while (this.positionQueue.length > 0 && Game.cpu.getUsed() - startCpu < cpuLimit) {
         const pos = this.positionQueue.pop()!;
         const to = new RoomPosition(pos.x, pos.y, targetRoom);
@@ -161,7 +153,7 @@ export default [
               {
                 maxCost: 1500,
                 maxOps: 10000,
-                roomCallback: roomName => new PathFinder.CostMatrix(),
+                roomCallback: _roomName => new PathFinder.CostMatrix(),
                 heuristicWeight: 1
               }
             );
@@ -237,10 +229,8 @@ export default [
           //(clockwork.cost !== pathfinder.cost || clockwork.path.length !== pathfinder.path.length) {
           // One algorithm found a better path
           // console.logUnsafe('Clockwork cost', clockwork.cost, 'clockwork path length', clockwork.path.length, 'Pathfinder cost', pathfinder.cost, 'pathfinder path length', pathfinder.path.length);
-          const clockworkWon = clockwork.cost <= pathfinder.cost && clockwork.path.length <= pathfinder.path.length;
-          let cost = pathfinder.cost - clockwork.cost;
-          let length = pathfinder.path.length - clockwork.path.length;
-          let text = cost == 0 ? length : cost;
+          const cost = pathfinder.cost - clockwork.cost;
+          const length = pathfinder.path.length - clockwork.path.length;
           viz.circle(x, y, {
             radius: 0.3,
             fill: cost >= 0 ? 'green' : 'red',
@@ -306,7 +296,7 @@ export default [
         console.logUnsafe('CPU Usage Map: Complete!');
 
         // Calculate and display overall statistics
-        let totalPositions = this.results.size;
+        const totalPositions = this.results.size;
         let betterPaths = 0;
         let equalPaths = 0;
         let betterCpu = 0;

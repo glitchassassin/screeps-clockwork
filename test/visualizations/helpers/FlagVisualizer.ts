@@ -30,10 +30,10 @@ export function runVisualizers(visualizers: FlagVisualizer[]) {
     const visualizer = visualizers[i];
     // display the visualizer name and colors
     const x = 1;
-    let font_size = 0.2;
+    const font_size = 0.2;
     const y = i * (font_size + 0.2);
     const rect_width = font_size + 0.2;
-    const rect_height = (font_size + 0.2);
+    const rect_height = font_size + 0.2;
     viz.rect(x, y, rect_width, rect_height, {
       fill: COLOR_LIST[visualizer.color1],
       opacity: 1

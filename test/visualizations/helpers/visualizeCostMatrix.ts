@@ -1,7 +1,5 @@
 import { ClockworkCostMatrix } from '../../../src';
 
-const UNREACHABLE = 0xff;
-
 /**
  * Visualize a distance map.
  * @param room - The room to visualize.

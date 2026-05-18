@@ -1,0 +1,6 @@
+dist
+dist_lib
+dist_test
+node_modules
+src/wasm
+target

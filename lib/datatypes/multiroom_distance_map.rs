@@ -31,7 +31,7 @@ impl MultiroomDistanceMap {
     /// Sets the distance value at a given position
     pub fn set(&mut self, pos: Position, value: usize) {
         let room_name = pos.room_name();
-        let map = self.maps.entry(room_name).or_insert_with(DistanceMap::new);
+        let map = self.maps.entry(room_name).or_default();
         map[pos.xy()] = value;
     }
 
@@ -47,7 +47,7 @@ impl MultiroomDistanceMap {
 
     /// Gets a mutable reference to the DistanceMap for a given room, creating it if it doesn't exist
     pub fn get_or_create_room_map(&mut self, room_name: RoomName) -> &mut DistanceMap {
-        self.maps.entry(room_name).or_insert_with(DistanceMap::new)
+        self.maps.entry(room_name).or_default()
     }
 
     /// Gets the list of rooms in the map

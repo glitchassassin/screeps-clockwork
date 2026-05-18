@@ -12,18 +12,18 @@ Converting a room name to coordinates is frequently useful. This algorithm uses 
 
 ```ts
 export const roomNameToCoords = (roomName: string) => {
-  if (roomName === "sim") return { wx: 0, wy: 0 };
+  if (roomName === 'sim') return { wx: 0, wy: 0 };
   let match = roomName.match(/^([WE])([0-9]+)([NS])([0-9]+)$/);
-  if (!match) throw new Error("Invalid room name");
+  if (!match) throw new Error('Invalid room name');
   let [, h, wx, v, wy] = match;
   return {
-    wx: h == "W" ? ~Number(wx) : Number(wx),
-    wy: v == "N" ? ~Number(wy) : Number(wy),
+    wx: h == 'W' ? ~Number(wx) : Number(wx),
+    wy: v == 'N' ? ~Number(wy) : Number(wy)
   };
 };
 export const roomNameFromCoords = (x: number, y: number) => {
-  let h = x < 0 ? "W" : "E";
-  let v = y < 0 ? "N" : "S";
+  let h = x < 0 ? 'W' : 'E';
+  let v = y < 0 ? 'N' : 'S';
   x = x < 0 ? ~x : x;
   y = y < 0 ? ~y : y;
   return `${h}${x}${v}${y}`;

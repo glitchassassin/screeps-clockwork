@@ -124,7 +124,7 @@ pub fn bfs_multiroom_distance_map(
             continue;
         }
 
-        for neighbor in neighbors(position, DirectionOrder::CardinalFirst).into_iter() {
+        for neighbor in neighbors(position, DirectionOrder::CardinalFirst) {
             let neighbor_room_key = if neighbor.room_name() == position.room_name() {
                 room_key
             } else {
@@ -138,9 +138,9 @@ pub fn bfs_multiroom_distance_map(
             if !cached_room_data[neighbor_room_key]
                 .cost_matrix
                 .as_ref()
-                .and_then(|matrix| {
+                .map(|matrix| {
                     let cost = matrix.get(neighbor.xy());
-                    Some(cost < 255)
+                    cost < 255
                 })
                 .unwrap_or(false)
             {

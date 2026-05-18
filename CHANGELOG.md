@@ -61,9 +61,9 @@
 ### Feat
 
 - use RoomDataCache with other algorithms
-- allow anyOf, allOf destinations for A*
+- allow anyOf, allOf destinations for A\*
 - implement room data cache from PF for more efficiency
-- optimize A* datastructures
+- optimize A\* datastructures
 - astar algorithm
 - cost matrix cache struct
 - optimization
@@ -79,7 +79,7 @@
 
 - clean up unused code
 - standardize maxOps, maxPathCost
-- clean up A* implementation
+- clean up A\* implementation
 - split out heuristics function for experimentation
 - condense duplicated flow field logic
 

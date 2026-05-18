@@ -16,7 +16,7 @@ export const runTestScenarios = () => {
     if (!creep.spawning && creep.memory.role) roles[creep.memory.role](creep);
   }
 
-  // visualizeIntel();
+  // _visualizeIntel();
   // profileReport();
 };
 
@@ -50,7 +50,7 @@ const roles = {
   scout: scout.run
 };
 
-const visualizeIntel = () => {
+const _visualizeIntel = () => {
   for (const room in Memory.rooms) {
     if (Memory.rooms[room].visited) {
       Game.map.visual.text('✓', new RoomPosition(25, 25, room));

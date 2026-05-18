@@ -23,7 +23,7 @@ type TestResult = 'pending' | 'success' | 'failure';
 // Module-level state
 const suites = new Map<string, TestSuite>();
 let currentSuite: TestSuite | null = null;
-let ranSuites = new Set<string>();
+const ranSuites = new Set<string>();
 let currentTestIndex = 0;
 let hasFailures = false;
 

@@ -13,14 +13,12 @@ It's frequently useful to compare room positions in different rooms (for distanc
 ```ts
 function roomPositionToCoords(pos: RoomPosition) {
   let { x, y, roomName } = pos;
-  if (!_.inRange(x, 0, 50))
-    throw new RangeError("x value " + x + " not in range");
-  if (!_.inRange(y, 0, 50))
-    throw new RangeError("y value " + y + " not in range");
+  if (!_.inRange(x, 0, 50)) throw new RangeError('x value ' + x + ' not in range');
+  if (!_.inRange(y, 0, 50)) throw new RangeError('y value ' + y + ' not in range');
   let { wx, wy } = roomNameToCoords(roomName);
   return {
     x: 50 * Number(wx) + x,
-    y: 50 * Number(wy) + y,
+    y: 50 * Number(wy) + y
   };
 }
 ```
