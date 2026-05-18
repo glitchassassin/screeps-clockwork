@@ -3,9 +3,7 @@ use crate::algorithms::map::neighbors_without_edges;
 use crate::algorithms::map::DirectionOrder;
 use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::Path;
-use crate::log;
 use screeps::Position;
-use std::collections::HashSet;
 use wasm_bindgen::prelude::*;
 
 // Maximum iterations to prevent infinite loops (50x50 room size)
@@ -17,14 +15,17 @@ pub fn path_to_multiroom_distance_map_origin(
     direction_order: DirectionOrder,
 ) -> Result<Path, &'static str> {
     let mut path = Path::new();
-    let mut visited = HashSet::new();
     let mut current = start;
     let mut steps = 0;
 
     while steps < MAX_STEPS {
         path.add(current);
 
-        let current_distance = distance_map.get(current);
+        let room_map = match distance_map.get_room_map(current.room_name()) {
+            Some(room_map) => room_map,
+            None => return Err("No valid path to origin found"),
+        };
+        let current_distance = room_map[current.xy()];
         if current_distance == 0 {
             // We've reached the origin
             return Ok(path);
@@ -35,7 +36,7 @@ pub fn path_to_multiroom_distance_map_origin(
         let mut min_distance = current_distance;
 
         for neighbor in neighbors_without_edges(current, direction_order) {
-            let neighbor_distance = distance_map.get(neighbor);
+            let neighbor_distance = room_map[neighbor.xy()];
 
             if neighbor_distance < min_distance {
                 min_distance = neighbor_distance;
@@ -50,18 +51,11 @@ pub fn path_to_multiroom_distance_map_origin(
                 return Ok(path);
             }
 
-            if visited.contains(&next) {
-                log(&format!("Cycle detected in distance map at {:?}", next));
-                log(&format!("Visited: {:?}", visited));
-                return Err("Cycle detected in distance map");
-            }
-
             // if next is a room edge, jump to the corresponding room edge
             if next.is_room_edge() {
                 path.add(next);
             }
             current = corresponding_room_edge(next);
-            visited.insert(current);
         } else {
             return Err("No valid path to origin found");
         }
