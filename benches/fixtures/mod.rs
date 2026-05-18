@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use screeps::{Position, RoomCoordinate, RoomName, RoomXY};
 use screeps_clockwork::bench_support::ClockworkCostMatrix;
 
+mod private_server_sector;
 mod realistic_rooms;
 
 const ROOM_SIZE: usize = 50;
@@ -42,6 +43,7 @@ pub fn distance_map_scenarios() -> Vec<DistanceMapScenario> {
         empty_multiroom_scenario(),
         realistic_w1s45_scenario(),
         realistic_w8n31_scenario(),
+        private_server_sector_scenario(),
     ]
 }
 
@@ -109,6 +111,23 @@ fn realistic_w8n31_scenario() -> DistanceMapScenario {
             terrain_cost_matrix(realistic_rooms::W8N31_TERRAIN),
         ))
         .collect(),
+        fallback_cost_matrix: None,
+    }
+}
+
+fn private_server_sector_scenario() -> DistanceMapScenario {
+    DistanceMapScenario {
+        name: "private_server_sector/W1N1_to_W9N9",
+        start: position(29, 41, room("W1N1")),
+        target: position(8, 41, room("W9N9")),
+        target_range: 1,
+        max_rooms: private_server_sector::DEFAULT_PRIVATE_SERVER_SECTOR.len(),
+        max_ops: ROOM_AREA * private_server_sector::DEFAULT_PRIVATE_SERVER_SECTOR.len(),
+        max_path_cost: 50_000,
+        cost_matrices: private_server_sector::DEFAULT_PRIVATE_SERVER_SECTOR
+            .iter()
+            .map(|(room_name, terrain)| (room(room_name), terrain_cost_matrix(terrain)))
+            .collect(),
         fallback_cost_matrix: None,
     }
 }
