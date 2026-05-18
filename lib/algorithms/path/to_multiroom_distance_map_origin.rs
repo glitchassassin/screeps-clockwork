@@ -95,6 +95,8 @@ pub fn js_path_to_multiroom_distance_map_origin(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::algorithms::distance_map::dijkstra::dijkstra_multiroom_distance_map;
+    use crate::datatypes::ClockworkCostMatrix;
     use screeps::{RoomCoordinate, RoomName};
 
     fn room(name: &str) -> RoomName {
@@ -107,6 +109,59 @@ mod tests {
             RoomCoordinate::new(y).unwrap(),
             room(room_name),
         )
+    }
+
+    fn edge_cost_matrix() -> ClockworkCostMatrix {
+        let mut matrix = ClockworkCostMatrix::new(Some(1));
+        for x in 1..49 {
+            for y in 1..49 {
+                matrix.set(
+                    screeps::RoomXY::new(
+                        RoomCoordinate::new(x).unwrap(),
+                        RoomCoordinate::new(y).unwrap(),
+                    ),
+                    5,
+                );
+            }
+        }
+        matrix
+    }
+
+    fn path_between(start: Position, target: Position) -> Vec<Position> {
+        let distance_map = dijkstra_multiroom_distance_map(
+            vec![target],
+            |_| Some(edge_cost_matrix()),
+            10_000,
+            4,
+            1_000,
+            None,
+            None,
+        )
+        .distance_map();
+
+        let path = path_to_multiroom_distance_map_origin(
+            start,
+            &distance_map,
+            DirectionOrder::CardinalFirst,
+        )
+        .unwrap();
+        (0..path.len()).map(|i| *path.get(i).unwrap()).collect()
+    }
+
+    fn assert_path_uses_only_corresponding_edge_transitions(path: &[Position]) {
+        for window in path.windows(2) {
+            let from = window[0];
+            let to = window[1];
+            if from.room_name() != to.room_name() {
+                assert_eq!(
+                    corresponding_room_edge(from),
+                    to,
+                    "cross-room path step must move to the corresponding edge tile: {:?} -> {:?}",
+                    from,
+                    to
+                );
+            }
+        }
     }
 
     #[test]
@@ -147,5 +202,133 @@ mod tests {
         );
 
         assert_eq!(result.err(), Some("No valid path to origin found"));
+    }
+
+    #[test]
+    fn path_follows_bottom_edge_left_to_right() {
+        let room_name = "W1N1";
+        let path = path_between(pos(7, 48, room_name), pos(14, 48, room_name));
+
+        let edge_8 = pos(8, 49, room_name);
+        let edge_9 = pos(9, 49, room_name);
+        let edge_10 = pos(10, 49, room_name);
+        let edge_11 = pos(11, 49, room_name);
+        let edge_12 = pos(12, 49, room_name);
+        let edge_13 = pos(13, 49, room_name);
+        let expected = [
+            pos(7, 48, room_name),
+            edge_8,
+            corresponding_room_edge(edge_8),
+            corresponding_room_edge(edge_9),
+            edge_9,
+            edge_10,
+            corresponding_room_edge(edge_10),
+            corresponding_room_edge(edge_11),
+            edge_11,
+            edge_12,
+            corresponding_room_edge(edge_12),
+            corresponding_room_edge(edge_13),
+            edge_13,
+            pos(14, 48, room_name),
+        ];
+
+        assert_eq!(path, expected);
+        assert_path_uses_only_corresponding_edge_transitions(&path);
+    }
+
+    #[test]
+    fn path_follows_bottom_edge_right_to_left() {
+        let room_name = "W1N1";
+        let path = path_between(pos(14, 48, room_name), pos(7, 48, room_name));
+
+        let edge_13 = pos(13, 49, room_name);
+        let edge_12 = pos(12, 49, room_name);
+        let edge_11 = pos(11, 49, room_name);
+        let edge_10 = pos(10, 49, room_name);
+        let edge_9 = pos(9, 49, room_name);
+        let edge_8 = pos(8, 49, room_name);
+        let expected = [
+            pos(14, 48, room_name),
+            edge_13,
+            corresponding_room_edge(edge_13),
+            corresponding_room_edge(edge_12),
+            edge_12,
+            edge_11,
+            corresponding_room_edge(edge_11),
+            corresponding_room_edge(edge_10),
+            edge_10,
+            edge_9,
+            corresponding_room_edge(edge_9),
+            corresponding_room_edge(edge_8),
+            edge_8,
+            pos(7, 48, room_name),
+        ];
+
+        assert_eq!(path, expected);
+        assert_path_uses_only_corresponding_edge_transitions(&path);
+    }
+
+    #[test]
+    fn path_follows_right_edge_top_to_bottom() {
+        let room_name = "W1N1";
+        let path = path_between(pos(48, 7, room_name), pos(48, 14, room_name));
+
+        let edge_8 = pos(49, 8, room_name);
+        let edge_9 = pos(49, 9, room_name);
+        let edge_10 = pos(49, 10, room_name);
+        let edge_11 = pos(49, 11, room_name);
+        let edge_12 = pos(49, 12, room_name);
+        let edge_13 = pos(49, 13, room_name);
+        let expected = [
+            pos(48, 7, room_name),
+            edge_8,
+            corresponding_room_edge(edge_8),
+            corresponding_room_edge(edge_9),
+            edge_9,
+            edge_10,
+            corresponding_room_edge(edge_10),
+            corresponding_room_edge(edge_11),
+            edge_11,
+            edge_12,
+            corresponding_room_edge(edge_12),
+            corresponding_room_edge(edge_13),
+            edge_13,
+            pos(48, 14, room_name),
+        ];
+
+        assert_eq!(path, expected);
+        assert_path_uses_only_corresponding_edge_transitions(&path);
+    }
+
+    #[test]
+    fn path_follows_right_edge_bottom_to_top() {
+        let room_name = "W1N1";
+        let path = path_between(pos(48, 14, room_name), pos(48, 7, room_name));
+
+        let edge_13 = pos(49, 13, room_name);
+        let edge_12 = pos(49, 12, room_name);
+        let edge_11 = pos(49, 11, room_name);
+        let edge_10 = pos(49, 10, room_name);
+        let edge_9 = pos(49, 9, room_name);
+        let edge_8 = pos(49, 8, room_name);
+        let expected = [
+            pos(48, 14, room_name),
+            edge_13,
+            corresponding_room_edge(edge_13),
+            corresponding_room_edge(edge_12),
+            edge_12,
+            edge_11,
+            corresponding_room_edge(edge_11),
+            corresponding_room_edge(edge_10),
+            edge_10,
+            edge_9,
+            corresponding_room_edge(edge_9),
+            corresponding_room_edge(edge_8),
+            edge_8,
+            pos(48, 7, room_name),
+        ];
+
+        assert_eq!(path, expected);
+        assert_path_uses_only_corresponding_edge_transitions(&path);
     }
 }

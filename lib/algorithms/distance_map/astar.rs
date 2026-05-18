@@ -1,4 +1,4 @@
-use crate::algorithms::map::{corresponding_room_edge, next_directions};
+use crate::algorithms::map::{corresponding_room_edge, next_directions, same_room_neighbor};
 use crate::datatypes::ClockworkCostMatrix;
 use crate::datatypes::RoomDataCache;
 use crate::utils::set_panic_hook;
@@ -121,12 +121,11 @@ pub fn astar_multiroom_distance_map(
             for neighbor_direction in next_directions(open_direction) {
                 // If neighbor would be a room edge, map it to the corresponding tile in
                 // the other room, where the creep would be if it moved in that direction.
-                let neighbor = corresponding_room_edge(
-                    match position.checked_add_direction(*neighbor_direction) {
-                        Ok(pos) => pos,
-                        Err(_) => continue,
-                    },
-                );
+                let next_pos = match same_room_neighbor(position, *neighbor_direction) {
+                    Some(pos) => pos,
+                    None => continue,
+                };
+                let neighbor = corresponding_room_edge(next_pos);
 
                 // Get the room index for the neighbor, if it's different from the current position.
                 let room_key = if neighbor.room_name() == current_room_name {

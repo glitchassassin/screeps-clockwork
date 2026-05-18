@@ -60,12 +60,43 @@ pub fn preferred_directions(order: DirectionOrder) -> &'static [Direction; 8] {
     }
 }
 
+#[inline(always)]
+fn direction_stays_in_room(position: Position, direction: Direction) -> bool {
+    match direction {
+        Direction::Top => position.y() != RoomCoordinate::MIN,
+        Direction::TopRight => {
+            position.y() != RoomCoordinate::MIN && position.x() != RoomCoordinate::MAX
+        }
+        Direction::Right => position.x() != RoomCoordinate::MAX,
+        Direction::BottomRight => {
+            position.y() != RoomCoordinate::MAX && position.x() != RoomCoordinate::MAX
+        }
+        Direction::Bottom => position.y() != RoomCoordinate::MAX,
+        Direction::BottomLeft => {
+            position.y() != RoomCoordinate::MAX && position.x() != RoomCoordinate::MIN
+        }
+        Direction::Left => position.x() != RoomCoordinate::MIN,
+        Direction::TopLeft => {
+            position.y() != RoomCoordinate::MIN && position.x() != RoomCoordinate::MIN
+        }
+    }
+}
+
+#[inline(always)]
+pub fn same_room_neighbor(position: Position, direction: Direction) -> Option<Position> {
+    if !direction_stays_in_room(position, direction) {
+        return None;
+    }
+
+    position.checked_add_direction(direction).ok()
+}
+
 /// Adjacency in Screeps is not perfectly euclidean: we need to apply
 /// special rules at room edges.
 pub fn neighbors(position: Position, order: DirectionOrder) -> impl Iterator<Item = Position> {
     preferred_directions(order)
         .iter()
-        .filter_map(move |dir| position.checked_add_direction(*dir).ok())
+        .filter_map(move |dir| same_room_neighbor(position, *dir))
         .map(corresponding_room_edge)
 }
 
@@ -77,7 +108,7 @@ pub fn neighbors_without_edges(
 ) -> impl Iterator<Item = Position> {
     preferred_directions(order)
         .iter()
-        .filter_map(move |dir| position.checked_add_direction(*dir).ok())
+        .filter_map(move |dir| same_room_neighbor(position, *dir))
 }
 
 pub fn room_xy_neighbors(position: RoomXY, order: DirectionOrder) -> impl Iterator<Item = RoomXY> {
