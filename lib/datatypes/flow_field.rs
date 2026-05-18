@@ -49,6 +49,15 @@ impl FlowField {
         directions
     }
 
+    /// Get the first valid direction for a given coordinate, respecting the field's tie-break order.
+    pub fn get_first_direction(&self, x: RoomCoordinate, y: RoomCoordinate) -> Option<Direction> {
+        let value = self.get(x, y);
+        preferred_directions(self.direction_order)
+            .iter()
+            .cloned()
+            .find(|direction| value & (1 << *direction as u8) != 0)
+    }
+
     /// Set the list of valid directions for a given coordinate.
     pub fn set_directions(
         &mut self,
