@@ -1,3 +1,14 @@
+## 0.12.0 (2026-05-19)
+
+### Feat
+
+- add rust/node benchmarks and optimizations (#257)
+
+### Fix
+
+- properly reverse arrays on visualizations
+- only allow legal directions on edge tiles
+
 ## 0.11.0 (2026-05-16)
 
 ### Feat
