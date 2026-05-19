@@ -10,6 +10,7 @@ import { ClockworkDistanceMap } from './distanceMap';
 import { ClockworkMultiroomFlowField } from './multiroomFlowField';
 import { ClockworkMultiroomMonoFlowField } from './multiroomMonoFlowField';
 import { ClockworkPath } from './path';
+import { assertNotFreed, freeHandle } from './freeable';
 
 export interface DirectionOrderOptions {
   directionOrder?: DirectionOrder;
@@ -22,27 +23,38 @@ const DEFAULT_DIRECTION_ORDER = DirectionOrder.CardinalFirst;
  * like `bfsMultiroomDistanceMap` rather than created directly.
  */
 export class ClockworkMultiroomDistanceMap {
-  constructor(private _map: MultiroomDistanceMap) {}
+  private _map: MultiroomDistanceMap | undefined;
+
+  constructor(map: MultiroomDistanceMap) {
+    this._map = map;
+  }
+
+  /**
+   * Frees the underlying WASM multiroom distance map allocation.
+   */
+  free(): void {
+    this._map = freeHandle(this._map);
+  }
 
   /**
    * Get the stored value for a given position.
    */
   get(pos: RoomPosition): number {
-    return this._map.get(pos.__packedPos);
+    return assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap').get(pos.__packedPos);
   }
 
   /**
    * Set the stored value for a given position.
    */
   set(pos: RoomPosition, value: number) {
-    this._map.set(pos.__packedPos, value);
+    assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap').set(pos.__packedPos, value);
   }
 
   /**
    * Get the DistanceMap for a given room.
    */
   getRoom(room: string): ClockworkDistanceMap | undefined {
-    const map = this._map.get_room(packRoomName(room));
+    const map = assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap').get_room(packRoomName(room));
     return map ? new ClockworkDistanceMap(map) : undefined;
   }
 
@@ -50,7 +62,9 @@ export class ClockworkMultiroomDistanceMap {
    * List all the rooms covered by this distance map.
    */
   getRooms(): string[] {
-    return [...this._map.get_rooms()].map(room => fromPackedRoomName(room));
+    return [...assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap').get_rooms()].map(room =>
+      fromPackedRoomName(room)
+    );
   }
 
   /**
@@ -61,7 +75,7 @@ export class ClockworkMultiroomDistanceMap {
     return new ClockworkPath(
       js_path_to_multiroom_distance_map_origin(
         start.__packedPos,
-        this._map,
+        assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap'),
         options.directionOrder ?? DEFAULT_DIRECTION_ORDER
       )
     );
@@ -73,7 +87,10 @@ export class ClockworkMultiroomDistanceMap {
    */
   toFlowField(options: DirectionOrderOptions = {}): ClockworkMultiroomFlowField {
     return new ClockworkMultiroomFlowField(
-      multiroomFlowField(this._map, options.directionOrder ?? DEFAULT_DIRECTION_ORDER)
+      multiroomFlowField(
+        assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap'),
+        options.directionOrder ?? DEFAULT_DIRECTION_ORDER
+      )
     );
   }
 
@@ -83,7 +100,10 @@ export class ClockworkMultiroomDistanceMap {
    */
   toMonoFlowField(options: DirectionOrderOptions = {}): ClockworkMultiroomMonoFlowField {
     return new ClockworkMultiroomMonoFlowField(
-      multiroomMonoFlowField(this._map, options.directionOrder ?? DEFAULT_DIRECTION_ORDER)
+      multiroomMonoFlowField(
+        assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap'),
+        options.directionOrder ?? DEFAULT_DIRECTION_ORDER
+      )
     );
   }
 }

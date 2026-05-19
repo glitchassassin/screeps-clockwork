@@ -1,47 +1,59 @@
 import { fromPackedRoomName, packRoomName } from '../utils/fromPacked';
 import { MultiroomFlowField, js_path_to_multiroom_flow_field_origin } from '../wasm/screeps_clockwork';
 import { ClockworkFlowField } from './flowField';
+import { assertNotFreed, freeHandle } from './freeable';
 import { ClockworkPath } from './path';
 
 /**
  * A flow field that spans multiple rooms, storing multiple directions per tile.
  */
 export class ClockworkMultiroomFlowField {
-  constructor(private _flowField: MultiroomFlowField) {}
+  private _flowField: MultiroomFlowField | undefined;
+
+  constructor(flowField: MultiroomFlowField) {
+    this._flowField = flowField;
+  }
+
+  /**
+   * Frees the underlying WASM multiroom flow field allocation.
+   */
+  free(): void {
+    this._flowField = freeHandle(this._flowField);
+  }
 
   /**
    * Get the flow field value at a given position.
    */
   get(pos: RoomPosition): number {
-    return this._flowField.get(pos.__packedPos);
+    return assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField').get(pos.__packedPos);
   }
 
   /**
    * Set the flow field value at a given position.
    */
   set(pos: RoomPosition, value: number): void {
-    this._flowField.set(pos.__packedPos, value);
+    assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField').set(pos.__packedPos, value);
   }
 
   /**
    * Get the list of valid directions at a given position.
    */
   getDirections(pos: RoomPosition): DirectionConstant[] {
-    return this._flowField.getDirections(pos.__packedPos);
+    return assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField').getDirections(pos.__packedPos);
   }
 
   /**
    * Set the list of valid directions at a given position.
    */
   setDirections(pos: RoomPosition, directions: DirectionConstant[]): void {
-    this._flowField.setDirections(pos.__packedPos, directions);
+    assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField').setDirections(pos.__packedPos, directions);
   }
 
   /**
    * Add a direction to the list of valid directions at a given position.
    */
   addDirection(pos: RoomPosition, direction: DirectionConstant): void {
-    this._flowField.addDirection(pos.__packedPos, direction);
+    assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField').addDirection(pos.__packedPos, direction);
   }
 
   /**
@@ -49,7 +61,7 @@ export class ClockworkMultiroomFlowField {
    */
   getRooms(): string[] {
     const rooms = [];
-    for (const packedRoomName of this._flowField.getRooms()) {
+    for (const packedRoomName of assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField').getRooms()) {
       rooms.push(fromPackedRoomName(packedRoomName));
     }
     return rooms;
@@ -59,7 +71,7 @@ export class ClockworkMultiroomFlowField {
    * Get the flow field for a given room.
    */
   getRoom(roomName: string): ClockworkFlowField | null {
-    const flowField = this._flowField.getRoom(packRoomName(roomName));
+    const flowField = assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField').getRoom(packRoomName(roomName));
     return flowField ? new ClockworkFlowField(flowField) : null;
   }
 
@@ -67,6 +79,11 @@ export class ClockworkMultiroomFlowField {
    * Find a path from a given position to the origin of the flow field.
    */
   pathToOrigin(start: RoomPosition): ClockworkPath {
-    return new ClockworkPath(js_path_to_multiroom_flow_field_origin(start.__packedPos, this._flowField));
+    return new ClockworkPath(
+      js_path_to_multiroom_flow_field_origin(
+        start.__packedPos,
+        assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField')
+      )
+    );
   }
 }

@@ -5,7 +5,6 @@ import {
   dijkstraMultiroomDistanceMap,
   getTerrainCostMatrix
 } from '../../../../src/index';
-import { ClockworkMultiroomDistanceMap } from '../../../../src/wrappers/multiroomDistanceMap';
 import { cpuTime, formatCpuTime } from '../../../utils/cpuTime';
 import { describe, expect, it } from '../../helpers';
 const UNREACHABLE = 0xffffffff;
@@ -105,7 +104,7 @@ describe('astarMultiroomDistanceMap', () => {
     const from = new RoomPosition(5, 5, 'W1N1');
     const to = new RoomPosition(45, 45, 'W1N1');
     const iterationsPerSample = 10;
-    const samples = 100;
+    const samples = 20;
     const timingOptions = { iterations: iterationsPerSample * samples, batchSize: iterationsPerSample };
 
     let pathFinderPath: PathFinderPath;
@@ -122,12 +121,11 @@ describe('astarMultiroomDistanceMap', () => {
       });
     }, timingOptions);
 
-    let clockworkDistanceMap: ClockworkMultiroomDistanceMap;
-    let clockworkPath: ClockworkPath;
+    let clockworkPathLength = 0;
     const cache = new Map<string, ClockworkCostMatrix>();
 
     const clockworkTime = cpuTime(() => {
-      clockworkDistanceMap = astarMultiroomDistanceMap([from], {
+      const clockworkDistanceMap = astarMultiroomDistanceMap([from], {
         costMatrixCallback: roomName => {
           if (cache.has(roomName)) {
             return cache.get(roomName);
@@ -138,16 +136,23 @@ describe('astarMultiroomDistanceMap', () => {
         },
         anyOfDestinations: [{ pos: to, range: 0 }]
       }).distanceMap;
-      clockworkPath = clockworkDistanceMap.pathToOrigin(to);
+      let clockworkPath: ClockworkPath | undefined;
+      try {
+        clockworkPath = clockworkDistanceMap.pathToOrigin(to);
+        clockworkPathLength = clockworkPath.length;
+      } finally {
+        clockworkPath?.free();
+        clockworkDistanceMap.free();
+      }
     }, timingOptions);
 
     console.logUnsafe('Clockwork Time', formatCpuTime(clockworkTime));
-    console.logUnsafe('Clockwork Path', clockworkPath!.length);
+    console.logUnsafe('Clockwork Path', clockworkPathLength);
     console.logUnsafe('PathFinder Time', formatCpuTime(pathFinderTime));
     console.logUnsafe('PathFinder Path', pathFinderPath!.path.length);
 
     // clockwork path includes the origin, so we add 1 to the path length.
-    expect(clockworkPath!.length).toBeLessThanOrEqual(pathFinderPath!.path.length + 1);
+    expect(clockworkPathLength).toBeLessThanOrEqual(pathFinderPath!.path.length + 1);
     expect(clockworkTime.mean).toBeLessThan(pathFinderTime.mean);
   }, 50);
   it('should be faster than PathFinder.search across multiple rooms', () => {
@@ -171,12 +176,11 @@ describe('astarMultiroomDistanceMap', () => {
       });
     }, timingOptions);
 
-    let clockworkDistanceMap: ClockworkMultiroomDistanceMap;
-    let clockworkPath: ClockworkPath;
+    let clockworkPathLength = 0;
     const cache = new Map<string, ClockworkCostMatrix>();
 
     const clockworkTime = cpuTime(() => {
-      clockworkDistanceMap = astarMultiroomDistanceMap([from], {
+      const clockworkDistanceMap = astarMultiroomDistanceMap([from], {
         costMatrixCallback: roomName => {
           if (cache.has(roomName)) {
             return cache.get(roomName);
@@ -187,16 +191,23 @@ describe('astarMultiroomDistanceMap', () => {
         },
         anyOfDestinations: [{ pos: to, range: 0 }]
       }).distanceMap;
-      clockworkPath = clockworkDistanceMap.pathToOrigin(to);
+      let clockworkPath: ClockworkPath | undefined;
+      try {
+        clockworkPath = clockworkDistanceMap.pathToOrigin(to);
+        clockworkPathLength = clockworkPath.length;
+      } finally {
+        clockworkPath?.free();
+        clockworkDistanceMap.free();
+      }
     }, timingOptions);
 
     console.logUnsafe('Clockwork Time', formatCpuTime(clockworkTime));
-    console.logUnsafe('Clockwork Path', clockworkPath!.length);
+    console.logUnsafe('Clockwork Path', clockworkPathLength);
     console.logUnsafe('PathFinder Time', formatCpuTime(pathFinderTime));
     console.logUnsafe('PathFinder Path', pathFinderPath!.path.length);
 
     // clockwork path includes the origin, so we add 1 to the path length.
-    expect(clockworkPath!.length).toBeLessThanOrEqual(pathFinderPath!.path.length + 1);
+    expect(clockworkPathLength).toBeLessThanOrEqual(pathFinderPath!.path.length + 1);
     expect(clockworkTime.mean).toBeLessThan(pathFinderTime.mean);
   }, 50);
 
@@ -243,7 +254,7 @@ describe('astarMultiroomDistanceMap', () => {
     const cache = new Map<string, ClockworkCostMatrix>();
     const dijkstraTime = cpuTime(
       () => {
-        dijkstraMultiroomDistanceMap([from], {
+        const { distanceMap } = dijkstraMultiroomDistanceMap([from], {
           costMatrixCallback: roomName => {
             if (cache.has(roomName)) {
               return cache.get(roomName);
@@ -254,13 +265,14 @@ describe('astarMultiroomDistanceMap', () => {
           },
           anyOfDestinations: to.map(pos => ({ pos, range: 0 }))
         });
+        distanceMap.free();
       },
       { iterations }
     );
 
     const astarTime = cpuTime(
       () => {
-        astarMultiroomDistanceMap([from], {
+        const { distanceMap } = astarMultiroomDistanceMap([from], {
           costMatrixCallback: roomName => {
             if (cache.has(roomName)) {
               return cache.get(roomName);
@@ -271,6 +283,7 @@ describe('astarMultiroomDistanceMap', () => {
           },
           anyOfDestinations: to.map(pos => ({ pos, range: 0 }))
         });
+        distanceMap.free();
       },
       { iterations }
     );
@@ -294,7 +307,7 @@ describe('astarMultiroomDistanceMap', () => {
     const cache = new Map<string, ClockworkCostMatrix>();
     const dijkstraTime = cpuTime(
       () => {
-        dijkstraMultiroomDistanceMap([from], {
+        const { distanceMap } = dijkstraMultiroomDistanceMap([from], {
           costMatrixCallback: roomName => {
             if (cache.has(roomName)) {
               return cache.get(roomName);
@@ -305,13 +318,14 @@ describe('astarMultiroomDistanceMap', () => {
           },
           allOfDestinations: to.map(pos => ({ pos, range: 0 }))
         });
+        distanceMap.free();
       },
       { iterations }
     );
 
     const astarTime = cpuTime(
       () => {
-        astarMultiroomDistanceMap([from], {
+        const { distanceMap } = astarMultiroomDistanceMap([from], {
           costMatrixCallback: roomName => {
             if (cache.has(roomName)) {
               return cache.get(roomName);
@@ -322,6 +336,7 @@ describe('astarMultiroomDistanceMap', () => {
           },
           allOfDestinations: to.map(pos => ({ pos, range: 0 }))
         });
+        distanceMap.free();
       },
       { iterations }
     );

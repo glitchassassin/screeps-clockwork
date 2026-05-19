@@ -1,12 +1,24 @@
 import { fromPacked } from '../utils/fromPacked';
 import { Path } from '../wasm/screeps_clockwork';
+import { assertNotFreed, freeHandle } from './freeable';
 
 /**
  * A path from a start position to an end position. Typically returned by a
  * function like `ClockworkMultiroomFlowField.pathToOrigin` rather than created directly.
  */
 export class ClockworkPath {
-  constructor(private readonly path: Path) {}
+  private path: Path | undefined;
+
+  constructor(path: Path) {
+    this.path = path;
+  }
+
+  /**
+   * Frees the underlying WASM path allocation.
+   */
+  free(): void {
+    this.path = freeHandle(this.path);
+  }
 
   /**
    * Iterate over the path.
@@ -61,7 +73,7 @@ export class ClockworkPath {
    * Get the position at a given index.
    */
   get(index: number) {
-    const packedPos = this.path.get(index);
+    const packedPos = assertNotFreed(this.path, 'ClockworkPath').get(index);
     if (packedPos === undefined) {
       throw new Error('Index out of bounds');
     }
@@ -72,14 +84,14 @@ export class ClockworkPath {
    * Get the length of the path.
    */
   get length() {
-    return this.path.len();
+    return assertNotFreed(this.path, 'ClockworkPath').len();
   }
 
   /**
    * Given a current position, find the index of the next position in the path.
    */
   findNextIndex(pos: RoomPosition) {
-    return this.path.find_next_index(pos.__packedPos);
+    return assertNotFreed(this.path, 'ClockworkPath').find_next_index(pos.__packedPos);
   }
 
   /**
@@ -87,7 +99,7 @@ export class ClockworkPath {
    */
   toArray() {
     const result: RoomPosition[] = [];
-    for (const packedPos of this.path.to_array()) {
+    for (const packedPos of assertNotFreed(this.path, 'ClockworkPath').to_array()) {
       result.push(fromPacked(packedPos));
     }
     return result;
@@ -98,7 +110,7 @@ export class ClockworkPath {
    */
   toArrayReversed() {
     const result: RoomPosition[] = [];
-    for (const packedPos of this.path.to_array_reversed()) {
+    for (const packedPos of assertNotFreed(this.path, 'ClockworkPath').to_array_reversed()) {
       result.push(fromPacked(packedPos));
     }
     return result;
