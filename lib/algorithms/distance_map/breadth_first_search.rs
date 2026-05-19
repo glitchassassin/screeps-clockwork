@@ -47,7 +47,7 @@ pub fn bfs_multiroom_distance_map(
     all_of_destinations: Option<Vec<(Position, usize)>>,
 ) -> SearchResult {
     set_panic_hook();
-    let mut frontier = VecDeque::with_capacity(max_ops.min(max_rooms.saturating_mul(2500)));
+    let mut frontier = VecDeque::new();
     let any_of_destinations =
         any_of_destinations.map(|d| d.iter().cloned().collect::<HashSet<_>>());
     let mut all_of_destinations =
