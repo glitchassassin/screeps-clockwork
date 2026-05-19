@@ -65,6 +65,9 @@ jobs:
           path: wasm
           key: ${{ runner.os }}-wasm-${{ hashFiles('lib/**') }}
 
+      - name: Check generated WASM types
+        run: npm run check:wasm-types
+
       - name: Build
         run: npm run build
 

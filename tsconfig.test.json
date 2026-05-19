@@ -4,6 +4,6 @@
     "rootDir": ".",
     "outDir": "./dist_test"
   },
-  "include": ["test/**/*", "src/**/*", "types.d.ts"],
+  "include": ["test/**/*", "src/**/*", "benches/**/*.ts", "types.d.ts"],
   "exclude": ["node_modules", "dist", "dist_test", "*.config.js"]
 }

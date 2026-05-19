@@ -1,15 +1,16 @@
 import { createRequire } from 'node:module';
 import { bench, describe } from 'vitest';
 
-import { distanceMapScenarios } from './fixtures.mjs';
+import { distanceMapScenarios, type DistanceMapScenario, type WasmModule } from './fixtures';
+import type * as Wasm from './pkg/screeps_clockwork';
 
 const require = createRequire(import.meta.url);
-const wasm = require('./pkg/screeps_clockwork.cjs');
+const wasm = require('./pkg/screeps_clockwork.cjs') as WasmModule;
 const scenarios = distanceMapScenarios(wasm);
 const CARDINAL_FIRST = wasm.DirectionOrder.CardinalFirst;
 const derivedScenarios = scenarios.map(createDerivedScenario);
 
-let sink = 0;
+let _sink = 0;
 
 describe('wasm/distance_map/dijkstra_vs_astar', () => {
   for (const scenario of scenarios) {
@@ -23,7 +24,7 @@ describe('wasm/distance_map/dijkstra_vs_astar', () => {
         scenario.destinationArray,
         undefined
       );
-      sink ^= result.ops;
+      _sink ^= result.ops;
       result.free();
     });
 
@@ -37,7 +38,7 @@ describe('wasm/distance_map/dijkstra_vs_astar', () => {
         scenario.destinationArray,
         undefined
       );
-      sink ^= result.ops;
+      _sink ^= result.ops;
       result.free();
     });
   }
@@ -55,7 +56,7 @@ describe('wasm/distance_map/bfs', () => {
         scenario.destinationArray,
         undefined
       );
-      sink ^= result.ops;
+      _sink ^= result.ops;
       result.free();
     });
   }
@@ -65,13 +66,13 @@ describe('wasm/flow_field', () => {
   for (const scenario of derivedScenarios) {
     bench(`multiroom_flow_field/${scenario.name}`, () => {
       const flowField = wasm.multiroomFlowField(scenario.distanceMap, CARDINAL_FIRST);
-      sink ^= flowField.get(scenario.pathStart);
+      _sink ^= flowField.get(scenario.pathStart);
       flowField.free();
     });
 
     bench(`multiroom_mono_flow_field/${scenario.name}`, () => {
       const flowField = wasm.multiroomMonoFlowField(scenario.distanceMap, CARDINAL_FIRST);
-      sink ^= flowField.get(scenario.pathStart) ?? 0;
+      _sink ^= flowField.get(scenario.pathStart) ?? 0;
       flowField.free();
     });
   }
@@ -85,19 +86,19 @@ describe('wasm/path', () => {
         scenario.distanceMap,
         CARDINAL_FIRST
       );
-      sink ^= path.len();
+      _sink ^= path.len();
       path.free();
     });
 
     bench(`flow_field_origin/${scenario.name}`, () => {
       const path = wasm.js_path_to_multiroom_flow_field_origin(scenario.pathStart, scenario.flowField);
-      sink ^= path.len();
+      _sink ^= path.len();
       path.free();
     });
 
     bench(`mono_flow_field_origin/${scenario.name}`, () => {
       const path = wasm.js_path_to_multiroom_mono_flow_field_origin(scenario.pathStart, scenario.monoFlowField);
-      sink ^= path.len();
+      _sink ^= path.len();
       path.free();
     });
 
@@ -108,7 +109,7 @@ describe('wasm/path', () => {
         CARDINAL_FIRST
       );
       const positions = path.to_array();
-      sink ^= positions.length;
+      _sink ^= positions.length;
       path.free();
     });
   }
@@ -125,18 +126,29 @@ describe('wasm/boundary', () => {
         checksum ^= scenario.distanceMap.get((roomPrefix | (x << 8) | y) >>> 0);
       }
     }
-    sink ^= checksum;
+    _sink ^= checksum;
   });
 
   bench('distance_map_get_room_to_array/2500_tiles', () => {
     const room = scenario.distanceMap.get_room((scenario.pathStart >>> 16) & 0xffff);
+    if (!room) {
+      throw new Error(`Missing benchmark room for ${scenario.name}`);
+    }
     const values = room.toArray();
-    sink ^= values.length;
+    _sink ^= values.length;
     room.free();
   });
 });
 
-function createDerivedScenario(scenario) {
+interface DerivedScenario {
+  name: string;
+  pathStart: number;
+  distanceMap: Wasm.MultiroomDistanceMap;
+  flowField: Wasm.MultiroomFlowField;
+  monoFlowField: Wasm.MultiroomMonoFlowField;
+}
+
+function createDerivedScenario(scenario: DistanceMapScenario): DerivedScenario {
   const searchResult = wasm.js_bfs_multiroom_distance_map(
     scenario.startArray,
     scenario.costMatrixCallback,

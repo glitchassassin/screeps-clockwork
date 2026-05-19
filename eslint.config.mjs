@@ -2,7 +2,15 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 
 export default [
   {
-    ignores: ['dist/**', 'dist_lib/**', 'dist_test/**', 'node_modules/**', 'src/wasm/**', 'target/**']
+    ignores: [
+      'dist/**',
+      'dist_lib/**',
+      'dist_test/**',
+      'node_modules/**',
+      'src/wasm/**',
+      'benches/wasm/pkg/**',
+      'target/**'
+    ]
   },
   ...tseslint.configs['flat/recommended'],
   {

@@ -22,6 +22,17 @@ export function fromPackedRoomName(packedRoomName: number): string {
   return result;
 }
 
+const roomNameCache = new Map<number, string>();
+
+export function fromPackedRoomNameCached(packedRoomName: number): string {
+  let roomName = roomNameCache.get(packedRoomName);
+  if (roomName === undefined) {
+    roomName = fromPackedRoomName(packedRoomName);
+    roomNameCache.set(packedRoomName, roomName);
+  }
+  return roomName;
+}
+
 export function packRoomName(room: string): number {
   // Handle sim room case
   if (room === 'sim') {

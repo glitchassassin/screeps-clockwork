@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import type * as Wasm from './pkg/screeps_clockwork';
+
 const ROOM_SIZE = 50;
 const ROOM_AREA = ROOM_SIZE * ROOM_SIZE;
 const HALF_WORLD_SIZE = 128;
@@ -11,7 +13,40 @@ const WALL_COST = 255;
 const FIXTURE_DIR = dirname(fileURLToPath(import.meta.url));
 const PRIVATE_SERVER_SECTOR = privateServerSectorFixture();
 
-export function distanceMapScenarios(wasm) {
+export type WasmModule = typeof Wasm;
+
+export interface DistanceMapScenario {
+  name: string;
+  start: number;
+  target: number;
+  targetRange: number;
+  maxRooms: number;
+  maxOps: number;
+  maxPathCost: number;
+  costMatrices?: Map<number, Wasm.ClockworkCostMatrix>;
+  fallbackCostMatrix?: Wasm.ClockworkCostMatrix;
+  startArray: Uint32Array;
+  destinationArray: Uint32Array;
+  costMatrixCallback: (room: number) => Wasm.ClockworkCostMatrix | undefined;
+}
+
+interface DistanceMapScenarioInput {
+  name: string;
+  start: number;
+  target: number;
+  targetRange: number;
+  maxRooms: number;
+  maxOps: number;
+  maxPathCost: number;
+  costMatrices?: Map<number, Wasm.ClockworkCostMatrix>;
+  fallbackCostMatrix?: Wasm.ClockworkCostMatrix;
+}
+
+interface PrivateServerSectorFixture {
+  rooms: Record<string, string>;
+}
+
+export function distanceMapScenarios(wasm: WasmModule): DistanceMapScenario[] {
   const emptyRoomName = packRoomName('W1N1');
   const realisticW1N1 = packRoomName('W1N1');
   const realisticW8N8 = packRoomName('W8N8');
@@ -73,7 +108,7 @@ export function distanceMapScenarios(wasm) {
   ].map(prepareScenario);
 }
 
-function prepareScenario(scenario) {
+function prepareScenario(scenario: DistanceMapScenarioInput): DistanceMapScenario {
   return {
     ...scenario,
     startArray: new Uint32Array([scenario.start]),
@@ -82,15 +117,17 @@ function prepareScenario(scenario) {
   };
 }
 
-function costMatrixCallback(scenario) {
+function costMatrixCallback(
+  scenario: DistanceMapScenarioInput
+): (room: number) => Wasm.ClockworkCostMatrix | undefined {
   return room => scenario.costMatrices?.get(room) ?? scenario.fallbackCostMatrix;
 }
 
-export function packPosition(x, y, roomName) {
+export function packPosition(x: number, y: number, roomName: string): number {
   return ((packRoomName(roomName) << 16) | (x << 8) | y) >>> 0;
 }
 
-export function packRoomName(roomName) {
+export function packRoomName(roomName: string): number {
   if (roomName === 'sim') {
     return 0;
   }
@@ -111,7 +148,7 @@ export function packRoomName(roomName) {
   return (((x + HALF_WORLD_SIZE) << 8) | (y + HALF_WORLD_SIZE)) >>> 0;
 }
 
-function terrainCostMatrix(wasm, terrain) {
+function terrainCostMatrix(wasm: WasmModule, terrain: string): Wasm.ClockworkCostMatrix {
   if (terrain.length !== ROOM_AREA) {
     throw new Error(`Expected terrain length ${ROOM_AREA}, received ${terrain.length}`);
   }
@@ -127,6 +164,8 @@ function terrainCostMatrix(wasm, terrain) {
   return matrix;
 }
 
-function privateServerSectorFixture() {
-  return JSON.parse(readFileSync(join(FIXTURE_DIR, '../fixtures/terrain/private_server_sector.json'), 'utf8'));
+function privateServerSectorFixture(): PrivateServerSectorFixture {
+  return JSON.parse(
+    readFileSync(join(FIXTURE_DIR, '../fixtures/terrain/private_server_sector.json'), 'utf8')
+  ) as PrivateServerSectorFixture;
 }

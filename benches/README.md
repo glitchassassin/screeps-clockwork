@@ -39,6 +39,13 @@ They cover the same distance-map, flow-field, and path-extraction groups as the
 Rust Criterion benchmarks, plus boundary-focused cases that repeatedly read a
 Rust-backed map and materialize a room into a JavaScript array.
 
+The Node benchmark scripts run Vitest with the same V8 WebAssembly flags used by
+Screeps:
+
+```sh
+--no-liftoff --no-wasm-lazy-compilation --wasm-wrapper-tiering-budget=0
+```
+
 Save a reusable baseline:
 
 ```sh
