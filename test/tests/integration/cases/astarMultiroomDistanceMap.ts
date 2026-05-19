@@ -104,8 +104,8 @@ describe('astarMultiroomDistanceMap', () => {
   it('should be faster than PathFinder.search across one room', () => {
     const from = new RoomPosition(5, 5, 'W1N1');
     const to = new RoomPosition(45, 45, 'W1N1');
-    const iterationsPerSample = 50;
-    const samples = 20;
+    const iterationsPerSample = 10;
+    const samples = 100;
     const timingOptions = { iterations: iterationsPerSample * samples, batchSize: iterationsPerSample };
 
     let pathFinderPath: PathFinderPath;
@@ -153,8 +153,8 @@ describe('astarMultiroomDistanceMap', () => {
   it('should be faster than PathFinder.search across multiple rooms', () => {
     const from = new RoomPosition(5, 5, 'W1N2');
     const to = new RoomPosition(5, 5, 'W2N2');
-    const iterationsPerSample = 5;
-    const samples = 1;
+    const iterationsPerSample = 1;
+    const samples = 5;
     const timingOptions = { iterations: iterationsPerSample * samples, batchSize: iterationsPerSample };
 
     let pathFinderPath: PathFinderPath;
