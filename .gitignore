@@ -1,7 +1,11 @@
 *.js
 !rollup.config.js
 *.d.ts
-src/wasm/
+!types.d.ts
+
+src/wasm/*
+!src/wasm/
+!src/wasm/*.d.ts
 node_modules/
 dist/
 dist_docs/
@@ -9,7 +13,6 @@ dist_lib/
 dist_test/
 .env
 *.log
-!types.d.ts
 
 /target
 **/*.rs.bk
@@ -18,4 +21,6 @@ wasm-pack.log
 node_modules
 dist
 pkg
+!benches/wasm/pkg/
+!benches/wasm/pkg/*.d.ts
 screeps.json

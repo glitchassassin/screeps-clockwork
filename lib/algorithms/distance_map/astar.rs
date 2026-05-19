@@ -111,6 +111,10 @@ pub fn astar_multiroom_distance_map(
             room_key,
         }) = open[min_idx].pop()
         {
+            if cached_room_data[room_key].distance_map[position.xy()] < g_score {
+                continue;
+            }
+
             // Ignore paths that cost too much.
             if g_score >= max_path_cost {
                 continue;
@@ -157,7 +161,8 @@ pub fn astar_multiroom_distance_map(
                 let next_cost = g_score.saturating_add(terrain_cost as usize);
 
                 // Skip this neighbor if we've already found a better path to it.
-                if cached_room_data[room_key].distance_map[neighbor.xy()] <= next_cost {
+                let neighbor_xy = neighbor.xy();
+                if cached_room_data[room_key].distance_map[neighbor_xy] <= next_cost {
                     // already visited and better path found
                     continue;
                 }
@@ -169,10 +174,9 @@ pub fn astar_multiroom_distance_map(
                 let f_score = next_cost.saturating_add(h_score);
 
                 // Ensure the open list has enough buckets to store the new state.
-                open.resize(
-                    open.len().max(f_score.saturating_add(1)),
-                    Default::default(),
-                );
+                if f_score >= open.len() {
+                    open.resize_with(f_score.saturating_add(1), Vec::new);
+                }
 
                 // Add the new state to the open list and update the distance map.
                 open[f_score].push(State {
@@ -181,7 +185,7 @@ pub fn astar_multiroom_distance_map(
                     open_direction: Some(*neighbor_direction),
                     room_key,
                 });
-                cached_room_data[room_key].distance_map[neighbor.xy()] = next_cost;
+                cached_room_data[room_key].distance_map[neighbor_xy] = next_cost;
                 tiles_remaining -= 1;
 
                 // if the f_score is lower than the current min_idx, update min_idx

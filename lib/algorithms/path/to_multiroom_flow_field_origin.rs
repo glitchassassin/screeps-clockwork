@@ -23,14 +23,15 @@ pub fn path_to_multiroom_flow_field_origin(
     while steps < MAX_STEPS {
         path.add(current);
 
-        let directions = flow_field.get_directions(current);
-        // No valid directions means we've reached the end of the flow field
-        if directions.is_empty() {
-            return Ok(path);
-        }
-
-        // Always take the first available direction
-        let next_direction = directions[0];
+        let next_direction = match flow_field
+            .get_room_map(current.room_name())
+            .and_then(|map| map.get_first_direction(current.x(), current.y()))
+        {
+            // No valid directions means we've reached the end of the flow field
+            None => return Ok(path),
+            // Always take the first available direction
+            Some(direction) => direction,
+        };
         let next_pos = current
             .checked_add_direction(next_direction)
             .map_err(|_| "Direction points outside room bounds")?;

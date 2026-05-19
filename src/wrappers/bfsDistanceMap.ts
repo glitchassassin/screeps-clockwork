@@ -1,5 +1,6 @@
 import { MAX_USIZE } from '../utils/constants';
-import { fromPackedRoomName } from '../utils/fromPacked';
+import { fromPackedRoomNameCached } from '../utils/fromPacked';
+import { packDestinations, packPositions } from '../utils/packedArrays';
 import { ClockworkCostMatrix, js_bfs_multiroom_distance_map } from '../wasm/screeps_clockwork';
 import { fromPackedSearchResult } from './searchResult';
 
@@ -43,29 +44,15 @@ export function bfsMultiroomDistanceMap(
     );
   }
 
-  const startPacked = new Uint32Array(start.map(pos => pos.__packedPos));
+  const startPacked = packPositions(start);
   const result = js_bfs_multiroom_distance_map(
     startPacked,
-    (room: number) => costMatrixCallback(fromPackedRoomName(room)),
+    (room: number) => costMatrixCallback(fromPackedRoomNameCached(room)),
     maxOps,
     maxRooms,
     maxPathCost,
-    anyOfDestinations
-      ? new Uint32Array(
-          anyOfDestinations.reduce((acc, { pos, range }) => {
-            acc.push(pos.__packedPos, range);
-            return acc;
-          }, [] as number[])
-        )
-      : undefined,
-    allOfDestinations
-      ? new Uint32Array(
-          allOfDestinations.reduce((acc, { pos, range }) => {
-            acc.push(pos.__packedPos, range);
-            return acc;
-          }, [] as number[])
-        )
-      : undefined
+    packDestinations(anyOfDestinations),
+    packDestinations(allOfDestinations)
   );
 
   return fromPackedSearchResult(result);
