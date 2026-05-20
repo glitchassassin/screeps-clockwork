@@ -5,7 +5,7 @@
 
 src/wasm/*
 !src/wasm/
-!src/wasm/*.d.ts
+!src/wasm/screeps_clockwork.d.ts
 node_modules/
 dist/
 dist_docs/
@@ -22,5 +22,5 @@ node_modules
 dist
 pkg
 !benches/wasm/pkg/
-!benches/wasm/pkg/*.d.ts
+!benches/wasm/pkg/screeps_clockwork.d.ts
 screeps.json
