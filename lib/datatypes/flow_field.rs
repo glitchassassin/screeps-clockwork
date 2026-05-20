@@ -42,7 +42,7 @@ impl FlowField {
         let value = self.get(x, y);
         let mut directions = Vec::new();
         for direction in preferred_directions(self.direction_order).iter().cloned() {
-            if value & (1 << direction as u8) != 0 {
+            if value & direction_bit(direction) != 0 {
                 directions.push(direction);
             }
         }
@@ -55,7 +55,7 @@ impl FlowField {
         preferred_directions(self.direction_order)
             .iter()
             .cloned()
-            .find(|direction| value & (1 << *direction as u8) != 0)
+            .find(|direction| value & direction_bit(*direction) != 0)
     }
 
     /// Set the list of valid directions for a given coordinate.
@@ -67,15 +67,19 @@ impl FlowField {
     ) {
         let mut value = 0;
         for direction in directions {
-            value |= 1 << direction as u8;
+            value |= direction_bit(direction);
         }
         self.set(x, y, value)
     }
 
     pub fn add_direction(&mut self, x: RoomCoordinate, y: RoomCoordinate, direction: Direction) {
         let value = self.get(x, y);
-        self.set(x, y, value | (1 << direction as u8));
+        self.set(x, y, value | direction_bit(direction));
     }
+}
+
+fn direction_bit(direction: Direction) -> u8 {
+    1 << (direction as u8 - 1)
 }
 
 #[wasm_bindgen]

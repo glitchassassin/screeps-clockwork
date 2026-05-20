@@ -395,6 +395,10 @@ export enum Terrain {
     Swamp = 2,
 }
 
+export function clear_portals(): void;
+
+export function debug_portal_index(): any;
+
 /**
  * Exports the global range calculation between two positions.
  */
@@ -403,6 +407,8 @@ export function get_range(packed_pos_1: number, packed_pos_2: number): number;
 export function get_terrain_cost_matrix(room_name: number, plain_cost?: number | null, swamp_cost?: number | null, wall_cost?: number | null): ClockworkCostMatrix;
 
 export function js_astar_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_rooms: number, max_ops: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
+
+export function js_astar_portal_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_rooms: number, max_ops: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
 
 /**
  * WASM wrapper for the BFS multiroom distance map function.
@@ -422,13 +428,23 @@ export function js_astar_multiroom_distance_map(start_packed: Uint32Array, get_c
  */
 export function js_bfs_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_ops: number, max_rooms: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
 
+export function js_bfs_portal_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_ops: number, max_rooms: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
+
 export function js_dijkstra_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_ops: number, max_rooms: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
+
+export function js_dijkstra_portal_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_ops: number, max_rooms: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
 
 export function js_path_to_multiroom_distance_map_origin(start: number, distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): Path;
 
+export function js_path_to_multiroom_distance_map_origin_with_portals(start: number, distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): Path;
+
 export function js_path_to_multiroom_flow_field_origin(start: number, flow_field: MultiroomFlowField): Path;
 
+export function js_path_to_multiroom_flow_field_origin_with_portals(start: number, flow_field: MultiroomFlowField): Path;
+
 export function js_path_to_multiroom_mono_flow_field_origin(start: number, flow_field: MultiroomMonoFlowField): Path;
+
+export function js_path_to_multiroom_mono_flow_field_origin_with_portals(start: number, flow_field: MultiroomMonoFlowField): Path;
 
 /**
  * Creates a flow field for the given distance map.
@@ -439,5 +455,13 @@ export function multiroomFlowField(distance_map: MultiroomDistanceMap, direction
  * Creates a monodirectional flow field for the given distance map.
  */
 export function multiroomMonoFlowField(distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): MultiroomMonoFlowField;
+
+export function multiroomPortalFlowField(distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): MultiroomFlowField;
+
+export function multiroomPortalMonoFlowField(distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): MultiroomMonoFlowField;
+
+export function set_portal_distance_cache_room_limit(room_limit: number): void;
+
+export function set_portals(packed_pairs: Uint32Array): void;
 
 export function version(): string;

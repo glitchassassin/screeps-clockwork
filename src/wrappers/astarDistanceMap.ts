@@ -1,7 +1,11 @@
 import { MAX_USIZE } from '../utils/constants';
 import { fromPackedRoomNameCached } from '../utils/fromPacked';
 import { packDestinations, packPositions } from '../utils/packedArrays';
-import { ClockworkCostMatrix, js_astar_multiroom_distance_map } from '../wasm/screeps_clockwork';
+import {
+  ClockworkCostMatrix,
+  js_astar_multiroom_distance_map,
+  js_astar_portal_multiroom_distance_map
+} from '../wasm/screeps_clockwork';
 import { fromPackedSearchResult } from './searchResult';
 
 /**
@@ -46,6 +50,62 @@ export function astarMultiroomDistanceMap(
 
   const startPacked = packPositions(start);
   const result = js_astar_multiroom_distance_map(
+    startPacked,
+    (room: number) => costMatrixCallback(fromPackedRoomNameCached(room)),
+    maxRooms,
+    maxOps,
+    maxPathCost,
+    packDestinations(anyOfDestinations),
+    packDestinations(allOfDestinations)
+  );
+
+  return fromPackedSearchResult(result);
+}
+
+/**
+ * Create a portal-aware distance map for the given start positions, using A* to
+ * optimize the search toward the given destinations.
+ *
+ * Portals configured with `initialize({ portals })` or `setPortals` are treated
+ * like exits: stepping onto a portal entrance lands on its paired exit.
+ *
+ * This calculates a distance map across multiple rooms, with a few configurable limits:
+ * - `maxOps`: The maximum number of pathfinding operations to perform.
+ * - `maxRooms`: The maximum number of rooms to explore.
+ * - `maxPathCost`: Don't explore tiles with a greater path cost than this.
+ *
+ * At least one of these limits or destination lists must be set.
+ *
+ * @param start - The starting positions.
+ * @param options - The options for the distance map.
+ * @returns A multi-room distance map.
+ */
+export function astarPortalMultiroomDistanceMap(
+  start: RoomPosition[],
+  {
+    costMatrixCallback,
+    maxRooms = MAX_USIZE,
+    maxOps = MAX_USIZE,
+    maxPathCost = MAX_USIZE,
+    anyOfDestinations,
+    allOfDestinations
+  }: {
+    costMatrixCallback: (room: string) => ClockworkCostMatrix | undefined;
+    maxRooms?: number;
+    maxOps?: number;
+    maxPathCost?: number;
+    anyOfDestinations?: { pos: RoomPosition; range: number }[];
+    allOfDestinations?: { pos: RoomPosition; range: number }[];
+  }
+) {
+  if ([maxRooms, maxOps, maxPathCost].every(n => n === MAX_USIZE) && !anyOfDestinations && !allOfDestinations) {
+    throw new Error(
+      'At least one of maxRooms, maxOps, maxPathCost, anyOfDestinations, or allOfDestinations must be set'
+    );
+  }
+
+  const startPacked = packPositions(start);
+  const result = js_astar_portal_multiroom_distance_map(
     startPacked,
     (room: number) => costMatrixCallback(fromPackedRoomNameCached(room)),
     maxRooms,

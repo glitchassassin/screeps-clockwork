@@ -1,9 +1,14 @@
 use crate::algorithms::map::corresponding_room_edge;
 use crate::algorithms::map::neighbors_without_edges;
+use crate::algorithms::map::preferred_directions;
+use crate::algorithms::map::same_room_neighbor;
 use crate::algorithms::map::DirectionOrder;
+use crate::datatypes::with_configured_portal_index;
 use crate::datatypes::MultiroomDistanceMap;
 use crate::datatypes::Path;
+use crate::datatypes::PortalIndex;
 use screeps::Position;
+use std::collections::HashSet;
 use wasm_bindgen::prelude::*;
 
 // Maximum iterations to prevent infinite loops (50x50 room size)
@@ -66,6 +71,94 @@ pub fn path_to_multiroom_distance_map_origin(
     Err("Path exceeded maximum length")
 }
 
+pub fn path_to_multiroom_distance_map_origin_with_portals(
+    start: Position,
+    distance_map: &MultiroomDistanceMap,
+    direction_order: DirectionOrder,
+    portal_index: &PortalIndex,
+) -> Result<Path, &'static str> {
+    let mut path = Path::new();
+    let mut current = start;
+    let mut visited = HashSet::new();
+    let mut steps = 0;
+
+    while steps < MAX_STEPS {
+        path.add(current);
+        visited.insert(current);
+
+        let current_distance = distance_map.get(current);
+        if current_distance == usize::MAX
+            && portal_index.exit(current).is_none()
+            && !current.is_room_edge()
+        {
+            return Err("No valid path to origin found");
+        }
+        if current_distance == 0 {
+            return Ok(path);
+        }
+
+        let mut next_step = None;
+        let mut next_landed = None;
+        let mut min_distance = current_distance;
+
+        for direction in preferred_directions(direction_order) {
+            let step = match same_room_neighbor(current, *direction) {
+                Some(step) => step,
+                None => continue,
+            };
+            let neighbor_distance = distance_map.get(step);
+
+            if neighbor_distance < min_distance {
+                min_distance = neighbor_distance;
+                next_step = Some(step);
+                next_landed = Some(
+                    portal_index
+                        .exit(step)
+                        .unwrap_or_else(|| corresponding_room_edge(step)),
+                );
+            }
+        }
+
+        let (step, landed) = match (next_step, next_landed) {
+            (Some(step), Some(landed)) => (step, landed),
+            _ => {
+                if let Some(portal_exit) = portal_index.exit(current) {
+                    if !visited.insert(portal_exit) {
+                        return Err("Cycle detected in portal path");
+                    }
+                    current = portal_exit;
+                    steps += 1;
+                    continue;
+                }
+                if current.is_room_edge() {
+                    let room_exit = corresponding_room_edge(current);
+                    if !visited.insert(room_exit) {
+                        return Err("Cycle detected in portal path");
+                    }
+                    current = room_exit;
+                    steps += 1;
+                    continue;
+                }
+                return Err("No valid path to origin found");
+            }
+        };
+
+        if min_distance == 0 && step == landed {
+            path.add(step);
+            return Ok(path);
+        }
+
+        if portal_index.exit(step).is_some() || step.is_room_edge() {
+            path.add(step);
+        }
+        current = landed;
+
+        steps += 1;
+    }
+
+    Err("Path exceeded maximum length")
+}
+
 #[wasm_bindgen]
 pub fn js_path_to_multiroom_distance_map_origin(
     start: u32,
@@ -80,6 +173,29 @@ pub fn js_path_to_multiroom_distance_map_origin(
         Ok(path) => Ok(path),
         Err(e) => Err(js_sys::Error::new(&format!(
             "Error calculating path to multiroom distance map origin: {}",
+            e
+        ))
+        .into()),
+    }
+}
+
+#[wasm_bindgen]
+pub fn js_path_to_multiroom_distance_map_origin_with_portals(
+    start: u32,
+    distance_map: &MultiroomDistanceMap,
+    direction_order: DirectionOrder,
+) -> Result<Path, JsValue> {
+    match with_configured_portal_index(|portal_index| {
+        path_to_multiroom_distance_map_origin_with_portals(
+            Position::from_packed(start),
+            distance_map,
+            direction_order,
+            portal_index,
+        )
+    }) {
+        Ok(path) => Ok(path),
+        Err(e) => Err(js_sys::Error::new(&format!(
+            "Error calculating portal path to multiroom distance map origin: {}",
             e
         ))
         .into()),
