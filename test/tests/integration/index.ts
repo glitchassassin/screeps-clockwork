@@ -14,3 +14,4 @@ import './cases/multiroomFlowField';
 import './cases/multiroomFlowFieldPath';
 import './cases/multiroomMonoFlowField';
 import './cases/multiroomMonoFlowFieldPath';
+import './cases/portalMultiroomDistanceMap';

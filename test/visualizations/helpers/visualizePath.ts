@@ -4,8 +4,6 @@
  * @param path - The path to visualize.
  */
 export function visualizePath(path: RoomPosition[], stroke: string = '#ffffff') {
-  // alpha map visual
-  Game.map.visual.poly(path, { stroke, fill: 'transparent', strokeWidth: 1 });
   // split the path into segments by room
   const segments: RoomPosition[][] = [];
   let currentSegment: RoomPosition[] = [];
@@ -22,6 +20,7 @@ export function visualizePath(path: RoomPosition[], stroke: string = '#ffffff') 
   // render each segment
   for (const segment of segments) {
     if (segment.length === 0) continue;
+    Game.map.visual.poly(segment, { stroke, fill: 'transparent', strokeWidth: 1 });
     const visual = new RoomVisual(segment[0].roomName);
     visual.poly(segment, { stroke, fill: 'transparent', strokeWidth: 0.15 });
   }

@@ -2,9 +2,12 @@ import { fromPackedRoomName, packRoomName } from '../utils/fromPacked';
 import {
   DirectionOrder,
   js_path_to_multiroom_distance_map_origin,
+  js_path_to_multiroom_distance_map_origin_with_portals,
   MultiroomDistanceMap,
   multiroomFlowField,
-  multiroomMonoFlowField
+  multiroomMonoFlowField,
+  multiroomPortalFlowField,
+  multiroomPortalMonoFlowField
 } from '../wasm/screeps_clockwork';
 import { ClockworkDistanceMap } from './distanceMap';
 import { ClockworkMultiroomFlowField } from './multiroomFlowField';
@@ -82,6 +85,20 @@ export class ClockworkMultiroomDistanceMap {
   }
 
   /**
+   * Portal-aware path to the origin from a given position.
+   * Pass `DirectionOrder.DiagonalFirst` to prefer diagonal steps when multiple neighbors are equally close.
+   */
+  pathToOriginWithPortals(start: RoomPosition, options: DirectionOrderOptions = {}): ClockworkPath {
+    return new ClockworkPath(
+      js_path_to_multiroom_distance_map_origin_with_portals(
+        start.__packedPos,
+        assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap'),
+        options.directionOrder ?? DEFAULT_DIRECTION_ORDER
+      )
+    );
+  }
+
+  /**
    * Flow field for this distance map.
    * Pass `DirectionOrder.DiagonalFirst` to prefer diagonal directions when multiple neighbors are equally close.
    */
@@ -95,12 +112,38 @@ export class ClockworkMultiroomDistanceMap {
   }
 
   /**
+   * Portal-aware flow field for this distance map.
+   * Pass `DirectionOrder.DiagonalFirst` to prefer diagonal directions when multiple neighbors are equally close.
+   */
+  toFlowFieldWithPortals(options: DirectionOrderOptions = {}): ClockworkMultiroomFlowField {
+    return new ClockworkMultiroomFlowField(
+      multiroomPortalFlowField(
+        assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap'),
+        options.directionOrder ?? DEFAULT_DIRECTION_ORDER
+      )
+    );
+  }
+
+  /**
    * Mono-directional flow field for this distance map.
    * Pass `DirectionOrder.DiagonalFirst` to prefer diagonal directions when multiple neighbors are equally close.
    */
   toMonoFlowField(options: DirectionOrderOptions = {}): ClockworkMultiroomMonoFlowField {
     return new ClockworkMultiroomMonoFlowField(
       multiroomMonoFlowField(
+        assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap'),
+        options.directionOrder ?? DEFAULT_DIRECTION_ORDER
+      )
+    );
+  }
+
+  /**
+   * Portal-aware monodirectional flow field for this distance map.
+   * Pass `DirectionOrder.DiagonalFirst` to prefer diagonal directions when multiple neighbors are equally close.
+   */
+  toMonoFlowFieldWithPortals(options: DirectionOrderOptions = {}): ClockworkMultiroomMonoFlowField {
+    return new ClockworkMultiroomMonoFlowField(
+      multiroomPortalMonoFlowField(
         assertNotFreed(this._map, 'ClockworkMultiroomDistanceMap'),
         options.directionOrder ?? DEFAULT_DIRECTION_ORDER
       )

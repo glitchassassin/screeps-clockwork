@@ -16,6 +16,7 @@ Basic algorithms and patterns can be composed into an optimized pathfinding stra
   - [Breadth-first search](./breadth-first-search.md)
   - [Dijkstra's Algorithm](./dijkstras-algorithm.md)
   - [A\*](./astar.md)
+    - [Portals](./portals.md)
 - Systems
   - [Traffic](./traffic.md)
   - Movement (e.g. following a path)

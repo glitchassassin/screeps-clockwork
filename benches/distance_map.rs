@@ -1,8 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use screeps::Position;
 use screeps_clockwork::bench_support::{
-    astar_multiroom_distance_map, base_heuristic_with_range, bfs_multiroom_distance_map,
-    dijkstra_multiroom_distance_map, multiroom_flow_field, multiroom_mono_flow_field,
+    astar_multiroom_distance_map, astar_portal_multiroom_distance_map, base_heuristic_with_range,
+    bfs_multiroom_distance_map, bfs_portal_multiroom_distance_map,
+    closest_portal_heuristic_cached_with_range, dijkstra_multiroom_distance_map,
+    dijkstra_portal_multiroom_distance_map, multiroom_flow_field, multiroom_mono_flow_field,
     path_to_multiroom_distance_map_origin, path_to_multiroom_flow_field_origin,
     path_to_multiroom_mono_flow_field_origin, DirectionOrder, MultiroomDistanceMap,
     MultiroomFlowField, MultiroomMonoFlowField,
@@ -10,7 +12,7 @@ use screeps_clockwork::bench_support::{
 
 mod fixtures;
 
-use fixtures::DistanceMapScenario;
+use fixtures::{DistanceMapScenario, PortalDistanceMapScenario};
 
 struct DerivedScenario {
     name: &'static str,
@@ -55,6 +57,64 @@ fn bench_bfs(c: &mut Criterion) {
             scenario,
             |bench, scenario| {
                 bench.iter(|| black_box(run_bfs(scenario)));
+            },
+        );
+    }
+
+    group.finish();
+}
+
+fn bench_portal_variants(c: &mut Criterion) {
+    let scenarios = fixtures::portal_distance_map_scenarios();
+    let mut group = c.benchmark_group("distance_map/portal_variants");
+
+    for scenario in &scenarios {
+        group.bench_with_input(
+            BenchmarkId::new("portal_bfs", scenario.name),
+            scenario,
+            |bench, scenario| {
+                bench.iter(|| black_box(run_portal_bfs(scenario)));
+            },
+        );
+
+        group.bench_with_input(
+            BenchmarkId::new("portal_dijkstra", scenario.name),
+            scenario,
+            |bench, scenario| {
+                bench.iter(|| black_box(run_portal_dijkstra(scenario)));
+            },
+        );
+
+        group.bench_with_input(
+            BenchmarkId::new("portal_astar_cached", scenario.name),
+            scenario,
+            |bench, scenario| {
+                bench.iter(|| black_box(run_portal_astar_cached(scenario)));
+            },
+        );
+    }
+
+    group.finish();
+}
+
+fn bench_astar_vs_portal_astar(c: &mut Criterion) {
+    let scenarios = fixtures::portal_distance_map_scenarios();
+    let mut group = c.benchmark_group("distance_map/astar_vs_portal_astar");
+
+    for scenario in &scenarios {
+        group.bench_with_input(
+            BenchmarkId::new("astar", scenario.name),
+            scenario,
+            |bench, scenario| {
+                bench.iter(|| black_box(run_astar_for_portal_scenario(scenario)));
+            },
+        );
+
+        group.bench_with_input(
+            BenchmarkId::new("portal_astar_cached", scenario.name),
+            scenario,
+            |bench, scenario| {
+                bench.iter(|| black_box(run_portal_astar_cached(scenario)));
             },
         );
     }
@@ -202,6 +262,69 @@ fn run_bfs(scenario: &DistanceMapScenario) -> usize {
     result.ops()
 }
 
+fn run_astar_for_portal_scenario(scenario: &PortalDistanceMapScenario) -> usize {
+    let targets = scenario.targets();
+    let heuristic = base_heuristic_with_range(&targets);
+    let result = black_box(astar_multiroom_distance_map(
+        vec![black_box(scenario.start)],
+        |room| scenario.cost_matrix(room),
+        scenario.max_rooms,
+        scenario.max_ops,
+        scenario.max_path_cost,
+        heuristic,
+        Some(targets.clone()),
+        None,
+    ));
+    result.ops()
+}
+
+fn run_portal_astar_cached(scenario: &PortalDistanceMapScenario) -> usize {
+    let targets = scenario.targets();
+    let heuristic = closest_portal_heuristic_cached_with_range(&targets, &scenario.portal_index);
+    let result = black_box(astar_portal_multiroom_distance_map(
+        vec![black_box(scenario.start)],
+        |room| scenario.cost_matrix(room),
+        scenario.max_rooms,
+        scenario.max_ops,
+        scenario.max_path_cost,
+        heuristic,
+        &scenario.portal_index,
+        Some(targets.clone()),
+        None,
+    ));
+    result.ops()
+}
+
+fn run_portal_dijkstra(scenario: &PortalDistanceMapScenario) -> usize {
+    let targets = scenario.targets();
+    let result = black_box(dijkstra_portal_multiroom_distance_map(
+        vec![black_box(scenario.start)],
+        |room| scenario.cost_matrix(room),
+        scenario.max_ops,
+        scenario.max_rooms,
+        scenario.max_path_cost,
+        &scenario.portal_index,
+        Some(targets),
+        None,
+    ));
+    result.ops()
+}
+
+fn run_portal_bfs(scenario: &PortalDistanceMapScenario) -> usize {
+    let targets = scenario.targets();
+    let result = black_box(bfs_portal_multiroom_distance_map(
+        vec![black_box(scenario.start)],
+        |room| scenario.cost_matrix(room),
+        scenario.max_ops,
+        scenario.max_rooms,
+        scenario.max_path_cost,
+        &scenario.portal_index,
+        Some(targets),
+        None,
+    ));
+    result.ops()
+}
+
 fn derived_scenarios() -> Vec<DerivedScenario> {
     fixtures::distance_map_scenarios()
         .into_iter()
@@ -241,6 +364,8 @@ criterion_group!(
     benches,
     bench_dijkstra_vs_astar,
     bench_bfs,
+    bench_portal_variants,
+    bench_astar_vs_portal_astar,
     bench_flow_fields,
     bench_paths
 );

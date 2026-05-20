@@ -1,5 +1,9 @@
 import { fromPackedRoomName, packRoomName } from '../utils/fromPacked';
-import { MultiroomFlowField, js_path_to_multiroom_flow_field_origin } from '../wasm/screeps_clockwork';
+import {
+  MultiroomFlowField,
+  js_path_to_multiroom_flow_field_origin,
+  js_path_to_multiroom_flow_field_origin_with_portals
+} from '../wasm/screeps_clockwork';
 import { ClockworkFlowField } from './flowField';
 import { assertNotFreed, freeHandle } from './freeable';
 import { ClockworkPath } from './path';
@@ -81,6 +85,18 @@ export class ClockworkMultiroomFlowField {
   pathToOrigin(start: RoomPosition): ClockworkPath {
     return new ClockworkPath(
       js_path_to_multiroom_flow_field_origin(
+        start.__packedPos,
+        assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField')
+      )
+    );
+  }
+
+  /**
+   * Find a portal-aware path from a given position to the origin of the flow field.
+   */
+  pathToOriginWithPortals(start: RoomPosition): ClockworkPath {
+    return new ClockworkPath(
+      js_path_to_multiroom_flow_field_origin_with_portals(
         start.__packedPos,
         assertNotFreed(this._flowField, 'ClockworkMultiroomFlowField')
       )

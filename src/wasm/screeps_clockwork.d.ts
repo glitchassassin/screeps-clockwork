@@ -395,6 +395,10 @@ export enum Terrain {
     Swamp = 2,
 }
 
+export function clear_portals(): void;
+
+export function debug_portal_index(): any;
+
 /**
  * Exports the global range calculation between two positions.
  */
@@ -403,6 +407,8 @@ export function get_range(packed_pos_1: number, packed_pos_2: number): number;
 export function get_terrain_cost_matrix(room_name: number, plain_cost?: number | null, swamp_cost?: number | null, wall_cost?: number | null): ClockworkCostMatrix;
 
 export function js_astar_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_rooms: number, max_ops: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
+
+export function js_astar_portal_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_rooms: number, max_ops: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
 
 /**
  * WASM wrapper for the BFS multiroom distance map function.
@@ -422,13 +428,23 @@ export function js_astar_multiroom_distance_map(start_packed: Uint32Array, get_c
  */
 export function js_bfs_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_ops: number, max_rooms: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
 
+export function js_bfs_portal_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_ops: number, max_rooms: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
+
 export function js_dijkstra_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_ops: number, max_rooms: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
+
+export function js_dijkstra_portal_multiroom_distance_map(start_packed: Uint32Array, get_cost_matrix: Function, max_ops: number, max_rooms: number, max_path_cost: number, any_of_destinations?: Uint32Array | null, all_of_destinations?: Uint32Array | null): SearchResult;
 
 export function js_path_to_multiroom_distance_map_origin(start: number, distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): Path;
 
+export function js_path_to_multiroom_distance_map_origin_with_portals(start: number, distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): Path;
+
 export function js_path_to_multiroom_flow_field_origin(start: number, flow_field: MultiroomFlowField): Path;
 
+export function js_path_to_multiroom_flow_field_origin_with_portals(start: number, flow_field: MultiroomFlowField): Path;
+
 export function js_path_to_multiroom_mono_flow_field_origin(start: number, flow_field: MultiroomMonoFlowField): Path;
+
+export function js_path_to_multiroom_mono_flow_field_origin_with_portals(start: number, flow_field: MultiroomMonoFlowField): Path;
 
 /**
  * Creates a flow field for the given distance map.
@@ -440,32 +456,42 @@ export function multiroomFlowField(distance_map: MultiroomDistanceMap, direction
  */
 export function multiroomMonoFlowField(distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): MultiroomMonoFlowField;
 
+export function multiroomPortalFlowField(distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): MultiroomFlowField;
+
+export function multiroomPortalMonoFlowField(distance_map: MultiroomDistanceMap, direction_order: DirectionOrder): MultiroomMonoFlowField;
+
+export function set_portal_distance_cache_room_limit(room_limit: number): void;
+
+export function set_portals(packed_pairs: Uint32Array): void;
+
 export function version(): string;
 
 export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembly.Module;
 
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
-    readonly __wbg_multiroommonoflowfield_free: (a: number, b: number) => void;
+    readonly js_astar_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
+    readonly js_astar_portal_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
+    readonly js_path_to_multiroom_distance_map_origin: (a: number, b: number, c: number, d: number) => void;
+    readonly js_path_to_multiroom_distance_map_origin_with_portals: (a: number, b: number, c: number, d: number) => void;
+    readonly js_path_to_multiroom_flow_field_origin: (a: number, b: number, c: number) => void;
+    readonly js_path_to_multiroom_flow_field_origin_with_portals: (a: number, b: number, c: number) => void;
     readonly js_path_to_multiroom_mono_flow_field_origin: (a: number, b: number, c: number) => void;
-    readonly multiroommonoflowfield_get: (a: number, b: number) => number;
-    readonly multiroommonoflowfield_getRoom: (a: number, b: number) => number;
-    readonly multiroommonoflowfield_getRooms: (a: number, b: number) => void;
-    readonly multiroommonoflowfield_js_new: () => number;
-    readonly multiroommonoflowfield_set: (a: number, b: number, c: number) => void;
-    readonly __wbg_distancemap_free: (a: number, b: number) => void;
-    readonly __wbg_path_free: (a: number, b: number) => void;
-    readonly distancemap_get: (a: number, b: number, c: number) => number;
-    readonly distancemap_set: (a: number, b: number, c: number, d: number) => void;
-    readonly distancemap_toArray: (a: number, b: number) => void;
-    readonly path_add: (a: number, b: number) => void;
-    readonly path_find_next_index: (a: number, b: number) => number;
-    readonly path_get: (a: number, b: number) => number;
-    readonly path_len: (a: number) => number;
-    readonly path_to_array: (a: number, b: number) => void;
-    readonly path_to_array_reversed: (a: number, b: number) => void;
+    readonly js_path_to_multiroom_mono_flow_field_origin_with_portals: (a: number, b: number, c: number) => void;
+    readonly __wbg_flowfield_free: (a: number, b: number) => void;
+    readonly __wbg_monoflowfield_free: (a: number, b: number) => void;
+    readonly flowfield_addDirection: (a: number, b: number, c: number, d: number) => void;
+    readonly flowfield_get: (a: number, b: number, c: number) => number;
+    readonly flowfield_getDirections: (a: number, b: number, c: number, d: number) => void;
+    readonly flowfield_set: (a: number, b: number, c: number, d: number) => void;
+    readonly flowfield_setDirections: (a: number, b: number, c: number, d: number, e: number) => void;
+    readonly monoflowfield_get: (a: number, b: number, c: number) => number;
+    readonly monoflowfield_set: (a: number, b: number, c: number, d: number) => void;
+    readonly __wbg_clockworkcostmatrix_free: (a: number, b: number) => void;
     readonly __wbg_multiroomflowfield_free: (a: number, b: number) => void;
-    readonly multiroomFlowField: (a: number, b: number) => number;
+    readonly clockworkcostmatrix_get: (a: number, b: number, c: number) => number;
+    readonly clockworkcostmatrix_new: (a: number) => number;
+    readonly clockworkcostmatrix_set: (a: number, b: number, c: number, d: number) => void;
     readonly multiroomflowfield_addDirection: (a: number, b: number, c: number) => void;
     readonly multiroomflowfield_get: (a: number, b: number) => number;
     readonly multiroomflowfield_getDirections: (a: number, b: number, c: number) => void;
@@ -474,45 +500,55 @@ export interface InitOutput {
     readonly multiroomflowfield_js_new: () => number;
     readonly multiroomflowfield_set: (a: number, b: number, c: number) => void;
     readonly multiroomflowfield_setDirections: (a: number, b: number, c: number, d: number) => void;
-    readonly __wbg_flowfield_free: (a: number, b: number) => void;
+    readonly __wbg_searchresult_free: (a: number, b: number) => void;
+    readonly searchresult_distance_map: (a: number) => number;
+    readonly searchresult_found_targets: (a: number, b: number) => void;
+    readonly searchresult_ops: (a: number) => number;
+    readonly __wbg_distancemap_free: (a: number, b: number) => void;
     readonly __wbg_multiroomdistancemap_free: (a: number, b: number) => void;
-    readonly flowfield_addDirection: (a: number, b: number, c: number, d: number) => void;
-    readonly flowfield_get: (a: number, b: number, c: number) => number;
-    readonly flowfield_getDirections: (a: number, b: number, c: number, d: number) => void;
-    readonly flowfield_set: (a: number, b: number, c: number, d: number) => void;
-    readonly flowfield_setDirections: (a: number, b: number, c: number, d: number, e: number) => void;
+    readonly distancemap_get: (a: number, b: number, c: number) => number;
+    readonly distancemap_set: (a: number, b: number, c: number, d: number) => void;
+    readonly distancemap_toArray: (a: number, b: number) => void;
     readonly get_terrain_cost_matrix: (a: number, b: number, c: number, d: number) => number;
-    readonly js_dijkstra_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
     readonly multiroomdistancemap_get: (a: number, b: number) => number;
     readonly multiroomdistancemap_get_room: (a: number, b: number) => number;
     readonly multiroomdistancemap_get_rooms: (a: number, b: number) => void;
     readonly multiroomdistancemap_js_new: () => number;
     readonly multiroomdistancemap_set: (a: number, b: number, c: number) => void;
-    readonly get_range: (a: number, b: number) => number;
-    readonly js_bfs_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
-    readonly js_path_to_multiroom_distance_map_origin: (a: number, b: number, c: number, d: number) => void;
-    readonly js_path_to_multiroom_flow_field_origin: (a: number, b: number, c: number) => void;
-    readonly version: (a: number) => void;
-    readonly js_astar_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
-    readonly __wbg_clockworkcostmatrix_free: (a: number, b: number) => void;
-    readonly __wbg_monoflowfield_free: (a: number, b: number) => void;
-    readonly clockworkcostmatrix_get: (a: number, b: number, c: number) => number;
-    readonly clockworkcostmatrix_new: (a: number) => number;
-    readonly clockworkcostmatrix_set: (a: number, b: number, c: number, d: number) => void;
-    readonly monoflowfield_get: (a: number, b: number, c: number) => number;
-    readonly monoflowfield_set: (a: number, b: number, c: number, d: number) => void;
+    readonly clear_portals: () => void;
+    readonly debug_portal_index: () => number;
+    readonly set_portal_distance_cache_room_limit: (a: number) => void;
+    readonly set_portals: (a: number, b: number) => void;
+    readonly js_dijkstra_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
+    readonly js_dijkstra_portal_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
+    readonly multiroomFlowField: (a: number, b: number) => number;
     readonly multiroomMonoFlowField: (a: number, b: number) => number;
-    readonly __wbg_searchresult_free: (a: number, b: number) => void;
-    readonly searchresult_distance_map: (a: number) => number;
-    readonly searchresult_found_targets: (a: number, b: number) => void;
-    readonly searchresult_ops: (a: number) => number;
+    readonly multiroomPortalFlowField: (a: number, b: number) => number;
+    readonly multiroomPortalMonoFlowField: (a: number, b: number) => number;
+    readonly __wbg_multiroommonoflowfield_free: (a: number, b: number) => void;
+    readonly __wbg_path_free: (a: number, b: number) => void;
+    readonly get_range: (a: number, b: number) => number;
+    readonly multiroommonoflowfield_get: (a: number, b: number) => number;
+    readonly multiroommonoflowfield_getRoom: (a: number, b: number) => number;
+    readonly multiroommonoflowfield_getRooms: (a: number, b: number) => void;
+    readonly multiroommonoflowfield_js_new: () => number;
+    readonly multiroommonoflowfield_set: (a: number, b: number, c: number) => void;
+    readonly path_add: (a: number, b: number) => void;
+    readonly path_find_next_index: (a: number, b: number) => number;
+    readonly path_get: (a: number, b: number) => number;
+    readonly path_len: (a: number) => number;
+    readonly path_to_array: (a: number, b: number) => void;
+    readonly path_to_array_reversed: (a: number, b: number) => void;
+    readonly version: (a: number) => void;
+    readonly js_bfs_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
+    readonly js_bfs_portal_multiroom_distance_map: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => number;
     readonly __wbg_searchgoal_free: (a: number, b: number) => void;
     readonly searchgoal_pos: (a: number) => number;
     readonly searchgoal_range: (a: number) => number;
-    readonly __wbindgen_exn_store: (a: number) => void;
-    readonly __wbindgen_free: (a: number, b: number, c: number) => void;
     readonly __wbindgen_malloc: (a: number, b: number) => number;
     readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+    readonly __wbindgen_exn_store: (a: number) => void;
+    readonly __wbindgen_free: (a: number, b: number, c: number) => void;
     readonly __wbindgen_add_to_stack_pointer: (a: number) => number;
 }
 

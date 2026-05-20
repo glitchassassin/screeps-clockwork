@@ -6,6 +6,7 @@ mod multiroom_distance_map;
 mod multiroom_flow_field;
 mod multiroom_mono_flow_field;
 mod path;
+mod portal_index;
 mod room_data_cache;
 
 pub use cost_matrix::ClockworkCostMatrix;
@@ -14,4 +15,6 @@ pub use multiroom_distance_map::MultiroomDistanceMap;
 pub use multiroom_flow_field::MultiroomFlowField;
 pub use multiroom_mono_flow_field::MultiroomMonoFlowField;
 pub use path::Path;
+pub use portal_index::with_configured_portal_index;
+pub use portal_index::PortalIndex;
 pub use room_data_cache::RoomDataCache;
