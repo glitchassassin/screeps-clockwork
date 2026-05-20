@@ -64,14 +64,18 @@ pub fn multiroom_portal_flow_field_with_index(
     for room in distance_map.rooms() {
         let room_map = distance_map.get_room_map(room).unwrap();
         for (position, &value) in room_map.enumerate() {
+            let pos = Position::new(position.x, position.y, room);
+            if value == 0 {
+                flow_field.set_terminal(pos);
+                continue;
+            }
+
             if value == usize::MAX {
-                let pos = Position::new(position.x, position.y, room);
                 if portal_index.exit(pos).is_none() && !pos.is_room_edge() {
                     continue;
                 }
             }
 
-            let pos = Position::new(position.x, position.y, room);
             let min_distance = preferred_directions(direction_order)
                 .iter()
                 .filter_map(|direction| same_room_neighbor(pos, *direction))

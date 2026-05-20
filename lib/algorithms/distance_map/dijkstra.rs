@@ -406,6 +406,88 @@ mod tests {
     }
 
     #[test]
+    fn portal_path_stops_when_origin_is_room_exit() {
+        let start = pos("W1N1", 47, 10);
+        let step_before_origin = pos("W1N1", 48, 10);
+        let origin = pos("W1N1", 49, 10);
+        let portals = PortalIndex::default();
+
+        let matrices = HashMap::from([(room("W1N1"), plain_matrix())]);
+
+        let distance_map = dijkstra_portal_multiroom_distance_map(
+            vec![origin],
+            callback(matrices),
+            1_000,
+            1,
+            100,
+            &portals,
+            None,
+            None,
+        )
+        .distance_map();
+
+        let expected = vec![start, step_before_origin, origin];
+
+        let path = path_to_multiroom_distance_map_origin_with_portals(
+            start,
+            &distance_map,
+            DirectionOrder::CardinalFirst,
+            &portals,
+        )
+        .unwrap();
+        let actual: Vec<Position> = (0..path.len()).map(|i| *path.get(i).unwrap()).collect();
+        assert_eq!(actual, expected);
+
+        let path = path_to_multiroom_distance_map_origin_with_portals(
+            origin,
+            &distance_map,
+            DirectionOrder::CardinalFirst,
+            &portals,
+        )
+        .unwrap();
+        let actual: Vec<Position> = (0..path.len()).map(|i| *path.get(i).unwrap()).collect();
+        assert_eq!(actual, vec![origin]);
+
+        let flow_field = multiroom_portal_flow_field_with_index(
+            &distance_map,
+            DirectionOrder::CardinalFirst,
+            &portals,
+        );
+        let path =
+            path_to_multiroom_flow_field_origin_with_portals(start, &flow_field, &portals).unwrap();
+        let actual: Vec<Position> = (0..path.len()).map(|i| *path.get(i).unwrap()).collect();
+        assert_eq!(actual, expected);
+
+        let path = path_to_multiroom_flow_field_origin_with_portals(origin, &flow_field, &portals)
+            .unwrap();
+        let actual: Vec<Position> = (0..path.len()).map(|i| *path.get(i).unwrap()).collect();
+        assert_eq!(actual, vec![origin]);
+
+        let mono_flow_field = multiroom_portal_mono_flow_field_with_index(
+            &distance_map,
+            DirectionOrder::CardinalFirst,
+            &portals,
+        );
+        let path = path_to_multiroom_mono_flow_field_origin_with_portals(
+            start,
+            &mono_flow_field,
+            &portals,
+        )
+        .unwrap();
+        let actual: Vec<Position> = (0..path.len()).map(|i| *path.get(i).unwrap()).collect();
+        assert_eq!(actual, expected);
+
+        let path = path_to_multiroom_mono_flow_field_origin_with_portals(
+            origin,
+            &mono_flow_field,
+            &portals,
+        )
+        .unwrap();
+        let actual: Vec<Position> = (0..path.len()).map(|i| *path.get(i).unwrap()).collect();
+        assert_eq!(actual, vec![origin]);
+    }
+
+    #[test]
     fn portal_flow_field_points_toward_the_portal_entrance() {
         let start = pos("W1N1", 9, 10);
         let portal_entry = pos("W1N1", 10, 10);

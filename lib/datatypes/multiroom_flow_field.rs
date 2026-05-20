@@ -1,6 +1,6 @@
 use crate::algorithms::map::DirectionOrder;
 use screeps::{Direction, Position, RoomName};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use wasm_bindgen::prelude::*;
 
 use super::flow_field::FlowField;
@@ -11,6 +11,7 @@ use super::flow_field::FlowField;
 pub struct MultiroomFlowField {
     maps: HashMap<RoomName, FlowField>,
     direction_order: DirectionOrder,
+    terminals: HashSet<Position>,
 }
 
 impl MultiroomFlowField {
@@ -24,6 +25,7 @@ impl MultiroomFlowField {
         MultiroomFlowField {
             maps: HashMap::new(),
             direction_order,
+            terminals: HashSet::new(),
         }
     }
 
@@ -92,6 +94,14 @@ impl MultiroomFlowField {
             .entry(room_name)
             .or_insert_with(|| FlowField::new_with_direction_order(direction_order));
         map.add_direction(pos.x(), pos.y(), direction);
+    }
+
+    pub fn set_terminal(&mut self, pos: Position) {
+        self.terminals.insert(pos);
+    }
+
+    pub fn is_terminal(&self, pos: Position) -> bool {
+        self.terminals.contains(&pos)
     }
 }
 

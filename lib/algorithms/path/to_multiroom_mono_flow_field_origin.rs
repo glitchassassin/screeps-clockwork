@@ -22,6 +22,9 @@ pub fn path_to_multiroom_mono_flow_field_origin(
 
     while steps < MAX_STEPS {
         path.add(current);
+        if flow_field.is_terminal(current) {
+            return Ok(path);
+        }
 
         let next_direction = flow_field.get(current);
 
@@ -64,6 +67,9 @@ pub fn path_to_multiroom_mono_flow_field_origin_with_portals(
 
     while steps < MAX_STEPS {
         path.add(current);
+        if flow_field.is_terminal(current) {
+            return Ok(path);
+        }
 
         let next_direction = flow_field.get(current);
 
@@ -97,6 +103,11 @@ pub fn path_to_multiroom_mono_flow_field_origin_with_portals(
 
         if visited.contains(&next_pos) {
             return Err("Cycle detected in flow field");
+        }
+
+        if flow_field.is_terminal(next_pos) {
+            path.add(next_pos);
+            return Ok(path);
         }
 
         if portal_index.exit(next_pos).is_some() || next_pos.is_room_edge() {

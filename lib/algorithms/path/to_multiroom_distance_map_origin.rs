@@ -143,7 +143,7 @@ pub fn path_to_multiroom_distance_map_origin_with_portals(
             }
         };
 
-        if min_distance == 0 && step == landed {
+        if min_distance == 0 {
             path.add(step);
             return Ok(path);
         }

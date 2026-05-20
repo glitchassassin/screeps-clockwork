@@ -1,5 +1,5 @@
 use screeps::{Direction, Position, RoomName};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use wasm_bindgen::prelude::*;
 
 use super::mono_flow_field::MonoFlowField;
@@ -9,6 +9,7 @@ use super::mono_flow_field::MonoFlowField;
 #[derive(Debug, Clone)]
 pub struct MultiroomMonoFlowField {
     maps: HashMap<RoomName, MonoFlowField>,
+    terminals: HashSet<Position>,
 }
 
 impl MultiroomMonoFlowField {
@@ -16,6 +17,7 @@ impl MultiroomMonoFlowField {
     pub fn new() -> Self {
         MultiroomMonoFlowField {
             maps: HashMap::new(),
+            terminals: HashSet::new(),
         }
     }
 
@@ -51,6 +53,14 @@ impl MultiroomMonoFlowField {
         self.maps
             .entry(room_name)
             .or_insert_with(MonoFlowField::new)
+    }
+
+    pub fn set_terminal(&mut self, pos: Position) {
+        self.terminals.insert(pos);
+    }
+
+    pub fn is_terminal(&self, pos: Position) -> bool {
+        self.terminals.contains(&pos)
     }
 }
 
