@@ -1,3 +1,10 @@
+## 0.13.1 (2026-05-20)
+
+### Fix
+
+- stop portal paths at edge origins
+- ignore generated wasm bg types
+
 ## 0.13.0 (2026-05-20)
 
 ### Feat
