@@ -1,3 +1,9 @@
+## 0.13.0 (2026-05-20)
+
+### Feat
+
+- add portal cache and portal-aware algorithms (#264)
+
 ## 0.12.0 (2026-05-19)
 
 ### Feat
