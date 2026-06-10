@@ -79,7 +79,7 @@
     "tslib": "^2.8.1",
     "typedoc": "^0.28.5",
     "typescript": "^6.0.3",
-    "vitest": "4.1.6"
+    "vitest": "4.1.8"
   },
   "dependencies": {
     "fastestsmallesttextencoderdecoder-encodeinto": "^1.0.22"
