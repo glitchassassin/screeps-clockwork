@@ -8,9 +8,9 @@ This is true for many, but not all, intershard portals as well. For pathfinding 
 
 ## Pathing with Portals
 
-Portals are fairly straightforward to integrate with BFS or Dijkstra algorithms. Just add the portal exit as another neighbor, and the algorithm will happily explore away. However, they immediately break the default A* heuristic.
+Portals are fairly straightforward to integrate with BFS or Dijkstra algorithms. Just add the portal exit as another neighbor, and the algorithm will happily explore away. However, they immediately break the default A\* heuristic.
 
-The default heuristic approximates the shortest possible distance to the target based on linear distance. With portals, the linear distance might not be the shortest distance. That means that the default heuristic is no longer "admissible." Even if we explore through portals as part of pathfinding, the default heuristic can lead us astray and cause us to wind up with a longer path. 
+The default heuristic approximates the shortest possible distance to the target based on linear distance. With portals, the linear distance might not be the shortest distance. That means that the default heuristic is no longer "admissible." Even if we explore through portals as part of pathfinding, the default heuristic can lead us astray and cause us to wind up with a longer path.
 
 ## Portal-Compatible Heuristics
 
@@ -20,10 +20,10 @@ The cheapest heuristic that I've found, therefore, is to ignore the portal conne
 
 ```ts
 function heuristic(tile: RoomPosition, target: RoomPosition) {
-    return Math.min(
-        distance(tile, target),
-        distance(tile, closestPortalEntrance(tile)) + distance(target, closestPortalExit(target))
-    )
+  return Math.min(
+    distance(tile, target),
+    distance(tile, closestPortalEntrance(tile)) + distance(target, closestPortalExit(target))
+  );
 }
 ```
 

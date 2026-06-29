@@ -68,10 +68,8 @@ pub fn multiroom_portal_mono_flow_field_with_index(
                 continue;
             }
 
-            if value == usize::MAX {
-                if portal_index.exit(pos).is_none() && !pos.is_room_edge() {
-                    continue;
-                }
+            if value == usize::MAX && portal_index.exit(pos).is_none() && !pos.is_room_edge() {
+                continue;
             }
 
             let min_distance = preferred_directions(direction_order)

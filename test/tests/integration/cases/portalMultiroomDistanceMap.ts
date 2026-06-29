@@ -180,11 +180,7 @@ describe('portalMultiroomDistanceMap', () => {
   }, 50);
 
   it('portal A* should be faster than PathFinder.search across multiple rooms', () => {
-    expectPortalAstarToBeatPathFinder(
-      new RoomPosition(5, 5, 'W1N2'),
-      new RoomPosition(5, 5, 'W2N2'),
-      'multi-room'
-    );
+    expectPortalAstarToBeatPathFinder(new RoomPosition(5, 5, 'W1N2'), new RoomPosition(5, 5, 'W2N2'), 'multi-room');
     logPortalIndexDebug('multi-room A* benchmark');
   }, 100);
 });
