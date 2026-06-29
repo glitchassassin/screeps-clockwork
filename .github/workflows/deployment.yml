@@ -17,6 +17,10 @@ concurrency:
   group: 'pages'
   cancel-in-progress: false
 
+env:
+  RUST_TOOLCHAIN: nightly-2026-05-14
+  WASM_PACK_VERSION: 0.15.0
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,6 +30,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
         with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
           targets: wasm32-unknown-unknown
           components: rust-src
 
@@ -37,7 +42,10 @@ jobs:
 
       - name: Install wasm-pack
         run: |
-          curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+          if ! command -v wasm-pack >/dev/null || [ "$(wasm-pack --version)" != "wasm-pack $WASM_PACK_VERSION" ]; then
+            cargo install wasm-pack --version "$WASM_PACK_VERSION" --locked --force
+          fi
+          wasm-pack --version
           rustup target add wasm32-unknown-unknown
 
       - name: Setup Node.js
