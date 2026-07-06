@@ -25,7 +25,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@nightly
@@ -56,7 +56,7 @@ jobs:
 
       # Add Node dependency caching
       - name: Cache node modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -68,7 +68,7 @@ jobs:
 
       # Cache wasm-pack output
       - name: Cache wasm-pack output
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: wasm
           key: ${{ runner.os }}-wasm-${{ hashFiles('lib/**') }}
@@ -99,7 +99,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -130,7 +130,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
         with:
           name: docs-artifact
