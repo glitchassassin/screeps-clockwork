@@ -156,6 +156,7 @@ export enum Find {
     SymbolContainers = 10021,
     SymbolDecoders = 10022,
     Reactors = 10051,
+    Score = 10031,
 }
 
 /**
